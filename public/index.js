@@ -1,37 +1,110 @@
+import { render } from "preact";
+import { html, Component } from "htm/preact";
 
-import { render } from 'preact';
-function App() {
-    return <h1>Hello World!</h1>;
+// https://github.com/developit/htm
+
+// C:\Users\rhys\source\repos\wmr\examples\demo\public\pages\meta-tags.js
+// C:\Users\rhys\source\repos\wmr\examples\demo\public\pages\json.js
+
+class App extends Component {
+  addTodo() {
+    const { todos = [] } = this.state;
+
+    this.setState({ todos: todos.concat(`Item ${todos.length}`) });
+    // http://aroha-garage-mini.local/switch/garage_control/toggle
+    fetch("/switch/garage_control/toggle").then((r) => {
+      console.log(r.json());
+    });
+    // const xhr = new XMLHttpRequest();
+    //xhr.open("POST", '/switch/' + id.substr(7) + '/toggle', true);
+    //xhr.send();
+  }
+
+  toggle(entity) {
+    console.dir(entity);
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `/switch/${entity.id}/toggle`, true);
+    xhr.send();
+  }
+
+  render({ page }, { todos = [] }) {
+    return html`
+      <article>
+        <h1>${document.title} Web Server</h1>
+        <h2>States</h2>
+
+        <table>
+          <thead>
+            <tr>
+              <th>Name</th>
+              <th>State</th>
+              <th>Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${entities.map(
+              (entity) =>
+                html`
+                  <tr>
+                    <td>${entity.name}</td>
+                    ${entity.state}
+                    <td></td>
+                    <td><button onClick=${() => this.toggle(entity)}>Toggle ${entity.id}</button></td>
+                  </tr>
+                `
+            )}
+          </tbody>
+        </table>
+
+        <h2>OTA Update</h2>
+        <form method="POST" action="/update" enctype="multipart/form-data">
+          <input type="file" name="update" />
+          <input type="submit" value="Update" />
+        </form>
+
+        <h2>Debug Log</h2>
+        <pre id="log"></pre>
+
+        <ul>
+          ${todos.map((todo) => html` <li>${todo}</li> `)}
+        </ul>
+        <button onClick=${() => this.addTodo()}>Add Todo!</button>
+      </article>
+    `;
+  }
 }
 
-render(<App />, document.body);
-/*
-import { LocationProvider, Router, Route, lazy, ErrorBoundary, hydrate, prerender as ssr } from 'preact-iso';
-import Home from './pages/home/index.js';
-import NotFound from './pages/_404.js';
-import Header from './header.js';
-import About from './pages/about/index.js';
+// http://aroha-garage-mini.local/switch/garage_control/toggle
 
-function App() {
-	return (
-		<LocationProvider>
-			<div class="app">
-				<Header />
-				<ErrorBoundary>
-					<Router>
-						<Route path="/" component={Home} />
-						<Route path="/about" component={About} />
-						<Route default component={NotFound} />
-					</Router>
-				</ErrorBoundary>
-			</div>
-		</LocationProvider>
-	);
-}
+const host = "http://aroha-garage-mini.local";
+const source = new EventSource(`${host}/events`);
 
-hydrate(<App />);
+source.addEventListener("log", function (e) {
+  const log = document.getElementById("log");
+  let klass = "";
+  if (e.data.startsWith("[1;31m")) {
+    klass = "e";
+  } else if (e.data.startsWith("[0;33m")) {
+    klass = "w";
+  } else if (e.data.startsWith("[0;32m")) {
+    klass = "i";
+  } else if (e.data.startsWith("[0;35m")) {
+    klass = "c";
+  } else if (e.data.startsWith("[0;36m")) {
+    klass = "d";
+  } else if (e.data.startsWith("[0;37m")) {
+    klass = "v";
+  } else {
+    log.innerHTML += e.data + "\n";
+  }
+  log.innerHTML += '<span class="' + klass + '">' + e.data.substr(7, e.data.length - 10) + "</span>\n";
+});
 
-export async function prerender(data) {
-	return await ssr(<App {...data} />);
-}
-*/
+source.addEventListener("state", function (e) {
+  const data = JSON.parse(e.data);
+  // {id: 'switch-garage_control', state: 'OFF', value: false}
+  console.log(data);
+  //document.getElementById(data.id).children[1].innerText = data.state;
+});
+
+render(html`<${App} page="All" />`, document.body);

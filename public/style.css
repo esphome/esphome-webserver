@@ -1,48 +1,95 @@
-html,
+@import url(https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css);
+
+/*
 body {
-	margin: 0;
-	min-height: 100%;
-	font-family: system-ui, sans-serif;
+    margin: 0;
+    padding: 0;
+    font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+    font-size: 16px;
+    line-height: 1.5;
 }
 
-header {
-	display: flex;
-	background: #ddd;
+h1 {
+    text-align: center;
 }
 
-header > nav {
-	flex: 1;
-	display: flex;
+button {
+    display: block;
+    margin: auto;
+    padding: 0.5em 3em;
+    border: 3px solid rgb(24, 24, 24);
+    box-sizing: border-box;
+    text-decoration: none;
+    text-transform: uppercase;
+    font-weight:400;
+    color:rgb(24, 24, 24);
+    text-align:center;
+    transition: all 0.15s;
+}
+button:hover{
+    color:rgb(180, 180, 180);
+    border-color: rgb(180, 180, 180);;
 }
 
-header > nav a {
-	padding: 10px;
-	color: #673ab8;
-	text-decoration: none;
+li {
+    height: 50px;
+    border: 0px solid rgba(123, 123, 123, 0.498039);
+    border-radius: 4px;
+    color: rgb(153, 153, 153);
+    line-height: 90px;
+    padding-left: 32px;
+    font-size: 24px;
+    display: flex;
+    align-items: center;
+    font-weight: 400;
+    background-color: rgb(255, 255, 255);
+    list-style: none;
+    box-shadow: rgba(0,0,0,0.2) 0px 1px 2px 0px;
+    margin-bottom: 20px;
+    width: 90%;
 }
 
-header > nav a:hover {
-	background-color: #f1e9ff;
+footer {
+    position: absolute;
+    bottom: 0;
+    padding: 20px 0;
+    text-align: center;
+    background: rgb(24, 24, 24);
+    color: #fff;
+    width: 100%;
+}
+*/
+/* hass */
+#log .v {
+  color: #888888;
 }
 
-header > label {
-	display: flex;
-	align-items: center;
-	padding: 10px;
-	color: #555;
-	font-size: 80%;
+#log .d {
+  color: #00DDDD;
 }
 
-header input {
-	border: none;
-	border-radius: 3px;
-	padding: 2px 5px;
-	font-size: 100%;
+#log .c {
+  color: magenta;
 }
 
-.app > section {
-	padding: 20px;
+#log .i {
+  color: limegreen;
 }
+
+#log .w {
+  color: yellow;
+}
+
+#log .e {
+  color: red;
+  font-weight: bold;
+}
+
+#log {
+  background-color: #1c1c1c;
+}
+
+
 
 /*
 See https://github.com/css-modules/css-modules/blob/master/docs/theming.md

@@ -1,12 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
-	<head>
-		<meta charset="utf-8" />
-		<title>ESPhome App</title>
-		<meta name="viewport" content="width=device-width,initial-scale=1" />
-		<link rel="stylesheet" href="/style.css" />
-	</head>
-	<body>
-		<script type="module" src="/index.js"></script>
-	</body>
+  <head>
+    <meta charset="utf-8" />
+    <title>ESPhome App</title>
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
+    <link rel="stylesheet" href="/style.css" />
+    <script>
+      let entities = [
+        { entity: "switch", id: "garage_control", name: "Garage Control" },
+        { entity: "text_sensor", id: "weather_forecast_from_home_assistant", name: "Weather Forecast From Home Assistant" },
+      ];
+    </script>
+  </head>
+  <body>
+    <script type="module" src="/index.js"></script>
+  </body>
 </html>
