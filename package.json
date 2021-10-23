@@ -5,15 +5,16 @@
 		"dev": "wmr",
 		"build-prerender": "wmr build --prerender",
 		"build": "wmr build --no-prerender",
-		"serve": "wmr serve"
+		"serve": "wmr serve",
+		"test": "http-server dist --port=80 --cors=*"
 	},
 	"eslintConfig": {
 		"extends": "preact"
 	},
 	"dependencies": {
 		"@wmrjs/nomodule": "^0.2.0",
-		"preact": "^10.5.15",
-		"preact-iso": "^2.3.0"
+		"http-proxy-middleware": "^2.0.1",
+		"preact": "^10.5.15"
 	},
 	"devDependencies": {
 		"wmr": "^3.7.2"

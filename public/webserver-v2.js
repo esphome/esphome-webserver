@@ -1,36 +1,29 @@
 import { render } from "preact";
 import { html, Component } from "htm/preact";
 
-// https://github.com/developit/htm
-
 // C:\Users\rhys\source\repos\wmr\examples\demo\public\pages\meta-tags.js
 // C:\Users\rhys\source\repos\wmr\examples\demo\public\pages\json.js
 
-class App extends Component {
-  addTodo() {
-    const { todos = [] } = this.state;
+const source = new EventSource("/events");
 
-    this.setState({ todos: todos.concat(`Item ${todos.length}`) });
-    // http://aroha-garage-mini.local/switch/garage_control/toggle
-    fetch("/switch/garage_control/toggle").then((r) => {
-      console.log(r.json());
-    });
-    // const xhr = new XMLHttpRequest();
-    //xhr.open("POST", '/switch/' + id.substr(7) + '/toggle', true);
-    //xhr.send();
+class App extends Component {
+  addLog(log) {
+    const { logs = [] } = this.state;
+
+    this.setState({ logs: logs.concat(log) });
   }
 
   toggle(entity) {
     console.dir(entity);
-    const xhr = new XMLHttpRequest();
-    xhr.open("POST", `/switch/${entity.id}/toggle`, true);
-    xhr.send();
+    fetch(`/switch/${entity.id}/toggle`, { method: "POST", body: 'true' }).then((r) => {
+      console.log(r.json());
+    });
   }
 
-  render({ page }, { todos = [] }) {
+  render({ page }, { logs = [] }) {
     return html`
       <article>
-        <h1>${document.title} Web Server</h1>
+        <h1>${document.title}</h1>
         <h2>States</h2>
 
         <table>
@@ -66,18 +59,13 @@ class App extends Component {
         <pre id="log"></pre>
 
         <ul>
-          ${todos.map((todo) => html` <li>${todo}</li> `)}
+          ${logs.map((log) => html` <li>${log}</li> `)}
         </ul>
-        <button onClick=${() => this.addTodo()}>Add Todo!</button>
+        <button onClick=${() => this.addLog()}>Add Todo!</button>
       </article>
     `;
   }
 }
-
-// http://aroha-garage-mini.local/switch/garage_control/toggle
-
-const host = "http://aroha-garage-mini.local";
-const source = new EventSource(`${host}/events`);
 
 source.addEventListener("log", function (e) {
   const log = document.getElementById("log");
