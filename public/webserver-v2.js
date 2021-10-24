@@ -18,8 +18,23 @@ class App extends Component {
     source.addEventListener("state", function (e) {
       const data = JSON.parse(e.data);
       let ref=entityByid[data.id];
-      ref.state=data.state;
-      ref.value=data.value;
+      if ( ref ) {
+        ref.state=data.state;
+        ref.value=data.value;
+      } else {
+        // Dynamically add discovered..
+        console.log(`discovered:${data.id}`)
+        let parts=data.id.split('-')
+        let entity = {
+          entity: parts[0],
+          id: parts[1],
+          state: data.state,
+          value: data. value,
+          name: data.id
+        };
+        entities.push(entity);
+        entityByid[data.id]=entity;
+      }
     });
     source.addEventListener("log", (e) => {
       const record =  {

@@ -11,7 +11,7 @@ export default defineConfig((options) => {
   const proxy_events = createProxyMiddleware('/events',{
     //changeOrigin: true,
     logLevel: "debug",
-    target: `${proxy_target}/events`,
+    target: `${proxy_target}`,
   });
   const proxy_post = createProxyMiddleware({
     changeOrigin: true,
@@ -19,7 +19,6 @@ export default defineConfig((options) => {
     target: `${proxy_target}`, // /switch/relay/toggle
   });
   options.middleware.push((req, res, next) => {
-    //proxy_events(req, res, next);
     res.setHeader("Access-Control-Allow-Origin", "*");
     if (req.method === "POST") {
       console.dir(req.path)
