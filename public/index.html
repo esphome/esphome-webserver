@@ -4,11 +4,18 @@
     <meta charset="utf-8" />
     <title>ESPhome App</title>
     <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=no" />
-    <link rel="stylesheet" href="/style.css" />
+    <link rel="stylesheet" href="/webserver-v2.css" />
     <script>
       let entities = [
-        { entity: "switch", id: "garage_control", name: "Garage Control" },
-        { entity: "text_sensor", id: "weather_forecast_from_home_assistant", name: "Weather Forecast From Home Assistant" },
+        { entity: "sensor", id: "probe_1", name: "Probe 1" },
+        { entity: "switch", id: "relay", name: "Relay" },
+        { entity: "binary_sensor", id: "button", name: "Button" },
+        { entity: "fan", id: "living_room_fan", name: "Living Room Fan" },
+        { entity: "light", id: "nodemcu_light", name: "nodemcu Light" },
+        { entity: "text_sensor", id: "hello_text_sensor", name: "Hello Text Sensor" },
+        { entity: "cover", id: "time-based_cover", name: "Time-Based Cover" },
+        { entity: "number", id: "template_number", name: "Template number" },
+        { entity: "select", id: "template_select", name: "Template select" },
       ];
     </script>
   </head>

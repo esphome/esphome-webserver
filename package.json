@@ -2,17 +2,13 @@
 	"private": true,
 	"scripts": {
 		"start": "wmr",
-		"dev": "wmr",
-		"build-prerender": "wmr build --prerender",
 		"build": "wmr build --no-prerender",
-		"serve": "wmr serve",
-		"test": "http-server dist --port=80 --cors=*"
+		"serve": "wmr serve"
 	},
 	"eslintConfig": {
 		"extends": "preact"
 	},
 	"dependencies": {
-		"@wmrjs/nomodule": "^0.2.0",
 		"http-proxy-middleware": "^2.0.1",
 		"preact": "^10.5.15"
 	},

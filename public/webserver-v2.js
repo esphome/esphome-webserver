@@ -4,19 +4,43 @@ import { html, Component } from "htm/preact";
 // C:\Users\rhys\source\repos\wmr\examples\demo\public\pages\meta-tags.js
 // C:\Users\rhys\source\repos\wmr\examples\demo\public\pages\json.js
 
-const source = new EventSource("/events");
-
 class App extends Component {
+  constructor() {
+    super();
+    const source = new EventSource("/events");
+    
+    const entityByid = entities.reduce((map, entity) => {
+      map[`${entity.entity}-${entity.id}`] = entity;
+      return map;
+    }, {});
+  
+  console.log(entityByid);
+    source.addEventListener("state", function (e) {
+      const data = JSON.parse(e.data);
+      let ref=entityByid[data.id];
+      ref.state=data.state;
+      ref.value=data.value;
+    });
+    source.addEventListener("log", (e) => {
+      const record =  {
+        sort: e.data.slice(0,7),
+        level: e.data.slice(9,1),
+       detail: e.data.slice(10,e.data.length-4)
+    };
+      this.addLog(record);
+    });
+  }
+
   addLog(log) {
     const { logs = [] } = this.state;
 
-    this.setState({ logs: logs.concat(log) });
+    logs.unshift(log);
+    this.setState({ logs: logs });
   }
 
   toggle(entity) {
-    console.dir(entity);
-    fetch(`/switch/${entity.id}/toggle`, { method: "POST", body: 'true' }).then((r) => {
-      console.log(r.json());
+    fetch(`/${entity.entity}/${entity.id}/toggle`, { method: "POST", body: 'true' }).then((r) => {
+      console.log(r);
     });
   }
 
@@ -40,9 +64,8 @@ class App extends Component {
                 html`
                   <tr>
                     <td>${entity.name}</td>
-                    ${entity.state}
-                    <td></td>
-                    <td><button onClick=${() => this.toggle(entity)}>Toggle ${entity.id}</button></td>
+                    <td>${entity.state}</td>
+                    <td><button onClick=${() => this.toggle(entity)}>Toggle</button></td>
                   </tr>
                 `
             )}
@@ -59,14 +82,14 @@ class App extends Component {
         <pre id="log"></pre>
 
         <ul>
-          ${logs.map((log) => html` <li>${log}</li> `)}
+          ${logs.map((log) => html` <li>${log.detail}</li> `)}
         </ul>
-        <button onClick=${() => this.addLog()}>Add Todo!</button>
       </article>
     `;
   }
 }
 
+/*
 source.addEventListener("log", function (e) {
   const log = document.getElementById("log");
   let klass = "";
@@ -87,12 +110,6 @@ source.addEventListener("log", function (e) {
   }
   log.innerHTML += '<span class="' + klass + '">' + e.data.substr(7, e.data.length - 10) + "</span>\n";
 });
-
-source.addEventListener("state", function (e) {
-  const data = JSON.parse(e.data);
-  // {id: 'switch-garage_control', state: 'OFF', value: false}
-  console.log(data);
-  //document.getElementById(data.id).children[1].innerText = data.state;
-});
+*/
 
 render(html`<${App} page="All" />`, document.body);
