@@ -37,10 +37,13 @@ class App extends Component {
       }
     });
     source.addEventListener("log", (e) => {
+      let parts=e.data.slice(10,e.data.length-4).split(':');
       const record =  {
         sort: e.data.slice(0,7),
         level: e.data.slice(9,1),
-       detail: e.data.slice(10,e.data.length-4)
+        who: `${parts[0]}:${parts[1]}`,
+        detail: parts[2],
+        when: Date.now()
     };
       this.addLog(record);
     });
@@ -87,23 +90,31 @@ class App extends Component {
           </tbody>
         </table>
 
-        <h2>OTA Update</h2>
+        <table>
+          <thead>
+            <tr>
+              <th>Time</th>
+              <th>sort</th>
+              <th>level</th>
+              <th>who</th>
+              <th style="width:50%">detail</th>
+            </tr>
+            </thead>
+          <tbody>
+          ${logs.map((log) => html` <tr><td>${log.when}</td><td>${log.sort}</td><td>${log.level}</td><td>${log.who}</td><td>${log.detail}</td></tr> `)}
+          </tbody>
+            </table>
+
+            <h2>OTA Update</h2>
         <form method="POST" action="/update" enctype="multipart/form-data">
           <input type="file" name="update" />
           <input type="submit" value="Update" />
         </form>
 
-        <h2>Debug Log</h2>
-        <pre id="log"></pre>
-
-        <ul>
-          ${logs.map((log) => html` <li>${log.detail}</li> `)}
-        </ul>
       </article>
     `;
   }
 }
-
 /*
 source.addEventListener("log", function (e) {
   const log = document.getElementById("log");
