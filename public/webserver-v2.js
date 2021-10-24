@@ -14,7 +14,6 @@ class App extends Component {
       return map;
     }, {});
   
-  console.log(entityByid);
     source.addEventListener("state", function (e) {
       const data = JSON.parse(e.data);
       let ref=entityByid[data.id];
@@ -40,10 +39,10 @@ class App extends Component {
       let parts=e.data.slice(10,e.data.length-4).split(':');
       const record =  {
         sort: e.data.slice(0,7),
-        level: e.data.slice(9,1),
+        level: e.data.slice(7,4),
         who: `${parts[0]}:${parts[1]}`,
         detail: parts[2],
-        when: Date.now()
+        when: (new Date).toTimeString().split(' ')[0]
     };
       this.addLog(record);
     });
