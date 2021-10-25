@@ -1,16 +1,15 @@
 import { defineConfig } from "wmr";
 import { createProxyMiddleware } from "http-proxy-middleware";
 
+// this should be in env vars
 const proxy_target = "http://nodemcu.local";
 export default defineConfig((options) => {
   const proxy_events = createProxyMiddleware("/events", {
-    logLevel: "debug",
-    target: `${proxy_target}`,
+    target: `${proxy_target}`
   });
   const proxy_post = createProxyMiddleware({
     changeOrigin: true,
-    logLevel: "debug",
-    target: `${proxy_target}`,
+    target: `${proxy_target}`
   });
   options.middleware.push((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");

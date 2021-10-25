@@ -1,5 +1,6 @@
 /*
 @import url(https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css);
+https://github.com/pure-css/pure
 */
 @import url(https://unpkg.com/purecss@2.0.6/build/pure-min.css);
 
@@ -68,7 +69,7 @@ footer {
 }
 
 #log .d {
-  color: #00DDDD;
+  color: #00dddd;
 }
 
 #log .c {
@@ -90,6 +91,11 @@ footer {
 
 #log {
   background-color: #1c1c1c;
+}
+
+.pure-table td,
+.pure-table th {
+  padding: 0.125em 0.5em;
 }
 
 /*
