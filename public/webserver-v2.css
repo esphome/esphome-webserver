@@ -1,8 +1,10 @@
 /*
 @import url(https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css);
 https://github.com/pure-css/pure
-*/
+
 @import url(https://unpkg.com/purecss@2.0.6/build/pure-min.css);
+*/
+@import url(https://cdn.jsdelivr.net/npm/minstyle.io@1.1.0/css/minstyle.io.css);
 
 /*
 body {
@@ -90,11 +92,13 @@ footer {
 }
 
 #log {
+  font-family: monospace;
   background-color: #1c1c1c;
+  color: white;
 }
 
-.pure-table td,
-.pure-table th {
+.ms-table td,
+.ms-table th {
   padding: 0.125em 0.5em;
 }
 

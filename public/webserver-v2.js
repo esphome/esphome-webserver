@@ -9,22 +9,57 @@ import { html, Component } from "htm/preact";
 // C:\Users\rhys\source\repos\wmr\examples\demo\public\pages\meta-tags.js
 // C:\Users\rhys\source\repos\wmr\examples\demo\public\pages\json.js
 
+function control(entity) {
+  if ( entity.entity === 'xfan' || entity.entity === 'switch' ||  entity.entity === 'light')
+    return html`<button class="ms-btn ms-primary ms-outline- ms-small" onClick=${() => toggle(entity)}>Toggle</button>`
+    if ( entity.entity === 'fan')
+    return html`<button class="ms-btn ms-primary ms-outline- ms-small  mr-1" onClick=${() => restAction(entity,'turn_on')}>On</button>
+    <button class="ms-btn ms-primary ms-small" onClick=${() => restAction(entity,'turn_off')}>Off</button>`
+    if ( entity.entity === 'cover')
+    return html`<button class="ms-btn ms-primary ms-outline- ms-small  mr-1" onClick=${() => restAction(entity,'open')}>Open</button>
+    <button class="ms-btn ms-primary ms-small" onClick=${() => restAction(entity,'close')}>Close</button>    
+    <button class="ms-btn ms-primary ms-small" onClick=${() => restAction(entity,'stop')}>Stop</button>`    
+    return html``
+}
+
+function toggle(entity) {
+  fetch(`/${entity.entity}/${entity.id}/toggle`, {
+    method: "POST",
+    body: "true",
+  }).then((r) => {
+    console.log(r);
+  });
+}
+
+function restAction(entity,action) {
+  fetch(`/${entity.entity}/${entity.id}/${action}`, {
+    method: "POST",
+    body: "true",
+  }).then((r) => {
+    console.log(r);
+  });
+}
+
 class App extends Component {
   constructor() {
     super();
     const source = new EventSource("/events");
 
-    const entityByid = entities.reduce((map, entity) => {
+    this.entities= window.entities || []; // hacked in: defined in index
+    const entityByid = this.entities.reduce((map, entity) => {
       map[`${entity.entity}-${entity.id}`] = entity;
       return map;
     }, {});
 
-    source.addEventListener("state", function (e) {
+    source.addEventListener("state", (e) => {
       const data = JSON.parse(e.data.replace(":NaN", ":null")); //'{"id":"number-template_number","state":"nan","value":NaN}' invalid json
       let ref = entityByid[data.id];
       if (ref) {
         ref.state = data.state;
         ref.value = data.value;
+        if (ref.found) {
+
+        }
       } else {
         // Dynamically add discovered..
         console.log(`discovered:${data.id}`);
@@ -37,7 +72,7 @@ class App extends Component {
           name: data.id,
           found: true,
         };
-        entities.push(entity);
+        this.entities.push(entity);
         entityByid[data.id] = entity;
       }
     });
@@ -54,7 +89,7 @@ class App extends Component {
       const record = {
         sort: debug[e.data.slice(0, 7)],
         level: e.data.slice(7, 10),
-        who: `${parts[0]}:${parts[1]}`,
+        tag: `${parts[0]}:${parts[1]}`,
         detail: parts[2],
         when: new Date().toTimeString().split(" ")[0],
       };
@@ -71,27 +106,12 @@ class App extends Component {
     });
   }
 
-  toggle(entity) {
-    fetch(`/${entity.entity}/${entity.id}/toggle`, {
-      method: "POST",
-      body: "true",
-    }).then((r) => {
-      console.log(r);
-    });
-  }
-
-  actionToggle(entity) {
-    return ( entity.entity === 'fan' || entity.entity === 'switch' ||  entity.entity === 'light') ? 
-    'Toggle' : ''
-  }
-
   render({ page }, { logs = [] }) {
     return html`
       <article>
         <h1>${document.title}</h1>
-        <h2>States</h2>
 
-        <table class="pure-table">
+        <table class="ms-table">
           <thead>
             <tr>
               <th>Name</th>
@@ -100,25 +120,25 @@ class App extends Component {
             </tr>
           </thead>
           <tbody>
-            ${entities.map(
+            ${this.entities.map(
               (entity) =>
                 html`
                   <tr>
                     <td>${entity.name}</td>
                     <td>${entity.state}</td>
-                    <td><button class="pure-button pure-button-primary" onClick=${() => this.toggle(entity)}>${this.actionToggle(entity)}</button></td>
+                    <td><${control} ...${entity}/></td>
                   </tr>
                 `
             )}
           </tbody>
         </table>
 
-        <table id="log" class="pure-table" style="font-family: monospace;">
+        <table id="log" class="ms-table">
           <thead>
             <tr>
               <th>Time</th>
               <th>level</th>
-              <th>who</th>
+              <th>tag</th>
               <th style="width:50%">detail</th>
             </tr>
           </thead>
@@ -129,8 +149,8 @@ class App extends Component {
                   <tr class="${log.sort}">
                     <td>${log.when}</td>
                     <td>${log.level}</td>
-                    <td>${log.who}</td>
-                    <td>${log.detail}</td>
+                    <td>${log.tag}</td>
+                    <td><pre>${log.detail}</pre></td>
                   </tr>
                 `
             )}
