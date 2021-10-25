@@ -80,6 +80,11 @@ class App extends Component {
     });
   }
 
+  actionToggle(entity) {
+    return ( entity.entity === 'fan' || entity.entity === 'switch' ||  entity.entity === 'light') ? 
+    'Toggle' : ''
+  }
+
   render({ page }, { logs = [] }) {
     return html`
       <article>
@@ -101,7 +106,7 @@ class App extends Component {
                   <tr>
                     <td>${entity.name}</td>
                     <td>${entity.state}</td>
-                    <td><button class="pure-button pure-button-primary" onClick=${() => this.toggle(entity)}>Toggle</button></td>
+                    <td><button class="pure-button pure-button-primary" onClick=${() => this.toggle(entity)}>${this.actionToggle(entity)}</button></td>
                   </tr>
                 `
             )}

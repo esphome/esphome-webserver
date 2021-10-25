@@ -13,7 +13,7 @@ export default defineConfig((options) => {
   });
   options.middleware.push((req, res, next) => {
     res.setHeader("Access-Control-Allow-Origin", "*");
-    // developement: redirect _static folder
+    // development: redirect _static folder
     if (options.mode === "start" && req.path.startsWith("/_static")) {
       res.writeHead(302, { Location: req.path.replace("/_static", ""), "Access-Control-Allow-Origin": "*" });
       return res.end("");
