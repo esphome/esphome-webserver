@@ -1,4 +1,7 @@
+/*
 @import url(https://cdnjs.cloudflare.com/ajax/libs/mini.css/3.0.1/mini-default.min.css);
+*/
+@import url(https://unpkg.com/purecss@2.0.6/build/pure-min.css);
 
 /*
 body {
@@ -88,8 +91,6 @@ footer {
 #log {
   background-color: #1c1c1c;
 }
-
-
 
 /*
 See https://github.com/css-modules/css-modules/blob/master/docs/theming.md
