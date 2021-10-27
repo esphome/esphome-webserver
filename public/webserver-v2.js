@@ -1,7 +1,7 @@
 import "preact/debug";
 import { render } from "preact";
 import { html, Component } from "htm/preact";
-//import { useEffect, useState } from 'preact/hooks';
+import { useEffect, useState } from 'preact/hooks';
 
 // To do
 // https://github.com/preactjs/preact-devtools
@@ -11,24 +11,16 @@ import { html, Component } from "htm/preact";
 
 function control(entity) {
   if ( entity.entity === 'xfan' || entity.entity === 'switch' ||  entity.entity === 'light')
-    return html`<button class="ms-btn ms-primary ms-outline- ms-small" onClick=${() => toggle(entity)}>Toggle</button>`
+    return html`<button class="ms-btn ms-primary ms-outline ms-small" onClick=${() => restAction(entity,'toggle')}>Toggle</button>`
     if ( entity.entity === 'fan')
-    return html`<button class="ms-btn ms-primary ms-outline- ms-small  mr-1" onClick=${() => restAction(entity,'turn_on')}>On</button>
-    <button class="ms-btn ms-primary ms-small" onClick=${() => restAction(entity,'turn_off')}>Off</button>`
+    return html`<button class="ms-btn ms-primary ms-outline ms-small  mr-1" onClick=${() => restAction(entity,'turn_on')}>On</button>
+    <button class="ms-btn ms-primary ms-small" 
+    onClick=${() => restAction(entity,'turn_off')}>Off</button>`
     if ( entity.entity === 'cover')
-    return html`<button class="ms-btn ms-primary ms-outline- ms-small  mr-1" onClick=${() => restAction(entity,'open')}>Open</button>
+    return html`<button class="ms-btn ms-primary ms-outline ms-small  mr-1" onClick=${() => restAction(entity,'open')}>Open</button>
     <button class="ms-btn ms-primary ms-small mr-1" onClick=${() => restAction(entity,'close')}>Close</button>    
     <button class="ms-btn ms-primary ms-small" onClick=${() => restAction(entity,'stop')}>Stop</button>`    
     return html``
-}
-
-function toggle(entity) {
-  fetch(`/${entity.entity}/${entity.id}/toggle`, {
-    method: "POST",
-    body: "true",
-  }).then((r) => {
-    console.log(r);
-  });
 }
 
 function restAction(entity,action) {
@@ -46,25 +38,26 @@ class App extends Component {
     const source = new EventSource("/events");
     //const [fetched, setFetched] = useState(null);
     
-    this.entities= []; // hacked in: defined in index
+    //this.entities= []; // hacked in: defined in index
     //const { entities = [] } = this.state;
     //this.setState({    entities: window.entities || []    });
 
+    /*
     const entityByid = this.entities.reduce((map, entity) => {
       map[`${entity.entity}-${entity.id}`] = entity;
       return map;
     }, {});
-
+    */
+    const entityByid = {};
 
     source.addEventListener("state", (e) => {
+      const { entities = [] } = this.state;
+      
       const data = JSON.parse(e.data); //'{"id":"number-template_number","state":"nan","value":NaN}' invalid json
       let ref = entityByid[data.id];
       if (ref) {
         ref.state = data.state;
         ref.value = data.value;
-        if (ref.found) {
-
-        }
       } else {
         // Dynamically add discovered..
         console.log(`discovered:${data.id}`);
@@ -77,8 +70,11 @@ class App extends Component {
           name: data.name || data.id,
           icon: data.icon
         };
-        this.entities.push(entity);
+        entities.push(entity);
         entityByid[data.id] = entity;
+        this.setState({
+          entities: entities
+        });
       }
     });
     source.addEventListener("log", (e) => {
@@ -107,11 +103,11 @@ class App extends Component {
 
     logs.unshift(log);
     this.setState({
-      logs: logs.slice(0,100)
+      logs: logs.slice(0,10)
     });
   }
 
-  render({ page }, { logs = [] }) {
+  render({ page }, { logs = [], entities = [] }) {
     return html`
       <article class="container">
         <h1>${document.title}</h1>
@@ -125,7 +121,7 @@ class App extends Component {
             </tr>
           </thead>
           <tbody>
-            ${this.entities.map(
+            ${entities.map(
               (entity) =>
                 html`
                   <tr>
