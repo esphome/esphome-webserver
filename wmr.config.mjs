@@ -20,6 +20,7 @@ export default defineConfig((options) => {
     }
     if (req.method === "POST") {
       proxy_post(req, res, next);
+      next();
       return;
     }
     if (req.path.match(/^\/events(|$)/)) proxy_events(req, res, next);

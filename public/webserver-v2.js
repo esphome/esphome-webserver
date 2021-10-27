@@ -1,13 +1,13 @@
+import "preact/debug";
 import { render } from "preact";
 import { html, Component } from "htm/preact";
+//import { useEffect, useState } from 'preact/hooks';
 
 // To do
 // https://github.com/preactjs/preact-devtools
-//import "preact/debug";
+// for live
 //import "preact/devtools";
 
-// C:\Users\rhys\source\repos\wmr\examples\demo\public\pages\meta-tags.js
-// C:\Users\rhys\source\repos\wmr\examples\demo\public\pages\json.js
 
 function control(entity) {
   if ( entity.entity === 'xfan' || entity.entity === 'switch' ||  entity.entity === 'light')
@@ -17,7 +17,7 @@ function control(entity) {
     <button class="ms-btn ms-primary ms-small" onClick=${() => restAction(entity,'turn_off')}>Off</button>`
     if ( entity.entity === 'cover')
     return html`<button class="ms-btn ms-primary ms-outline- ms-small  mr-1" onClick=${() => restAction(entity,'open')}>Open</button>
-    <button class="ms-btn ms-primary ms-small" onClick=${() => restAction(entity,'close')}>Close</button>    
+    <button class="ms-btn ms-primary ms-small mr-1" onClick=${() => restAction(entity,'close')}>Close</button>    
     <button class="ms-btn ms-primary ms-small" onClick=${() => restAction(entity,'stop')}>Stop</button>`    
     return html``
 }
@@ -44,15 +44,20 @@ class App extends Component {
   constructor() {
     super();
     const source = new EventSource("/events");
+    //const [fetched, setFetched] = useState(null);
+    
+    this.entities= []; // hacked in: defined in index
+    //const { entities = [] } = this.state;
+    //this.setState({    entities: window.entities || []    });
 
-    this.entities= window.entities || []; // hacked in: defined in index
     const entityByid = this.entities.reduce((map, entity) => {
       map[`${entity.entity}-${entity.id}`] = entity;
       return map;
     }, {});
 
+
     source.addEventListener("state", (e) => {
-      const data = JSON.parse(e.data.replace(":NaN", ":null")); //'{"id":"number-template_number","state":"nan","value":NaN}' invalid json
+      const data = JSON.parse(e.data); //'{"id":"number-template_number","state":"nan","value":NaN}' invalid json
       let ref = entityByid[data.id];
       if (ref) {
         ref.state = data.state;
@@ -69,8 +74,8 @@ class App extends Component {
           id: parts[1],
           state: data.state,
           value: data.value,
-          name: data.id,
-          found: true,
+          name: data.name || data.id,
+          icon: data.icon
         };
         this.entities.push(entity);
         entityByid[data.id] = entity;
@@ -102,13 +107,13 @@ class App extends Component {
 
     logs.unshift(log);
     this.setState({
-      logs: logs,
+      logs: logs.slice(0,100)
     });
   }
 
   render({ page }, { logs = [] }) {
     return html`
-      <article>
+      <article class="container">
         <h1>${document.title}</h1>
 
         <table class="ms-table">
@@ -163,6 +168,7 @@ class App extends Component {
           <input type="submit" value="Update" />
         </form>
       </article>
+      
     `;
   }
 }
