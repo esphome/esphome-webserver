@@ -1,5 +1,8 @@
 import { defineConfig } from "wmr";
 import { createProxyMiddleware } from "http-proxy-middleware";
+import gzipPlugin from "rollup-plugin-gzip";
+//import template from 'rollup-plugin-html-literals';
+import { uglify } from 'rollup-plugin-uglify';
 
 // this should be in env vars
 const proxy_target = "http://nodemcu.local";
@@ -26,11 +29,21 @@ export default defineConfig((options) => {
     if (req.path.match(/^\/events(|$)/)) proxy_events(req, res, next);
     else next();
   });
+  options.plugins = [
+    //template(),
+    uglify(),
+    {
+    ...gzipPlugin({ filter: /\.(js|css|html|svg)$/, additionalFiles: ['./public/esphome.svg']
+    }),
+    enforce: 'post',
+    apply: 'build'
+  }];
   return {
     output: { chunkFileNames: "[name].js", assetFileNames: "[name][extname]", dir: "dist/_static" },
     host: "0.0.0.0",
     port: 80,
     //debug: true,
-    //visualize: true
+    //visualize: true,
+    
   };
 });

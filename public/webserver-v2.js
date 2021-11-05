@@ -3,6 +3,8 @@ import { render } from "preact";
 import { html, Component } from "htm/preact";
 import { useEffect, useState } from 'preact/hooks';
 
+//import "minstyle/styles.scss";
+
 // To do
 // https://github.com/preactjs/preact-devtools
 // for live

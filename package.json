@@ -10,9 +10,15 @@
 	},
 	"dependencies": {
 		"http-proxy-middleware": "^2.0.1",
-		"preact": "^10.5.15"
+		"lit": "^2.0.2",
+		"minstyle": "^0.0.1",
+		"preact": "^10.5.15",
+		"rollup-plugin-gzip": "^2.5.0",
+		"rollup-plugin-html-literals": "^1.1.4",
+		"rollup-plugin-uglify": "^6.0.4"
 	},
 	"devDependencies": {
+		"sass": "^1.43.4",
 		"wmr": "^3.7.2"
 	}
 }
