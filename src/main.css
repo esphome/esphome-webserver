@@ -40,8 +40,9 @@
     --c-text: text;
   }
 }
+
 html {
-    color-scheme: dark;
+    color-scheme: light dark;
     font-family: ui-monospace, system-ui
 }
 

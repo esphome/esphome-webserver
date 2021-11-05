@@ -111,8 +111,8 @@ export class EntityTable extends LitElement {
   static get styles() {
     return css`
     table {
-      background-color: var(--c-bg);
-      color: var(--c-text);
+      /* background-color: var(--c-bg); */
+      /* color: var(--c-text); */
       border-spacing: 0;
       border-collapse: collapse;
     }

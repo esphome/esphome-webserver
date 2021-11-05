@@ -34,12 +34,6 @@ export default class EspApp extends LitElement {
     };
   }
 
-  toggleSwitch(): void {
-    this.themeChecked = !this.themeChecked;
-    this.theme = this.themeChecked ? "dark" : "light";
-    // color-scheme: dark;
-  }
-
   updated(changedProperties: Map<string, unknown>) {
     if (changedProperties.has("theme")) {
       let el = document.documentElement;
@@ -52,7 +46,6 @@ export default class EspApp extends LitElement {
       }, 1000);
     }
     if (changedProperties.has("ping")) {
-      //heartbeat here
       this.beat.animate(this.frames, 1000);
     }
   }
@@ -82,15 +75,11 @@ export default class EspApp extends LitElement {
       h2 {
         border-bottom: 1px solid #eaecef;
       }
-
-      html[data-theme="dark"] img {
+      
+      html[color-scheme="dark"] img {
         filter: invert(100%);
       }
 
-      Ximg {
-        background-color: yellow;
-        filter: invert(100%);
-      }
     `;
   }
 }
