@@ -1,9 +1,11 @@
 import { LitElement, html, css } from "lit";
 import { customElement, property, query } from "lit/decorators.js";
+import {unsafeHTML} from 'lit-html/directives/unsafe-html.js';
 
 import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
+import logo from "/logo.svg?raw";
 
 @customElement("esp-app")
 export default class EspApp extends LitElement {
@@ -19,7 +21,7 @@ export default class EspApp extends LitElement {
   @query("#beat")
   beat!: HTMLSpanElement;
 
-  frames = [{ color: "inherit" }, { color: "red", transform: "scale(1.25)" }, { color: "inherit" }];
+  frames = [{ color: "inherit" }, { color: "red", transform: "scale(1.25,1.25)" }, { color: "inherit" }];
 
   constructor() {
     super();
@@ -39,6 +41,7 @@ export default class EspApp extends LitElement {
       let el = document.documentElement;
       el.classList.add("theme-toggle");
       el.setAttribute("data-theme", this.theme);
+      el.setAttribute("color-scheme", this.theme);
       document.documentElement.style.setProperty('--my-variable-name', 'pink');
       document.documentElement.style.setProperty('color-scheme', this.theme);
       window.setTimeout(() => {
@@ -51,8 +54,9 @@ export default class EspApp extends LitElement {
   }
 
   render() {
-    return html`
-      <h1><span id="beat" style="float:right;height:1rem">❤</span><img src="https://esphome.io/_static/safari-pinned-tab.svg" style="height:3rem" /> ${document.title}</h1>
+     return html`
+      <h1 style="text-align: center;width:100%;line-height:4rem"><a href="https://esphome.io/web-api" style="width:6rem;height:4rem;float:left;color:inherit" />${unsafeHTML(logo)}</a> ${document.title}
+      <span id="beat" style="float:right;height:1rem;margin-bottom:1rem">❤</span></h1>
       <section>
         <esp-entity-table .source=${this.source}></esp-entity-table>
 
@@ -75,11 +79,6 @@ export default class EspApp extends LitElement {
       h2 {
         border-bottom: 1px solid #eaecef;
       }
-      
-      html[color-scheme="dark"] img {
-        filter: invert(100%);
-      }
-
     `;
   }
 }

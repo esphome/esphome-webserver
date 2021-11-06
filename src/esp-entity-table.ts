@@ -111,8 +111,6 @@ export class EntityTable extends LitElement {
   static get styles() {
     return css`
     table {
-      /* background-color: var(--c-bg); */
-      /* color: var(--c-text); */
       border-spacing: 0;
       border-collapse: collapse;
     }
@@ -130,14 +128,10 @@ export class EntityTable extends LitElement {
       th,
       td {
         padding: 0.25rem 0.5rem;
-        border: 1px solid #dfe2e5;
-        color: var(mdc-theme-primary);
-      }
-      tr {
-        background-color: #fff;
+        border: 1px solid var(--c-gray-40);
       }
       tr:nth-child(2n),tr th {
-        background-color: #f6f8fa;
+        /* background-color:var(--c-gray-40) */
       }
     `;
   }  

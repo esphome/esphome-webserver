@@ -50,7 +50,7 @@ export class DebugLog extends LitElement {
           <label>
           ${this.labelOff}
             <input type="checkbox" ?checked="${this.checked}" @click="${this.toggle}">
-            <span class="lever"></span>
+            <span style="color: #26a69a" class="lever"></span>
             ${this.labelOn}
           </label>
         </div>
@@ -85,8 +85,7 @@ export class DebugLog extends LitElement {
 }
 
 .switch label input[type=checkbox]:checked+.lever:after {
-  background-color: #26a69a
-  /*background-color: var(--mdc-theme-primary)*/
+  background-color: currentColor
 }
 
 .switch label .lever {
