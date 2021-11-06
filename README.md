@@ -1,2 +1,2 @@
 # esphome-webserver
-wmr preact htm webserver for esphome devices
+Vite <strike>wmr preact</strike> Lit Element htm webserver for esphome devices
