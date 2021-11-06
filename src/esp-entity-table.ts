@@ -71,7 +71,8 @@ export class EntityTable extends LitElement {
     if (entity.domain === "fan" || entity.domain === "switch" || entity.domain === "light") return html`
     <span style="float:right">${this.actionButtonToggle(entity)}</span>
     <esp-switch .state="${entity.state}" @state="${(e:CustomEvent)=>{let act='turn_'+e.detail.state;this.restAction(entity,act.toLowerCase() )}}"></esp-switch>`;
-    if (entity.domain === "cover") return html`${this.actionButton(entity, "Open")}${this.actionButton(entity, "Close")}${this.actionButton(entity, "Stop")}`;
+    if (entity.domain === "cover") 
+    return html`${this.actionButton(entity, "Open")}${this.actionButton(entity, "Close")}${this.actionButton(entity, "Stop")}`;
     return html``;
   }
 

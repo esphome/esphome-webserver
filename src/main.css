@@ -3,12 +3,29 @@
 :root {
   --c-bg: #fff;
   --c-text: #000;
+  --color:0, 100%; 
+  --l:50%; 
+  /* --color-primary: hsl(var(--color),var(--l));
+   */
+   --color-primary: #26a69a;
+   --color-primary-lighter: rgba(var(--color-primary), 50%);
+  --color-primary-darker: hsl(var(--color),calc(var(--l) - 5%));
+  --color-primary-darkest: hsl(var(--color),calc(var(--l) - 10%));   
 }
 @media (prefers-color-scheme: dark) {
   :root {
     --c-bg: #000;
     --c-text: #fff;
   }
+}
+
+html {
+  /* color:blanchedalmond */
+}
+
+      
+html[color-scheme="dark"] img {
+  filter: invert(100%);
 }
 
 /* For browsers that don’t support `color-scheme` and therefore
@@ -28,7 +45,7 @@
   and (color: CanvasText) {
   :root {
     --c-bg: Canvas;
-    --c-text: CanvasText;
+    --c-text: ButtonText;
   }
 }
 
@@ -42,8 +59,10 @@
 }
 
 html {
+    /* color-scheme: light dark; */
     color-scheme: light dark;
-    font-family: ui-monospace, system-ui
+    font-family: ui-monospace, system-ui;
+    --c-gray-40: #dfe2e5;
 }
 
 /*
