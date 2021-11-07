@@ -6,11 +6,16 @@
   --color:0, 100%; 
   --l:50%; 
   /* --color-primary: hsl(var(--color),var(--l));
+  https://blog.jim-nielsen.com/2019/generating-shades-of-color-using-css-variables/
    */
    --color-primary: #26a69a;
-   --color-primary-lighter: rgba(var(--color-primary), 50%);
+   
   --color-primary-darker: hsl(var(--color),calc(var(--l) - 5%));
-  --color-primary-darkest: hsl(var(--color),calc(var(--l) - 10%));   
+  --color-primary-darkest: hsl(var(--color),calc(var(--l) - 10%));
+  --color-text: #5b3e81;
+  --color-text-rgb: 47, 6, 100;
+  --color-primary-lighter: rgba(var(--color-text-rgb), 50%);
+  --color-slider-thingy: 38, 166, 154;
 }
 @media (prefers-color-scheme: dark) {
   :root {

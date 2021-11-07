@@ -21,7 +21,7 @@ export default class EspApp extends LitElement {
   @query("#beat")
   beat!: HTMLSpanElement;
 
-  frames = [{ color: "inherit" }, { color: "red", transform: "scale(1.25,1.25)" }, { color: "inherit" }];
+  frames = [{ color: "inherit" }, { color: "red", transform: "scale(1.25)", }, { color: "inherit" }];
 
   constructor() {
     super();
