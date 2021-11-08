@@ -1,16 +1,1 @@
-    <svg viewBox="0 0 73 56" xmlns="http://www.w3.org/2000/svg">
-      <g transform="translate(-6.9 -8.2)" stroke-width="2" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
-       <g id="t">
-       <path id="p" d="m27 16v-4 c0-1 1-2.7 2-2.7 2 0 3 1.7 3 2.7v4m-14"/>
-       <use href="#p" x="9"/>
-       <use href="#p" x="18"/>
-       <use href="#p" x="27"/>
-       <use href="#p" x="36"/>
-       <use href="#p" x="45"/>
-      </g>
-      <use href="#t" transform="scale(1 -1) translate(0,-72)"/>
-      <path class="box" fill="inherit" d="m78 16h-52c-1 0-1 1-1 1v38c0 1 0 1 1 1h52c1 0 1 0 1-1v-38s0-1-1-1z"/>
-       <path class="home" fill="currentColor" d="m40 38h2.9v7.8h17v-7.8h2.9l-2.9-2.9v-5.1h-1.8v3.3l-6.8-6.8z"/>
-       <path class="aerial" d="m24 54h-16v-4h12v-4h-12v-4h12v-4h-12v-4h12v-4h-12v-12"  />
-      </g>
-     </svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="7 8 73 56" width="73" height="56"><g style="fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round"><g id="b"><path d="M27 16v-4c0-1 1-2.7 2-2.7 2 0 3 1.7 3 2.7v4" id="a"/><use x="9" href="#a"/><use x="18" href="#a"/><use x="27" href="#a"/><use x="36" href="#a"/><use x="45" href="#a"/></g><use transform="matrix(1 0 0 -1 0 72)" href="#b"/><path d="M78 16H26c-1 0-1 1-1 1v38c0 1 0 1 1 1h52c1 0 1 0 1-1V17s0-1-1-1z" class="box"/><path d="M40 38h2.9v7.8h17V38h2.9l-2.9-2.9V30h-1.8v3.3l-6.8-6.8z" class="home" fill="currentColor"/><path d="M24 54H8v-4h12v-4H8v-4h12v-4H8v-4h12v-4H8V18" class="aerial"/></g></svg>
