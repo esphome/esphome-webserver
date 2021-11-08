@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="data:" />
+    <meta name="viewport" content="width=device-width, initial-scale=1,user-scalable=no" />
+    <title>ESP-Home</title>
+    <link rel="stylesheet" href="/src/main.css" />
+  </head>
+
+    <div style="color: purple">
+      <div style="background-color: currentColor; width: 6rem; height: 2rem">currentColor</div>
+      <div style="background-color: hsl(currentColor, calc(var(--l) - 5%)); width: 6rem; height: 2rem">currentColor</div>
+      <div style="background-color: var(--color-slider-thingy); width: 6rem; height: 2rem">color-slider-thingy</div>
+      color-slider-thingy
+    </div>
+    <div style="background-color: var(--color-primary); width: 6rem; height: 2rem">primary</div>
+    <div style="background-color: var(--color-slider-thingy); width: 6rem; height: 2rem">color-slider-thingy</div>
+    <div style="background-color: var(--color-primary-lighter); width: 6rem; height: 2rem">lighter!</div>
+    <div style="background-color: var(--color-primary-darker); width: 6rem; height: 2rem">darker</div>
+    <div style="background-color: var(--color-primary-darkest); width: 6rem; height: 2rem">darkest</div>
+
+    <script type="module" src="/src/main.ts"></script>
+  </body>
+</html>

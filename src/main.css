@@ -64,11 +64,21 @@ html[color-scheme="dark"] img {
 }
 
 html {
-    /* color-scheme: light dark; */
     color-scheme: light dark;
     font-family: ui-monospace, system-ui;
     --c-gray-40: #dfe2e5;
 }
+
+
+html ,
+html *,
+html *:before,
+html *:after {
+  transition: all 250ms !important;
+  transition-delay: 0 !important;
+  transition-property: color-scheme;
+}
+
 
 /*
 https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#system_colors

@@ -29,12 +29,6 @@ export class DebugLog extends LitElement {
     return super.requestUpdate(name, oldValue);
 }
 
-  updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has("state"))
-      //this.checked = this.state === this.stateOn
-      console.log("now ", this.stateOn, this.checked)
-  }
-
   constructor() {
     super();
   }

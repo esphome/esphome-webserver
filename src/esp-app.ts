@@ -10,24 +10,29 @@ import logo from "/logo.svg?raw";
 @customElement("esp-app")
 export default class EspApp extends LitElement {
   static properties = {
-    theme: {},
+    scheme: {},
   };
 
-  @property({ type: String }) theme = "";
-  @property({ type: Boolean }) themeChecked = false;
+  @property({ type: String }) scheme = "";
+  @property({ type: Boolean }) schemeChecked = false;
   @property({ type: String }) ping = "";
   @property({ attribute: false }) source = new EventSource("/events");
 
   @query("#beat")
   beat!: HTMLSpanElement;
 
+  darkQuery: MediaQueryList = window.matchMedia('(prefers-color-scheme: dark)')
+
   frames = [{ color: "inherit" }, { color: "red", transform: "scale(1.25)", }, { color: "inherit" }];
 
   constructor() {
     super();
+    this.darkQuery.addEventListener( "change", () => {
+      this.scheme=this.isDark();
+    });
+    this.scheme=this.isDark();
     this.source.addEventListener("ping", (e: Event) => {
       const messageEvent = e as MessageEvent;
-      console.dir(messageEvent.lastEventId);
       this.ping = messageEvent.lastEventId;
     });
     this.source.onerror = function(e) {
@@ -36,17 +41,17 @@ export default class EspApp extends LitElement {
     };
   }
 
+  isDark() {
+    let r=this.darkQuery.matches ? 'dark':'light';
+    console.log(r)
+    return r;
+  }
+
   updated(changedProperties: Map<string, unknown>) {
-    if (changedProperties.has("theme")) {
+    if (changedProperties.has("scheme")) {
       let el = document.documentElement;
-      el.classList.add("theme-toggle");
-      el.setAttribute("data-theme", this.theme);
-      el.setAttribute("color-scheme", this.theme);
-      document.documentElement.style.setProperty('--my-variable-name', 'pink');
-      document.documentElement.style.setProperty('color-scheme', this.theme);
-      window.setTimeout(() => {
-        el.classList.remove("theme-toggle");
-      }, 1000);
+      el.setAttribute("color-scheme", this.scheme);
+      document.documentElement.style.setProperty('color-scheme', this.scheme);
     }
     if (changedProperties.has("ping")) {
       this.beat.animate(this.frames, 1000);
@@ -63,7 +68,7 @@ export default class EspApp extends LitElement {
         <h2>Debug Log</h2>
         <esp-log rows="50" .source=${this.source}></esp-log>
 
-        <esp-switch style="float:right" .state="${this.theme}" @state="${(e: CustomEvent) => (this.theme = e.detail.state)}" labelOn="Dark" labelOff="Light" stateOn="dark" stateOff="light"></esp-switch>
+        <esp-switch style="float:right" .state="${this.scheme}" @state="${(e: CustomEvent) => (this.scheme = e.detail.state)}" labelOn="🌒" labelOff="☀️" stateOn="dark" stateOff="light"></esp-switch>
         <h2>OTA Update</h2>
         <form method="POST" action="/update" enctype="multipart/form-data">
           <input type="file" name="update" />
