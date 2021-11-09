@@ -52,7 +52,7 @@ export class EntityTable extends LitElement {
   }
   actionButton(entity:entityConfig, label: String, action?: String) {
     let a = action || label.toLowerCase();
-    return html`<button class="button mr-1" @click=${() => this.restAction(entity, a)}>${label}</button>`
+    return html`<button class="button" @click=${() => this.restAction(entity, a)}>${label}</button>`
   }
 
   actionButtonOn(entity:entityConfig) {
@@ -66,13 +66,13 @@ export class EntityTable extends LitElement {
   actionButtonToggle(entity:entityConfig) {
     return this.actionButton(entity, "Toggle")
   }
-
+ 
   control(entity:entityConfig) {
-    if (entity.domain === "fan" || entity.domain === "switch" || entity.domain === "light") return html`
-    <span style="float:right">${this.actionButtonToggle(entity)}</span>
-    <esp-switch .state="${entity.state}" @state="${(e:CustomEvent)=>{let act='turn_'+e.detail.state;this.restAction(entity,act.toLowerCase() )}}"></esp-switch>`;
+    if (entity.domain === "fan" || entity.domain === "switch" || entity.domain === "light")
+      return html`
+    <esp-switch color="var(--c-primary,currentColor)" .state="${entity.state}" @state="${(e:CustomEvent)=>{let act='turn_'+e.detail.state;this.restAction(entity,act.toLowerCase() )}}"></esp-switch>`;
     if (entity.domain === "cover") 
-    return html`${this.actionButton(entity, "Open")}${this.actionButton(entity, "Close")}${this.actionButton(entity, "Stop")}`;
+      return html`${this.actionButton(entity, "Open")} ${this.actionButton(entity, "Close")} ${this.actionButton(entity, "Stop")}`;
     return html``;
   }
 
@@ -114,14 +114,10 @@ export class EntityTable extends LitElement {
     table {
       border-spacing: 0;
       border-collapse: collapse;
+      width: 100%;
+      border: 1px solid currentColor;
     }
 
-      .w-100 {
-        width: 100%;
-      }
-      .mr-1 {
-        margin-right: 0.25rem;
-      }
       th {
         font-weight: 600;
         text-align: left
@@ -129,10 +125,13 @@ export class EntityTable extends LitElement {
       th,
       td {
         padding: 0.25rem 0.5rem;
-        border: 1px solid var(--c-gray-40);
       }
-      tr:nth-child(2n),tr th {
-        /* background-color:var(--c-gray-40) */
+      td:nth-last-child(2), th:nth-last-child(2) {
+        text-align: center;
+      }
+      tr:nth-child(2n),th,td {
+        background-color: rgba(127,127,127,0.3);
+        border: 1px solid currentColor
       }
     `;
   }  

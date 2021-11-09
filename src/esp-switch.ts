@@ -2,7 +2,7 @@ import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 
 @customElement("esp-switch")
-export class DebugLog extends LitElement {
+export class EspSwitch extends LitElement {
 
   // Use arrays - or slots
   @property({ type: String }) labelOn = "On";
@@ -10,12 +10,13 @@ export class DebugLog extends LitElement {
   @property({ type: String }) stateOn = "ON";
   @property({ type: String }) stateOff = "OFF";
   @property({ type: String }) state = "OFF";
+  @property({ type: String }) color = "currentColor";
   @property({ type: Boolean }) checked = false;
+  @property({ type: Boolean }) disabled = false;
 
   toggle(): void {
     this.checked = !this.checked;
     this.state=this.checked ? this.stateOn : this.stateOff
-    // Emit to parent...
     let event = new CustomEvent('state', { 
       detail: { state: this.state, id: this.id },
     });
@@ -29,10 +30,6 @@ export class DebugLog extends LitElement {
     return super.requestUpdate(name, oldValue);
 }
 
-  constructor() {
-    super();
-  }
-
   connectedCallback() {
     super.connectedCallback();
     this.checked = this.state === this.stateOn;
@@ -40,14 +37,14 @@ export class DebugLog extends LitElement {
 
   render() {
     return html`
-       <div class="switch">
-          <label>
-          ${this.labelOff}
-            <input type="checkbox" ?checked="${this.checked}" @click="${this.toggle}">
-            <span style="color: #26a69a" class="lever"></span>
-            ${this.labelOn}
-          </label>
-        </div>
+    <div class="switch">
+      <label>
+        ${this.labelOff}
+        <input type="checkbox" ?checked="${this.checked}" ?disabled="${this.disabled}" @click="${this.toggle}">
+        <span style="color:${this.color}" class="lever"></span>
+        ${this.labelOn}
+      </label>
+    </div>
     `;
   }
 
@@ -70,7 +67,8 @@ export class DebugLog extends LitElement {
 }
 
 .switch label input[type=checkbox]:checked+.lever {
-  background-color: #84c7c1
+  background-color: currentColor;
+  background-image: linear-gradient( 0deg, rgba(255,255,255,0.5) 0%, rgba(255,255,255,0.5) 100%);
 }
 
 .switch label input[type=checkbox]:checked+.lever:before,
@@ -88,7 +86,8 @@ export class DebugLog extends LitElement {
   position: relative;
   width: 36px;
   height: 14px;
-  background-color: rgba(0, 0, 0, 0.38);
+  background-image: linear-gradient( 0deg, rgba(127,127,127,0.5) 0%, rgba(127,127,127,0.5) 100%);
+  background-color: inherit;
   border-radius: 15px;
   margin-right: 10px;
   transition: background 0.3s ease;
@@ -110,7 +109,8 @@ export class DebugLog extends LitElement {
 }
 
 .switch label .lever:before {
-  background-color: rgba(38, 166, 154, 0.15)
+  background-color: currentColor;
+  background-image: linear-gradient( 0deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.9)100%);
 }
 
 .switch label .lever:after {
@@ -121,12 +121,12 @@ export class DebugLog extends LitElement {
 input[type=checkbox]:checked:not(:disabled)~.lever:active::before,
 input[type=checkbox]:checked:not(:disabled).tabbed:focus~.lever::before {
   transform: scale(2.4);
-  background-color: rgba(38, 166, 154, 0.15)
+  background-color: currentColor;
+  background-image: linear-gradient( 0deg, rgba(255,255,255,0.9) 0%, rgba(255,255,255,0.9) 100%);
 }
 
 input[type=checkbox]:not(:disabled)~.lever:active:before,
 input[type=checkbox]:not(:disabled).tabbed:focus~.lever::before {
-  -webkit-transform: scale(2.4);
   transform: scale(2.4);
   background-color: rgba(0, 0, 0, 0.08)
 }
@@ -140,7 +140,6 @@ input[type=checkbox]:not(:disabled).tabbed:focus~.lever::before {
 .switch label input[type=checkbox][disabled]:checked+.lever:after {
   background-color: #949494
 }
-      
     `;
   }
 }

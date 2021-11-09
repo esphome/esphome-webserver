@@ -3,6 +3,7 @@
 :root {
   --c-bg: #fff;
   --c-text: #000;
+  --c-primary: #26a69a;
   --color:0, 100%; 
   --l:50%; 
   /* --color-primary: hsl(var(--color),var(--l));
@@ -16,6 +17,15 @@
   --color-text-rgb: 47, 6, 100;
   --color-primary-lighter: rgba(var(--color-text-rgb), 50%);
   --color-slider-thingy: 38, 166, 154;
+
+  --primary-color: hsla(323, 18%, 49%, 0.924);
+  --dark-primary-color: #0288d1;
+  --light-primary-color: #b3e5fC;
+  --c-pri-rgb: 3, 169, 244;
+  --c-pri: rgba(var(--c-pri-rgb),100%);
+  --c-pri-l: rgba(var(--c-pri-rgb), 50%);
+  --c-pri-d: hsl(var(--c-pri-rgb),calc(var(--l) - 5%);
+  --color-primary-lighter2: rgba(var(--c-pri), 50%));
 }
 @media (prefers-color-scheme: dark) {
   :root {
@@ -65,18 +75,18 @@ html[color-scheme="dark"] img {
 
 html {
     color-scheme: light dark;
-    font-family: ui-monospace, system-ui;
+    font-family: ui-monospace, system-ui, "Helvetica", "Arial Narrow", "Roboto", "Oxygen", "Ubuntu", sans-serif;
     --c-gray-40: #dfe2e5;
 }
 
 
-html ,
-html *,
-html *:before,
-html *:after {
-  transition: all 250ms !important;
-  transition-delay: 0 !important;
-  transition-property: color-scheme;
+html * {
+  /* transition: all 750ms !important; */
+  /* transition-property: color-scheme; */
+  transition-property: color;
+    transition-duration: 450ms !important;
+    transition-timing-function: ease !important;
+    transition-delay: 0s !important;
 }
 
 
@@ -262,4 +272,5 @@ button {
   cursor: pointer;
 }
 */
+
 
