@@ -76,8 +76,16 @@ html[color-scheme="dark"] img {
 html {
     color-scheme: light dark;
     font-family: ui-monospace, system-ui, "Helvetica", "Arial Narrow", "Roboto", "Oxygen", "Ubuntu", sans-serif;
-    --c-gray-40: #dfe2e5;
 }
+
+html button, html .btn {
+  cursor: pointer;
+  border-radius: 1rem;
+  background-color: inherit;
+  background-image: linear-gradient( 0deg, rgba(127,127,127,0.5) 0%, rgba(127,127,127,0.5) 100%);
+  color:inherit;
+  border: 1px solid rgba(127,127,127,0.5);
+  height: 1.2rem;
 
 
 html * {
