@@ -93,7 +93,7 @@ export class EntityTable extends LitElement {
 
   render() {
     return html`
-      <table class="w-100">
+      <table>
         <thead>
           <tr>
             <th>Name</th>
@@ -135,16 +135,11 @@ export class EntityTable extends LitElement {
         th,
         td {
           padding: 0.25rem 0.5rem;
-        }
-        td:nth-last-child(2),
-        th:nth-last-child(2) {
-          text-align: center;
-        }
-        tr:nth-child(2n),
-        th,
-        td {
-          background-color: rgba(127, 127, 127, 0.3);
           border: 1px solid currentColor;
+        }
+        tr th,
+        tr:nth-child(2n) {
+          background-color: rgba(127, 127, 127, 0.3);
         }
       `,
     ];

@@ -4,7 +4,7 @@ export default css`
   button,
   .btn {
     cursor: pointer;
-    border-radius: 1rem;
+    border-radius: 4px;
     background-color: inherit;
     background-image: linear-gradient(0deg, rgba(127, 127, 127, 0.5) 0%, rgba(127, 127, 127, 0.5) 100%);
     color: inherit;

@@ -65,19 +65,31 @@ export default class EspApp extends LitElement {
       </a> 
       ${document.title}
       <span id="beat" style="float:right;height:1rem">❤</span></h1>
-      <section>
+      <main class="flex-grid-half">
+
+      <section class="col">
         <esp-entity-table .source=${this.source}></esp-entity-table>
-
-        <h2>Debug Log</h2>
-        <esp-log rows="50" .source=${this.source}></esp-log>
-
-        <h2><esp-switch color="var(--primary-color,currentColor)" style="float:right" .state="${this.scheme}" @state="${(e: CustomEvent) => (this.scheme = e.detail.state)}" labelOn="🌒" labelOff="☀️" stateOn="dark" stateOff="light"></esp-switch>
-        OTA Update</h2>
+        <h2>
+          <esp-switch color="var(--primary-color,currentColor)" 
+            style="float:right" .state="${this.scheme}" 
+            @state="${(e: CustomEvent) => (this.scheme = e.detail.state)}" 
+            labelOn="🌒" labelOff="☀️" 
+            stateOn="dark" stateOff="light">
+          </esp-switch>
+          Scheme
+        </h2>
+        <h2>
+        OTA Update
+        </h2>
         <form method="POST" action="/update" enctype="multipart/form-data">
           <input class="btn" type="file" name="update" />
           <input class="btn" type="submit" value="Update" />
         </form>
-      </section>
+        </section>
+        <section class="col">
+        <esp-log rows="50" .source=${this.source}></esp-log>
+      </section>   
+  </main>
     `;
   }
 
@@ -86,6 +98,39 @@ export default class EspApp extends LitElement {
       cssReset,
       cssButton,
       css`
+        .flex-grid {
+          display: flex;
+        }
+        .flex-grid .col {
+          flex: 2;
+        }
+        .flex-grid-half {
+          display: flex;
+          justify-content: space-evenly;
+        }
+        .col {
+          width: 48%;
+        }
+
+        @media (max-width: 600px) {
+          .flex-grid,
+          .flex-grid-half {
+            display: block;
+          }
+          .col {
+            width: 100%;
+            margin: 0 0 10px 0;
+          }
+        }
+
+        * {
+          box-sizing: border-box;
+        }
+        .flex-grid {
+          margin: 0 0 20px 0;
+        }
+        .col {
+        }
         h1 {
           text-align: center;
           width: 100%;
@@ -94,6 +139,7 @@ export default class EspApp extends LitElement {
         h1,
         h2 {
           border-bottom: 1px solid #eaecef;
+          margin-bottom: 0.25rem;
         }
       `,
     ];
