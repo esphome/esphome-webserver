@@ -5,8 +5,8 @@ import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
 import "./esp-logo";
-import cssReset from "./css/reset.ts";
-import cssButton from "./css/button.ts";
+import cssReset from "./css/reset";
+import cssButton from "./css/button";
 
 @customElement("esp-app")
 export default class EspApp extends LitElement {
@@ -15,8 +15,10 @@ export default class EspApp extends LitElement {
   };
 
   @property({ type: String }) scheme = "";
+  @property({ type: String }) version = import.meta.env.PACKAGE_VERSION;
   @property({ type: Boolean }) schemeChecked = false;
   @property({ type: String }) ping = "";
+  @property({ type: Object }) config = { ota: false, title: "" };
   @property({ attribute: false }) source = new EventSource("/events");
 
   @query("#beat")
@@ -28,12 +30,23 @@ export default class EspApp extends LitElement {
 
   constructor() {
     super();
+    document.getElementsByTagName("head")[0].innerHTML += '<meta charset=UTF-8><meta name=viewport content="width=device-width, initial-scale=1,user-scalable=no">';
+    const l = <HTMLLinkElement>document.querySelector("link[rel~='icon']"); // Set favicon to house
+    l.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="22" height="22"><path d="M0 11.5h2.9v7.8h17v-7.8h2.9l-2.9-2.9V3.5h-1.8v3.3L11.3 0Z"/></svg>';
     this.darkQuery.addEventListener("change", () => {
       this.scheme = this.isDark();
     });
     this.scheme = this.isDark();
     this.source.addEventListener("ping", (e: Event) => {
       const messageEvent = e as MessageEvent;
+      const d: String = messageEvent.data;
+      if (d.length) {
+        const config = JSON.parse(messageEvent.data);
+        this.config = config;
+        
+        document.title = config.title;
+        document.documentElement.lang=config.lang;
+      }
       this.ping = messageEvent.lastEventId;
     });
     this.source.onerror = function (e) {
@@ -57,39 +70,37 @@ export default class EspApp extends LitElement {
     }
   }
 
-  render() {
-    return html`
-      <h1>
-      <a href="https://esphome.io/web-api" style="width:6rem;height:4rem;float:left;color:inherit" />
-      <esp-logo></esp-logo>
-      </a> 
-      ${document.title}
-      <span id="beat" style="float:right;height:1rem">❤</span></h1>
-      <main class="flex-grid-half">
-
-      <section class="col">
-        <esp-entity-table .source=${this.source}></esp-entity-table>
-        <h2>
-          <esp-switch color="var(--primary-color,currentColor)" 
-            style="float:right" .state="${this.scheme}" 
-            @state="${(e: CustomEvent) => (this.scheme = e.detail.state)}" 
-            labelOn="🌒" labelOff="☀️" 
-            stateOn="dark" stateOff="light">
-          </esp-switch>
-          Scheme
-        </h2>
-        <h2>
-        OTA Update
-        </h2>
+  ota() {
+    if (this.config.ota)
+      return html`<h2>OTA Update</h2>
         <form method="POST" action="/update" enctype="multipart/form-data">
           <input class="btn" type="file" name="update" />
           <input class="btn" type="submit" value="Update" />
-        </form>
+        </form>`;
+  }
+
+  render() {
+    return html`
+      <h1>
+        <a href="https://esphome.io/web-api" style="height:4rem;float:left;color:inherit">
+          <esp-logo></esp-logo>
+        </a>
+        ${this.config.title}
+        <span id="beat" style="float:right;height:1rem" title="${this.version}">❤</span>
+      </h1>
+      <main class="flex-grid-half">
+        <section class="col">
+          <esp-entity-table .source=${this.source}></esp-entity-table>
+          <h2>
+            <esp-switch color="var(--primary-color,currentColor)" style="float:right" .state="${this.scheme}" @state="${(e: CustomEvent) => (this.scheme = e.detail.state)}" labelOn="🌒" labelOff="☀️" stateOn="dark" stateOff="light"> </esp-switch>
+            Scheme
+          </h2>
+          ${this.ota()}
         </section>
         <section class="col">
-        <esp-log rows="50" .source=${this.source}></esp-log>
-      </section>   
-  </main>
+          <esp-log rows="50" .source=${this.source}></esp-log>
+        </section>
+      </main>
     `;
   }
 
@@ -128,8 +139,6 @@ export default class EspApp extends LitElement {
         }
         .flex-grid {
           margin: 0 0 20px 0;
-        }
-        .col {
         }
         h1 {
           text-align: center;

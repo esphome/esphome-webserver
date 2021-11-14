@@ -1,6 +1,6 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import cssReset from "./css/reset.ts";
+import cssReset from "./css/reset";
 
 @customElement("esp-switch")
 export class EspSwitch extends LitElement {

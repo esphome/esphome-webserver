@@ -1,15 +1,16 @@
 import { defineConfig } from "vite";
-import { createProxyMiddleware } from "http-proxy-middleware";
 import gzipPlugin from "rollup-plugin-gzip";
 import minifyHTML from "rollup-plugin-minify-html-template-literals";
 import { brotliCompressSync } from "zlib";
 import { nodeResolve } from '@rollup/plugin-node-resolve';
+import loadVersion from 'vite-plugin-package-version';
 
-// should be from env and default to off
 const proxy_target = "http://nodemcu.local";
 
 export default defineConfig({
+  clearScreen: false,
   plugins: [
+    loadVersion(),
     { ...minifyHTML(), enforce: "pre", apply: "build" },
     { ...nodeResolve({ exportConditions: ['development']})},
     {
@@ -38,8 +39,8 @@ export default defineConfig({
     },
   },
   server: {
-    open: "/", // auto open browser in dev mode
-    host: true, // dev also on ip
+    // open: "/", // auto open browser in dev mode
+    host: true, // dev on local and network
     proxy: {
       "/light": proxy_target, 
       "/select": proxy_target, 

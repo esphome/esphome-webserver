@@ -1,7 +1,7 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import cssReset from "./css/reset.ts";
-import cssButton from "./css/button.ts";
+import cssReset from "./css/reset";
+import cssButton from "./css/button";
 
 interface entityConfig {
   unique_id: string;
@@ -13,6 +13,7 @@ interface entityConfig {
   name: string;
   when: string;
   icon?: string;
+  option?: string[];
 }
 
 @customElement("esp-entity-table")
@@ -33,15 +34,7 @@ export class EntityTable extends LitElement {
       if (idx === -1) {
         // Dynamically add discovered..
         let parts = data.id.split("-");
-        let entity = {
-          unique_id: data.id,
-          domain: parts[0],
-          id: parts.slice(1).join("-"),
-          state: data.state,
-          value: data.value,
-          name: data.name || data.id,
-          icon: data.icon || null,
-        } as entityConfig;
+        let entity = { ...data, domain: parts[0], unique_id:data.id, id:parts.slice(1).join("-") } as entityConfig;
         this.entities.push(entity);
         this.requestUpdate();
       } else {
@@ -56,18 +49,6 @@ export class EntityTable extends LitElement {
     return html`<button class="btn" @click=${() => this.restAction(entity, a)}>${label}</button>`;
   }
 
-  actionButtonOn(entity: entityConfig) {
-    return this.actionButton(entity, "On", "turn_on");
-  }
-
-  actionButtonOff(entity: entityConfig) {
-    return this.actionButton(entity, "Off", "turn_off");
-  }
-
-  actionButtonToggle(entity: entityConfig) {
-    return this.actionButton(entity, "Toggle");
-  }
-
   control(entity: entityConfig) {
     if (entity.domain === "fan" || entity.domain === "switch" || entity.domain === "light")
       return html` <esp-switch
@@ -79,8 +60,27 @@ export class EntityTable extends LitElement {
         }}"
       ></esp-switch>`;
     if (entity.domain === "cover") return html`${this.actionButton(entity, "Open")} ${this.actionButton(entity, "Close")} ${this.actionButton(entity, "Stop")}`;
+    if (entity.domain === "select") {
+      return html`
+      <select @change="${(e:Event) => {
+        let val= e.target.value;
+        this.restAction(entity, `set?option=${val}`);
+      }
+      }">
+            ${entity.option.map(option => html`
+                <option value="${option}" ?selected=${entity.value === option}>${option}</option>
+            `)}
+        </select>`
+    }
+    
     return html``;
   }
+
+  optionChange(entity: entityConfig) {
+    console.dir(entity);
+    return
+  }
+  
 
   restAction(entity: entityConfig, action: String) {
     fetch(`/${entity.domain}/${entity.id}/${action}`, {
@@ -99,7 +99,7 @@ export class EntityTable extends LitElement {
             <th>Name</th>
             <th>State</th>
             <th>Actions</th>
-          </tr>
+          </tr> 
         </thead>
         <tbody>
           ${this.entities.map(
@@ -137,9 +137,22 @@ export class EntityTable extends LitElement {
           padding: 0.25rem 0.5rem;
           border: 1px solid currentColor;
         }
+        td:nth-child(2),th:nth-child(2) {
+          text-align:center
+        }
         tr th,
         tr:nth-child(2n) {
           background-color: rgba(127, 127, 127, 0.3);
+        }
+        select {
+          background-color: inherit;
+          color: inherit;
+          width:100%;
+          border-radius: 4px;
+        }
+        option {
+          color: currentColor;
+          background-color: var(--primary-color,currentColor);
         }
       `,
     ];
