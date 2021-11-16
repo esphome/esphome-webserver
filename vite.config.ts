@@ -4,6 +4,8 @@ import minifyHTML from "rollup-plugin-minify-html-template-literals";
 import { brotliCompressSync } from "zlib";
 import { nodeResolve } from '@rollup/plugin-node-resolve';
 import loadVersion from 'vite-plugin-package-version';
+import { viteSingleFile } from 'vite-plugin-singlefile'
+import { minifyHtml as ViteMinifyHtml } from 'vite-plugin-html';
 
 const proxy_target = "http://nodemcu.local";
 
@@ -12,6 +14,8 @@ export default defineConfig({
   plugins: [
     loadVersion(),
     { ...minifyHTML(), enforce: "pre", apply: "build" },
+    viteSingleFile(),
+    ViteMinifyHtml(),
     { ...nodeResolve({ exportConditions: ['development']})},
     {
       ...gzipPlugin({ filter: /\.(js|css|html|svg)$/, additionalFiles: [], customCompression: (content) => brotliCompressSync(Buffer.from(content)), fileName: ".br" }),

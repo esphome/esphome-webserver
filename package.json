@@ -14,7 +14,9 @@
     "lit": "^2.0.2",
     "rollup-plugin-gzip": "^2.5.0",
     "rollup-plugin-minify-html-template-literals": "^1.2.0",
-    "vite-plugin-package-version": "^1.0.2"
+    "vite-plugin-html": "^2.1.1",
+    "vite-plugin-package-version": "^1.0.2",
+    "vite-plugin-singlefile": "^0.5.1"
   },
   "devDependencies": {
     "@rollup/plugin-node-resolve": "^13.0.6",
