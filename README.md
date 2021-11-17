@@ -36,7 +36,7 @@ Light scheme on mobile:
 web_server:
   port: 80
   css_url: ""
-  js_url: https://wilberforce.github.io/_static/v2/www.js
+  js_url: https://esphome.io/_static/v2/www.js
   version: 2
 ```
 
@@ -44,7 +44,7 @@ development
 ===========
 
 ```
-git clone https://github.com/wilberforce/esphome-webserver.git
+git clone https://github.com/esphome/esphome-webserver.git
 pnpm install
 ```
 
@@ -62,7 +62,7 @@ The json api will POST to the real device and the events are proxied
 build
 =====
 `npm run build`
-The build files are copied to static/v2 usually for deployment for https://esphome.io/static/v2
+The build files are copied to static/v2 usually for deployment to https://esphome.io/static/v2 or your /local/www homeassistant folder
 
 If you customise, you can deploy to your local homeassistant /local/www/_static/v2 and use:
 
@@ -70,7 +70,7 @@ If you customise, you can deploy to your local homeassistant /local/www/_static/
 web_server:
   port: 80
   version: 2
-  js_url: https://homeassistant.local:8123/local/_static/v2/www.js
+  js_url: http://homeassistant.local:8123/local/_static/v2/www.js
 
 ```
 
