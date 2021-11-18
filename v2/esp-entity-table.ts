@@ -59,7 +59,7 @@ export class EntityTable extends LitElement {
           this.restAction(entity, act.toLowerCase());
         }}"
       ></esp-switch>`;
-    if (entity.domain === "cover") return html`${this.actionButton(entity, "Open")} ${this.actionButton(entity, "Close")} ${this.actionButton(entity, "Stop")}`;
+    if (entity.domain === "cover") return html`${this.actionButton(entity, "Open")} ${this.actionButton(entity, "Stop")} ${this.actionButton(entity, "Close")}`;
     if (entity.domain === "select") {
       return html`
       <select @change="${(e:Event) => {
