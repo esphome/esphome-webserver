@@ -7,14 +7,17 @@ import loadVersion from "vite-plugin-package-version";
 import { viteSingleFile } from "vite-plugin-singlefile";
 import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import copy from "rollup-plugin-copy";
+import stripBanner from 'rollup-plugin-strip-banner';
 
 const proxy_target = "http://nodemcu.local";
 
 export default defineConfig({
   clearScreen: false,
   plugins: [
+    
     loadVersion(),
     { ...minifyHTML(), enforce: "pre", apply: "build" },
+    stripBanner(),
     viteSingleFile(),
     ViteMinifyHtml(),
     { ...nodeResolve({ exportConditions: ["development"] }) },
@@ -42,7 +45,6 @@ export default defineConfig({
     cssCodeSplit: true,
     outDir: "_static/v2",
     polyfillModulePreload: false,
-    comments: false,
     rollupOptions: {
       output: {
         manualChunks: (chunk) => {
