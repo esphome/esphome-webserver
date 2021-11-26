@@ -7,20 +7,20 @@ import loadVersion from "vite-plugin-package-version";
 import { viteSingleFile } from "vite-plugin-singlefile";
 import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import copy from "rollup-plugin-copy";
-import stripBanner from 'rollup-plugin-strip-banner';
+import stripBanner from "rollup-plugin-strip-banner";
 
 const proxy_target = "http://nodemcu.local";
 
 export default defineConfig({
   clearScreen: false,
   plugins: [
-    
+    { ...nodeResolve({ exportConditions: ["development"] }), enforce: "pre", apply: "start" },
+    stripBanner(),
     loadVersion(),
     { ...minifyHTML(), enforce: "pre", apply: "build" },
-    stripBanner(),
+    //
+    { ...ViteMinifyHtml({ removeComments: true }), enforce: "post", apply: "build" },
     viteSingleFile(),
-    ViteMinifyHtml(),
-    { ...nodeResolve({ exportConditions: ["development"] }) },
     {
       ...gzipPlugin({ filter: /\.(js|css|html|svg)$/, additionalFiles: [], customCompression: (content) => brotliCompressSync(Buffer.from(content)), fileName: ".br" }),
       enforce: "post",
@@ -42,7 +42,7 @@ export default defineConfig({
   ],
   build: {
     brotliSize: false,
-    cssCodeSplit: true,
+    // cssCodeSplit: true,
     outDir: "_static/v2",
     polyfillModulePreload: false,
     rollupOptions: {

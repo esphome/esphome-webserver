@@ -25,5 +25,13 @@ export default css`
     background-image: linear-gradient(0deg, rgba(127, 127, 127, 0.2) 0%, rgba(127, 127, 127, 0.8) 100%);
     transition-duration: 1s
   }
+
+  .rnd {
+    border-radius: 1rem;
+    height: 2rem;
+    width: 2rem;
+    font-weight:500;
+    font-size: 1.2rem
+  }
 `;
 

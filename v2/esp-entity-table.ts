@@ -14,6 +14,7 @@ interface entityConfig {
   when: string;
   icon?: string;
   option?: string[];
+  target_temperature?: Number;
 }
 
 @customElement("esp-entity-table")
@@ -27,14 +28,14 @@ export class EntityTable extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.source.addEventListener("state", (e: Event) => {
+    this.source?.addEventListener("state", (e: Event) => {
       const messageEvent = e as MessageEvent;
       const data = JSON.parse(messageEvent.data);
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
       if (idx === -1) {
         // Dynamically add discovered..
         let parts = data.id.split("-");
-        let entity = { ...data, domain: parts[0], unique_id:data.id, id:parts.slice(1).join("-") } as entityConfig;
+        let entity = { ...data, domain: parts[0], unique_id: data.id, id: parts.slice(1).join("-") } as entityConfig;
         this.entities.push(entity);
         this.requestUpdate();
       } else {
@@ -46,41 +47,82 @@ export class EntityTable extends LitElement {
   }
   actionButton(entity: entityConfig, label: String, action?: String) {
     let a = action || label.toLowerCase();
-    return html`<button class="btn" @click=${() => this.restAction(entity, a)}>${label}</button>`;
+    return html`<button class="rnd" @click=${() => this.restAction(entity, a)}>${label}</button>`;
+  }
+
+  select(entity: entityConfig, action: string, opt: String, options: String[], val: string) {
+    return html`<select
+      @change="${(e: Event) => {
+        let val = e.target?.value;
+        this.restAction(entity, `${action}?${opt}=${val}`);
+      }}"
+    >
+      ${options.map((option) => html` <option value="${option}" ?selected=${val === option}>${option}</option> `)}
+    </select>`;
+  }
+
+  range(entity: entityConfig, action: string, opt: String, value: Number, min: Number, max: Number, step: Number) {
+    return html`<label>${min || 0}</label>
+      <input
+        style="width:80%"
+        type="range"
+        name="${entity.unique_id}"
+        id="${entity.unique_id}"
+        value="${value}"
+        step="${step}"
+        min="${min}"
+        max="${max}"
+        @change="${(e: Event) => {
+          let val = e.target?.value;
+          this.restAction(entity, `${action}?${opt}=${val}`);
+        }}"
+      />
+      <label>${max || 100}</label>`;
+  }
+
+  switch(entity: entityConfig) {
+    return html` <esp-switch
+      color="var(--primary-color,currentColor)"
+      .state="${entity.state}"
+      @state="${(e: CustomEvent) => {
+        let act = "turn_" + e.detail.state;
+        this.restAction(entity, act.toLowerCase());
+      }}"
+    ></esp-switch>`;
   }
 
   control(entity: entityConfig) {
-    if (entity.domain === "fan" || entity.domain === "switch" || entity.domain === "light")
-      return html` <esp-switch
-        color="var(--primary-color,currentColor)"
-        .state="${entity.state}"
-        @state="${(e: CustomEvent) => {
-          let act = "turn_" + e.detail.state;
-          this.restAction(entity, act.toLowerCase());
-        }}"
-      ></esp-switch>`;
-    if (entity.domain === "cover") return html`${this.actionButton(entity, "Open")} ${this.actionButton(entity, "Stop")} ${this.actionButton(entity, "Close")}`;
+    if (entity.domain === "fan" || entity.domain === "switch") return this.switch(entity);
+
+    if (entity.domain === "light") return [this.switch(entity), this.select(entity, "turn_on", "effect", entity.effects, entity.effect)];
+
+    if (entity.domain === "cover") return html`${this.actionButton(entity, "↑", "open")} ${this.actionButton(entity, "☐", "stop")} ${this.actionButton(entity, "↓", "close")}`;
     if (entity.domain === "select") {
-      return html`
-      <select @change="${(e:Event) => {
-        let val= e.target.value;
-        this.restAction(entity, `set?option=${val}`);
-      }
-      }">
-            ${entity.option.map(option => html`
-                <option value="${option}" ?selected=${entity.value === option}>${option}</option>
-            `)}
-        </select>`
+      return this.select(entity, "set", "option", entity.option, entity.value);
     }
-    
+    if (entity.domain === "number") {
+      return this.range(entity, "set", "value", entity.value, entity.min_value, entity.max_value, entity.step);
+    }
+    if (entity.domain === "climate")
+      return html`
+        ${entity.target_temperature} ${entity.current_temperature} ${entity.current_temperature_low} ${entity.current_temperature_high}
+        <label for="${entity.unique_id}"></label>
+        <div>${this.range(entity, "set", "target_temperature", entity.value, entity.min_temp, entity.max_temp, entity.step)}</div>
+        <br /><label
+          >Mode:
+          ${entity.modes.map(
+            (mode) => html` 
+      <input type="radio" name="mode" @change="${(e: Event) => {
+        let val = e.target?.value;
+        this.restAction(entity, `set?mode=${val}`);
+      }}"
+         value="${mode}" ?checked=${entity.mode === mode}>${mode}</input> `
+          )}
+        </label>
+      `;
+
     return html``;
   }
-
-  optionChange(entity: entityConfig) {
-    console.dir(entity);
-    return
-  }
-  
 
   restAction(entity: entityConfig, action: String) {
     fetch(`/${entity.domain}/${entity.id}/${action}`, {
@@ -99,7 +141,7 @@ export class EntityTable extends LitElement {
             <th>Name</th>
             <th>State</th>
             <th>Actions</th>
-          </tr> 
+          </tr>
         </thead>
         <tbody>
           ${this.entities.map(
@@ -137,8 +179,9 @@ export class EntityTable extends LitElement {
           padding: 0.25rem 0.5rem;
           border: 1px solid currentColor;
         }
-        td:nth-child(2),th:nth-child(2) {
-          text-align:center
+        td:nth-child(2),
+        th:nth-child(2) {
+          text-align: center;
         }
         tr th,
         tr:nth-child(2n) {
@@ -147,12 +190,12 @@ export class EntityTable extends LitElement {
         select {
           background-color: inherit;
           color: inherit;
-          width:100%;
+          width: 100%;
           border-radius: 4px;
         }
         option {
           color: currentColor;
-          background-color: var(--primary-color,currentColor);
+          background-color: var(--primary-color, currentColor);
         }
       `,
     ];

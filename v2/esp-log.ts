@@ -23,7 +23,7 @@ export class DebugLog extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.source.addEventListener("log", (e: Event) => {
+    this.source?.addEventListener("log", (e: Event) => {
       const messageEvent = e as MessageEvent;
       const d: String = messageEvent.data;
       let parts = d.slice(10, d.length - 4).split(":");
