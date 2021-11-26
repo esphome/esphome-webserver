@@ -94,7 +94,7 @@ export class EntityTable extends LitElement {
   control(entity: entityConfig) {
     if (entity.domain === "fan" || entity.domain === "switch") return this.switch(entity);
 
-    if (entity.domain === "light") return [this.switch(entity), this.select(entity, "turn_on", "effect", entity.effects, entity.effect)];
+    if (entity.domain === "light") return [this.switch(entity), entity.effects && this.select(entity, "turn_on", "effect", entity.effects, entity.effect)];
 
     if (entity.domain === "cover") return html`${this.actionButton(entity, "↑", "open")} ${this.actionButton(entity, "☐", "stop")} ${this.actionButton(entity, "↓", "close")}`;
     if (entity.domain === "select") {
