@@ -1,0 +1,41 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <link rel="icon" href="data:image" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, user-scalable=no" />
+    <link rel="stylesheet" type="text/css" href="/src/stylesheet.css" />
+  </head>
+
+  <body>
+    <main>
+      <h1 id="h1">WiFi Networks</h1>
+      <aside>
+        The ESP will now try to connect to the network...<br />
+        Please give it some time to connect.<br />
+        Note: Copy the changed network to your YAML file - the next OTA update will overwrite these settings.
+      </aside>
+      <span id="net">
+      </span>
+
+      <h3>WiFi Settings</h3>
+      <form method="GET" action="/wifisave">
+        <input id="ssid" name="ssid" length="32" placeholder="SSID" /><br />
+        <input id="psk" name="psk" length="64" type="password" placeholder="Password" /><br />
+        <br />
+        <button type="submit">Save</button>
+      </form>
+      <br />
+      <hr />
+      <br />
+
+      <h1>OTA Update</h1>
+      <form method="POST" action="/update" enctype="multipart/form-data">
+        <input type="file" name="update" />
+        <button type="submit">Update</button>
+      </form>
+    </main>
+
+    <script type="module" src="/src/main.ts?module"></script>
+  </body>
+</html>
