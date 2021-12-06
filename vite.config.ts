@@ -8,6 +8,7 @@ import { viteSingleFile } from "vite-plugin-singlefile";
 import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import copy from "rollup-plugin-copy";
 import stripBanner from "rollup-plugin-strip-banner";
+import replace from '@rollup/plugin-replace';
 
 const proxy_target = "http://nodemcu.local";
 
@@ -20,6 +21,13 @@ export default defineConfig({
     { ...minifyHTML(), enforce: "pre", apply: "build" },
     //
     { ...ViteMinifyHtml({ removeComments: true }), enforce: "post", apply: "build" },
+    replace({
+      '@license' : 'license',
+      "Value passed to 'css' function must be a 'css' function result:" : 'use css function',
+      "Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.": "Use unsafeCSS",
+      delimiters: ['', ''],
+      preventAssignment: true
+    }),
     viteSingleFile(),
     {
       ...gzipPlugin({ filter: /\.(js|css|html|svg)$/, additionalFiles: [], customCompression: (content) => brotliCompressSync(Buffer.from(content)), fileName: ".br" }),
