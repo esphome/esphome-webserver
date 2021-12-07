@@ -15,4 +15,3 @@ cat <<EOT >> ./dist/captive_index.h
 }  // namespace esphome
 EOT
 ls -l ./dist/captive_index.h
-tail ./dist/captive_index.h

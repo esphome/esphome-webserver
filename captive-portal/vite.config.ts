@@ -22,6 +22,7 @@ export default defineConfig({
     brotliSize: false,
     cssCodeSplit: false,
     assetsInlineLimit: 100000000,
+    polyfillModulePreload: false
   },
   server: {
     open: "/", // auto open browser
