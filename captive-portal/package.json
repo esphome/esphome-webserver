@@ -13,6 +13,7 @@
   "dependencies": {
     "rollup-plugin-generate-html-template": "^1.7.0",
     "rollup-plugin-gzip": "^2.5.0",
+    "rollup-plugin-minify-html-template-literals": "^1.2.0",
     "vite-plugin-html": "^2.1.1"
   },
   "devDependencies": {

@@ -1,13 +1,16 @@
 import { defineConfig } from "vite";
 import gzipPlugin from "rollup-plugin-gzip";
 import { viteSingleFile } from 'vite-plugin-singlefile'
-import { minifyHtml } from 'vite-plugin-html';
+
+import minifyHTML from "rollup-plugin-minify-html-template-literals";
+import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 
 export default defineConfig({
   clearScreen: false,
   plugins: [
     viteSingleFile(),
-    minifyHtml(),
+    { ...minifyHTML(), enforce: "pre", apply: "build" },
+    //ViteMinifyHtml(),
     {
       ...gzipPlugin({ filter: /\.(html)$/ }),
         enforce: "post",

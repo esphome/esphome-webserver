@@ -1,9 +1,9 @@
 {"name":"My ESPhome",
     "aps":[
         {}
-        ,{"ssid":"Hermione","sig":4,"lock":0}
-        ,{"ssid":"Neville","sig":2,"lock":1}
-        ,{"ssid":"Gandalf the Grey","sig":3,"lock":1}
-        ,{"ssid":"Hagrid","sig":1,"lock":0}
+        ,{"ssid":"Hermione","rssi":-50,"lock":0}
+        ,{"ssid":"Neville","rssi":-65,"lock":1}
+        ,{"ssid":"Gandalf the Grey","rssi":-85,"lock":1}
+        ,{"ssid":"Hagrid","rssi":-95,"lock":0}
     ]
 }
