@@ -72,6 +72,7 @@ export default defineConfig({
       "/select": proxy_target,
       "/cover": proxy_target,
       "/switch": proxy_target,
+      "/button": proxy_target,
       "/fan": proxy_target,
       "/number": proxy_target,
       "/climate": proxy_target,
