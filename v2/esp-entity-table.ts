@@ -15,11 +15,12 @@ interface entityConfig {
   icon?: string;
   option?: string[];
   target_temperature?: Number;
+  current_temperature?: Number;
 }
 
 @customElement("esp-entity-table")
 export class EntityTable extends LitElement {
-  @property({ type: Array }) entities: entityConfig[] = [];
+  @property({ type: Array, reflect: true }) entities: entityConfig[] = [];
   @property({ attribute: false }) source: EventSource | undefined;
 
   constructor() {
@@ -106,8 +107,7 @@ export class EntityTable extends LitElement {
     }
     if (entity.domain === "climate")
       return html`
-        ${entity.target_temperature} ${entity.current_temperature} ${entity.current_temperature_low} ${entity.current_temperature_high}
-        <label for="${entity.unique_id}"></label>
+        ${entity.state}  <label>${entity.current_temperature}</label> ${entity.target_temperature_low} ${entity.target_temperature_high}
         <div>${this.range(entity, "set", "target_temperature", entity.value, entity.min_temp, entity.max_temp, entity.step)}</div>
         <br /><label
           >Mode:
