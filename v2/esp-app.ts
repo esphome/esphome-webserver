@@ -26,13 +26,19 @@ export default class EspApp extends LitElement {
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
-  frames = [{ color: "inherit" }, { color: "red", transform: "scale(1.25) translateY(-30%)" }, { color: "inherit" }];
+  frames = [
+    { color: "inherit" },
+    { color: "red", transform: "scale(1.25) translateY(-30%)" },
+    { color: "inherit" },
+  ];
 
   constructor() {
     super();
-    document.getElementsByTagName("head")[0].innerHTML += '<meta name=viewport content="width=device-width, initial-scale=1,user-scalable=no">';
+    document.getElementsByTagName("head")[0].innerHTML +=
+      '<meta name=viewport content="width=device-width, initial-scale=1,user-scalable=no">';
     const l = <HTMLLinkElement>document.querySelector("link[rel~='icon']"); // Set favicon to house
-    l.href = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"><path d="M1 12.5h2.9v7.8h17v-7.8h2.9l-2.9-2.9V4.5h-1.8v3.3L12.3 1 1 12.5Z"/></svg>';
+    l.href =
+      'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"><path d="M1 12.5h2.9v7.8h17v-7.8h2.9l-2.9-2.9V4.5h-1.8v3.3L12.3 1 1 12.5Z"/></svg>';
     this.darkQuery.addEventListener("change", () => {
       this.scheme = this.isDark();
     });
@@ -43,9 +49,9 @@ export default class EspApp extends LitElement {
       if (d.length) {
         const config = JSON.parse(messageEvent.data);
         this.config = config;
-        
+
         document.title = config.title;
-        document.documentElement.lang=config.lang;
+        document.documentElement.lang = config.lang;
       }
       this.ping = messageEvent.lastEventId;
     });
@@ -82,17 +88,32 @@ export default class EspApp extends LitElement {
   render() {
     return html`
       <h1>
-        <a href="https://esphome.io/web-api" style="height:4rem;float:left;color:inherit">
+        <a
+          href="https://esphome.io/web-api"
+          style="height:4rem;float:left;color:inherit"
+        >
           <esp-logo></esp-logo>
         </a>
         ${this.config.title}
-        <span id="beat" style="float:right;height:1rem" title="${this.version}">❤</span>
+        <span id="beat" style="float:right;height:1rem" title="${this.version}"
+          >❤</span
+        >
       </h1>
       <main class="flex-grid-half">
         <section class="col">
           <esp-entity-table .source=${this.source}></esp-entity-table>
           <h2>
-            <esp-switch color="var(--primary-color,currentColor)" style="float:right" .state="${this.scheme}" @state="${(e: CustomEvent) => (this.scheme = e.detail.state)}" labelOn="🌒" labelOff="☀️" stateOn="dark" stateOff="light"> </esp-switch>
+            <esp-switch
+              color="var(--primary-color,currentColor)"
+              style="float:right"
+              .state="${this.scheme}"
+              @state="${(e: CustomEvent) => (this.scheme = e.detail.state)}"
+              labelOn="🌒"
+              labelOff="☀️"
+              stateOn="dark"
+              stateOff="light"
+            >
+            </esp-switch>
             Scheme
           </h2>
           ${this.ota()}

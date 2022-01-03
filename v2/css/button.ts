@@ -6,7 +6,11 @@ export default css`
     cursor: pointer;
     border-radius: 4px;
     background-color: inherit;
-    background-image: linear-gradient(0deg, rgba(127, 127, 127, 0.5) 0%, rgba(127, 127, 127, 0.5) 100%);
+    background-image: linear-gradient(
+      0deg,
+      rgba(127, 127, 127, 0.5) 0%,
+      rgba(127, 127, 127, 0.5) 100%
+    );
     color: inherit;
     border: 1px solid rgba(127, 127, 127, 0.5);
     height: 1.2rem;
@@ -16,22 +20,29 @@ export default css`
 
   button:active,
   .btn:active {
-    background-image: linear-gradient(0deg, rgba(127, 127, 127, 0.8) 0%, rgba(127, 127, 127, 0.2) 100%);
-    transition-duration: 1s
+    background-image: linear-gradient(
+      0deg,
+      rgba(127, 127, 127, 0.8) 0%,
+      rgba(127, 127, 127, 0.2) 100%
+    );
+    transition-duration: 1s;
   }
 
   button:hover,
   .btn:hover {
-    background-image: linear-gradient(0deg, rgba(127, 127, 127, 0.2) 0%, rgba(127, 127, 127, 0.8) 100%);
-    transition-duration: 1s
+    background-image: linear-gradient(
+      0deg,
+      rgba(127, 127, 127, 0.2) 0%,
+      rgba(127, 127, 127, 0.8) 100%
+    );
+    transition-duration: 1s;
   }
 
   .rnd {
     border-radius: 1rem;
     height: 2rem;
     width: 2rem;
-    font-weight:500;
-    font-size: 1.2rem
+    font-weight: 500;
+    font-size: 1.2rem;
   }
 `;
-

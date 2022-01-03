@@ -11,7 +11,6 @@ interface recordConfig {
 
 @customElement("esp-log")
 export class DebugLog extends LitElement {
-
   @property({ type: Number }) rows = 10;
   @property({ type: Array }) logs: recordConfig[] = [];
   @property({ attribute: false }) source: EventSource | undefined;
@@ -27,8 +26,8 @@ export class DebugLog extends LitElement {
       const messageEvent = e as MessageEvent;
       const d: String = messageEvent.data;
       let parts = d.slice(10, d.length - 4).split(":");
-      let tag = parts.slice(0,2).join(':');
-      let detail=d.slice(12+tag.length, d.length - 4);
+      let tag = parts.slice(0, 2).join(":");
+      let detail = d.slice(12 + tag.length, d.length - 4);
       const types: Record<string, string> = {
         "[1;31m": "e",
         "[0;33m": "w",
@@ -46,26 +45,25 @@ export class DebugLog extends LitElement {
       } as recordConfig;
       this.logs.unshift(record);
       this.logs = this.logs.slice(0, this.rows);
-    })
+    });
   }
 
   render() {
     return html`
-    <div style='overflow-x:auto'>
-      <table>
-        <thead>
-          <tr>
-            
-            <th>Debug</th>
-            <th style="width:50%">Detail</th>
-            <th>Time</th>
-            <th>level</th>
-          </tr>
-        </thead>
-        <tbody>
-          ${this.logs.map(
-            (log: recordConfig) =>
-              html`
+      <div style="overflow-x:auto">
+        <table>
+          <thead>
+            <tr>
+              <th>Debug</th>
+              <th style="width:50%">Detail</th>
+              <th>Time</th>
+              <th>level</th>
+            </tr>
+          </thead>
+          <tbody>
+            ${this.logs.map(
+              (log: recordConfig) =>
+                html`
                 <tr class="${log.type}">
                   <td>${log.tag}</td>
                   <td><pre>${log.detail}</pre>
@@ -74,9 +72,9 @@ export class DebugLog extends LitElement {
                 </td>
                 </tr>
               `
-          )}
-        </tbody>
-      </table>
+            )}
+          </tbody>
+        </table>
       </div>
     `;
   }
@@ -91,14 +89,13 @@ export class DebugLog extends LitElement {
         border: 1px solid #dfe2e5;
         line-height: 1;
       }
-      
+
       thead {
         border: 1px solid #dfe2e5;
-        line-height:1rem;
+        line-height: 1rem;
       }
       th {
         text-align: left;
-
       }
       th,
       td {

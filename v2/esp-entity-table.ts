@@ -36,7 +36,12 @@ export class EntityTable extends LitElement {
       if (idx === -1) {
         // Dynamically add discovered..
         let parts = data.id.split("-");
-        let entity = { ...data, domain: parts[0], unique_id: data.id, id: parts.slice(1).join("-") } as entityConfig;
+        let entity = {
+          ...data,
+          domain: parts[0],
+          unique_id: data.id,
+          id: parts.slice(1).join("-"),
+        } as entityConfig;
         this.entities.push(entity);
         this.requestUpdate();
       } else {
@@ -48,21 +53,44 @@ export class EntityTable extends LitElement {
   }
   actionButton(entity: entityConfig, label: String, action?: String) {
     let a = action || label.toLowerCase();
-    return html`<button class="rnd" @click=${() => this.restAction(entity, a)}>${label}</button>`;
+    return html`<button class="rnd" @click=${() => this.restAction(entity, a)}>
+      ${label}
+    </button>`;
   }
 
-  select(entity: entityConfig, action: string, opt: String, options: String[], val: string) {
+  select(
+    entity: entityConfig,
+    action: string,
+    opt: String,
+    options: String[],
+    val: string
+  ) {
     return html`<select
       @change="${(e: Event) => {
         let val = e.target?.value;
         this.restAction(entity, `${action}?${opt}=${val}`);
       }}"
     >
-      ${options.map((option) => html` <option value="${option}" ?selected=${val === option}>${option}</option> `)}
+      ${options.map(
+        (option) =>
+          html`
+            <option value="${option}" ?selected=${val === option}>
+              ${option}
+            </option>
+          `
+      )}
     </select>`;
   }
 
-  range(entity: entityConfig, action: string, opt: String, value: Number, min: Number, max: Number, step: Number) {
+  range(
+    entity: entityConfig,
+    action: string,
+    opt: String,
+    value: Number,
+    min: Number,
+    max: Number,
+    step: Number
+  ) {
     return html`<label>${min || 0}</label>
       <input
         style="width:80%"
@@ -93,22 +121,58 @@ export class EntityTable extends LitElement {
   }
 
   control(entity: entityConfig) {
-    if (entity.domain === "fan" || entity.domain === "switch") return this.switch(entity);
+    if (entity.domain === "fan" || entity.domain === "switch")
+      return this.switch(entity);
 
-    if (entity.domain === "light") return [this.switch(entity), entity.effects && this.select(entity, "turn_on", "effect", entity.effects, entity.effect)];
+    if (entity.domain === "light")
+      return [
+        this.switch(entity),
+        entity.effects &&
+          this.select(
+            entity,
+            "turn_on",
+            "effect",
+            entity.effects,
+            entity.effect
+          ),
+      ];
 
-    if (entity.domain === "cover") return html`${this.actionButton(entity, "↑", "open")} ${this.actionButton(entity, "☐", "stop")} ${this.actionButton(entity, "↓", "close")}`;
-    if (entity.domain === "button") return html`${this.actionButton(entity, "☐", "press ")}`;
+    if (entity.domain === "cover")
+      return html`${this.actionButton(entity, "↑", "open")}
+      ${this.actionButton(entity, "☐", "stop")}
+      ${this.actionButton(entity, "↓", "close")}`;
+    if (entity.domain === "button")
+      return html`${this.actionButton(entity, "☐", "press ")}`;
     if (entity.domain === "select") {
       return this.select(entity, "set", "option", entity.option, entity.value);
     }
     if (entity.domain === "number") {
-      return this.range(entity, "set", "value", entity.value, entity.min_value, entity.max_value, entity.step);
+      return this.range(
+        entity,
+        "set",
+        "value",
+        entity.value,
+        entity.min_value,
+        entity.max_value,
+        entity.step
+      );
     }
     if (entity.domain === "climate")
       return html`
-        ${entity.state}  <label>${entity.current_temperature}</label> ${entity.target_temperature_low} ${entity.target_temperature_high}
-        <div>${this.range(entity, "set", "target_temperature", entity.value, entity.min_temp, entity.max_temp, entity.step)}</div>
+        ${entity.state}
+        <label>${entity.current_temperature}</label>
+        ${entity.target_temperature_low} ${entity.target_temperature_high}
+        <div>
+          ${this.range(
+            entity,
+            "set",
+            "target_temperature",
+            entity.value,
+            entity.min_temp,
+            entity.max_temp,
+            entity.step
+          )}
+        </div>
         <br /><label
           >Mode:
           ${entity.modes.map(
