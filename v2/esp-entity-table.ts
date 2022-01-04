@@ -94,7 +94,6 @@ export class EntityTable extends LitElement {
   ) {
     return html`<label>${min || 0}</label>
       <input
-        style="width:80%"
         type="${entity.mode == 1 ? "number" : "range"}"
         name="${entity.unique_id}"
         id="${entity.unique_id}"
@@ -262,6 +261,9 @@ export class EntityTable extends LitElement {
         option {
           color: currentColor;
           background-color: var(--primary-color, currentColor);
+        }
+        input[type="range"] {
+          width:calc(100% - 4rem);
         }
       `,
     ];

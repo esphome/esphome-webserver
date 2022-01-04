@@ -100,7 +100,7 @@ export default class EspApp extends LitElement {
           <h2>
             <esp-switch
               color="var(--primary-color,currentColor)"
-              style="float:right"
+              class="right"
               .state="${this.scheme}"
               @state="${(e: CustomEvent) => (this.scheme = e.detail.state)}"
               labelOn="🌒"
@@ -174,6 +174,9 @@ export default class EspApp extends LitElement {
           height: 4rem;
           float: left;
           color: inherit;
+        }
+        .right {
+          float:right
         }
       `,
     ];

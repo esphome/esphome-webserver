@@ -48,12 +48,12 @@ export class DebugLog extends LitElement {
 
   render() {
     return html`
-      <div style="overflow-x:auto">
+      <div class="flow-x">
         <table>
           <thead>
             <tr>
               <th>Debug</th>
-              <th style="width:50%">Detail</th>
+              <th>Detail</th>
               <th>Time</th>
               <th>level</th>
             </tr>
@@ -64,7 +64,7 @@ export class DebugLog extends LitElement {
                 html`
                 <tr class="${log.type}">
                   <td>${log.tag}</td>
-                  <td><pre>${log.detail}</pre>
+                  <td><pre>${log.detail}</pre></td>
                   <td>${log.when}</td>
                   <td>${log.level}</td>
                 </td>
@@ -120,6 +120,9 @@ export class DebugLog extends LitElement {
       .e {
         color: red;
         font-weight: bold;
+      }
+      .flow-x {
+        overflow-x:auto
       }
     `;
   }
