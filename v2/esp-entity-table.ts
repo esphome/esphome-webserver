@@ -1,5 +1,5 @@
 import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, state } from "lit/decorators.js";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
@@ -16,12 +16,12 @@ interface entityConfig {
   option?: string[];
   target_temperature?: Number;
   current_temperature?: Number;
+  mode?: Number;
 }
 
 @customElement("esp-entity-table")
 export class EntityTable extends LitElement {
-  @property({ type: Array, reflect: true }) entities: entityConfig[] = [];
-  @property({ attribute: false }) source: EventSource | undefined;
+  @state({ type: Array, reflect: true }) entities: entityConfig[] = [];
 
   constructor() {
     super();
@@ -29,7 +29,7 @@ export class EntityTable extends LitElement {
 
   connectedCallback() {
     super.connectedCallback();
-    this.source?.addEventListener("state", (e: Event) => {
+    window.source?.addEventListener("state", (e: Event) => {
       const messageEvent = e as MessageEvent;
       const data = JSON.parse(messageEvent.data);
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
@@ -43,6 +43,7 @@ export class EntityTable extends LitElement {
           id: parts.slice(1).join("-"),
         } as entityConfig;
         this.entities.push(entity);
+        this.entities.sort((a, b) => (a.name < b.name ? -1 : 1));
         this.requestUpdate();
       } else {
         this.entities[idx].state = data.state;
@@ -94,7 +95,7 @@ export class EntityTable extends LitElement {
     return html`<label>${min || 0}</label>
       <input
         style="width:80%"
-        type="range"
+        type="${entity.mode == 1 ? "number" : "range"}"
         name="${entity.unique_id}"
         id="${entity.unique_id}"
         value="${value}"
@@ -170,7 +171,8 @@ export class EntityTable extends LitElement {
             entity.value,
             entity.min_temp,
             entity.max_temp,
-            entity.step
+            entity.step,
+            0
           )}
         </div>
         <br /><label
@@ -185,7 +187,6 @@ export class EntityTable extends LitElement {
           )}
         </label>
       `;
-
     return html``;
   }
 

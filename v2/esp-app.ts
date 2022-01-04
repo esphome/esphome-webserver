@@ -1,5 +1,5 @@
-import { LitElement, html, svg, css } from "lit";
-import { customElement, property, query } from "lit/decorators.js";
+import { LitElement, html, css } from "lit";
+import { customElement, state, query } from "lit/decorators.js";
 
 import "./esp-entity-table";
 import "./esp-log";
@@ -8,21 +8,17 @@ import "./esp-logo";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
+window.source = new EventSource("/events");
+
 @customElement("esp-app")
 export default class EspApp extends LitElement {
-  static properties = {
-    scheme: {},
-  };
-
-  @property({ type: String }) scheme = "";
-  @property({ type: String }) version = import.meta.env.PACKAGE_VERSION;
-  @property({ type: Boolean }) schemeChecked = false;
-  @property({ type: String }) ping = "";
-  @property({ type: Object }) config = { ota: false, title: "" };
-  @property({ attribute: false }) source = new EventSource("/events");
-
+  @state({ type: String }) scheme = "";
+  @state({ type: String }) ping = "";
   @query("#beat")
   beat!: HTMLSpanElement;
+
+  version: String = import.meta.env.PACKAGE_VERSION;
+  config: Object = { ota: false, title: "" };
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -34,6 +30,10 @@ export default class EspApp extends LitElement {
 
   constructor() {
     super();
+  }
+
+  firstUpdated(changedProperties) {
+    super.firstUpdated(changedProperties);
     document.getElementsByTagName("head")[0].innerHTML +=
       '<meta name=viewport content="width=device-width, initial-scale=1,user-scalable=no">';
     const l = <HTMLLinkElement>document.querySelector("link[rel~='icon']"); // Set favicon to house
@@ -43,7 +43,7 @@ export default class EspApp extends LitElement {
       this.scheme = this.isDark();
     });
     this.scheme = this.isDark();
-    this.source.addEventListener("ping", (e: Event) => {
+    window.source.addEventListener("ping", (e: Event) => {
       const messageEvent = e as MessageEvent;
       const d: String = messageEvent.data;
       if (d.length) {
@@ -55,18 +55,18 @@ export default class EspApp extends LitElement {
       }
       this.ping = messageEvent.lastEventId;
     });
-    this.source.onerror = function (e) {
+    window.source.onerror = function (e: Event) {
       console.dir(e);
-      //alert("Lost event stream!");
+      //alert("Lost event stream!")
     };
   }
 
   isDark() {
-    let r = this.darkQuery.matches ? "dark" : "light";
-    return r;
+    return this.darkQuery.matches ? "dark" : "light";
   }
 
   updated(changedProperties: Map<string, unknown>) {
+    super.updated(changedProperties);
     if (changedProperties.has("scheme")) {
       let el = document.documentElement;
       document.documentElement.style.setProperty("color-scheme", this.scheme);
@@ -82,7 +82,7 @@ export default class EspApp extends LitElement {
         <form method="POST" action="/update" enctype="multipart/form-data">
           <input class="btn" type="file" name="update" />
           <input class="btn" type="submit" value="Update" />
-        </form>`;
+        </form>`
   }
 
   render() {
@@ -101,7 +101,7 @@ export default class EspApp extends LitElement {
       </h1>
       <main class="flex-grid-half">
         <section class="col">
-          <esp-entity-table .source=${this.source}></esp-entity-table>
+          <esp-entity-table></esp-entity-table>
           <h2>
             <esp-switch
               color="var(--primary-color,currentColor)"
@@ -119,7 +119,7 @@ export default class EspApp extends LitElement {
           ${this.ota()}
         </section>
         <section class="col">
-          <esp-log rows="50" .source=${this.source}></esp-log>
+          <esp-log rows="50"></esp-log>
         </section>
       </main>
     `;

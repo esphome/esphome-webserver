@@ -1,5 +1,5 @@
 import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { customElement, property, state } from "lit/decorators.js";
 
 interface recordConfig {
   type: string;
@@ -12,17 +12,15 @@ interface recordConfig {
 @customElement("esp-log")
 export class DebugLog extends LitElement {
   @property({ type: Number }) rows = 10;
-  @property({ type: Array }) logs: recordConfig[] = [];
-  @property({ attribute: false }) source: EventSource | undefined;
+  @state() logs: recordConfig[] = [];
 
   constructor() {
     super();
-    this.logs = [];
   }
 
   connectedCallback() {
     super.connectedCallback();
-    this.source?.addEventListener("log", (e: Event) => {
+    window.source?.addEventListener("log", (e: Event) => {
       const messageEvent = e as MessageEvent;
       const d: String = messageEvent.data;
       let parts = d.slice(10, d.length - 4).split(":");
