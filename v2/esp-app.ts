@@ -82,22 +82,17 @@ export default class EspApp extends LitElement {
         <form method="POST" action="/update" enctype="multipart/form-data">
           <input class="btn" type="file" name="update" />
           <input class="btn" type="submit" value="Update" />
-        </form>`
+        </form>`;
   }
 
   render() {
     return html`
       <h1>
-        <a
-          href="https://esphome.io/web-api"
-          style="height:4rem;float:left;color:inherit"
-        >
+        <a href="https://esphome.io/web-api" class="logo">
           <esp-logo></esp-logo>
         </a>
         ${this.config.title}
-        <span id="beat" style="float:right;height:1rem" title="${this.version}"
-          >❤</span
-        >
+        <span id="beat" title="${this.version}">❤</span>
       </h1>
       <main class="flex-grid-half">
         <section class="col">
@@ -170,6 +165,15 @@ export default class EspApp extends LitElement {
         h2 {
           border-bottom: 1px solid #eaecef;
           margin-bottom: 0.25rem;
+        }
+        #beat {
+          float: right;
+          height: 1rem;
+        }
+        a.logo {
+          height: 4rem;
+          float: left;
+          color: inherit;
         }
       `,
     ];

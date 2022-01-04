@@ -61,19 +61,16 @@ export class EspSwitch extends LitElement {
         .sw * {
           -webkit-tap-highlight-color: transparent;
           user-select: none;
-        }
-
-        .sw label {
           cursor: pointer;
         }
 
-        .sw label input[type="checkbox"] {
+        input[type="checkbox"] {
           opacity: 0;
           width: 0;
           height: 0;
         }
 
-        .sw label input[type="checkbox"]:checked + .lever {
+        input[type="checkbox"]:checked + .lever {
           background-color: currentColor;
           background-image: linear-gradient(
             0deg,
@@ -82,16 +79,16 @@ export class EspSwitch extends LitElement {
           );
         }
 
-        .sw label input[type="checkbox"]:checked + .lever:before,
-        .sw label input[type="checkbox"]:checked + .lever:after {
+        input[type="checkbox"]:checked + .lever:before,
+        input[type="checkbox"]:checked + .lever:after {
           left: 18px;
         }
 
-        .sw label input[type="checkbox"]:checked + .lever:after {
+        input[type="checkbox"]:checked + .lever:after {
           background-color: currentColor;
         }
 
-        .sw label .lever {
+        .lever {
           content: "";
           display: inline-block;
           position: relative;
@@ -110,8 +107,8 @@ export class EspSwitch extends LitElement {
           margin: 0 16px;
         }
 
-        .sw label .lever:before,
-        .sw label .lever:after {
+        .lever:before,
+        .lever:after {
           content: "";
           position: absolute;
           display: inline-block;
@@ -124,7 +121,7 @@ export class EspSwitch extends LitElement {
             transform 0.1s ease;
         }
 
-        .sw label .lever:before {
+        .lever:before {
           background-color: currentColor;
           background-image: linear-gradient(
             0deg,
@@ -133,7 +130,7 @@ export class EspSwitch extends LitElement {
           );
         }
 
-        .sw label .lever:after {
+        .lever:after {
           background-color: #f1f1f1;
           box-shadow: 0px 3px 1px -2px rgba(0, 0, 0, 0.2),
             0px 2px 2px 0px rgba(0, 0, 0, 0.14),
@@ -158,13 +155,13 @@ export class EspSwitch extends LitElement {
           background-color: rgba(0, 0, 0, 0.08);
         }
 
-        .sw input[type="checkbox"][disabled] + .lever {
+        input[type="checkbox"][disabled] + .lever {
           cursor: default;
           background-color: rgba(0, 0, 0, 0.12);
         }
 
-        .sw label input[type="checkbox"][disabled] + .lever:after,
-        .sw label input[type="checkbox"][disabled]:checked + .lever:after {
+        input[type="checkbox"][disabled] + .lever:after,
+        input[type="checkbox"][disabled]:checked + .lever:after {
           background-color: #949494;
         }
       `,
