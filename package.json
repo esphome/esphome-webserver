@@ -6,8 +6,9 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "vite",
-    "build": "vite build",
+    "build": "vite build && npm run deploy",
     "serve": "vite preview",
+    "deploy": "bash -c './scripts/make_header.sh _static/v2 server_index.h'",
     "build-v1": ""
   },
   "dependencies": {
