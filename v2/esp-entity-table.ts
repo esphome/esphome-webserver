@@ -49,9 +49,6 @@ export class EntityTable extends LitElement {
         this.entities.sort((a, b) => (a.name < b.name ? -1 : 1))
         this.requestUpdate();
       } else {
-        console.dir(data)
-        //this.entities[idx].state = data.state
-        //this.entities[idx].value = data.value
         delete data.id
         delete data.domain
         delete data.unique_id
