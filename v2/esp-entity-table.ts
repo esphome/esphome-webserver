@@ -1,27 +1,30 @@
-import { html, css, LitElement } from "lit";
-import { customElement, state } from "lit/decorators.js";
-import cssReset from "./css/reset";
-import cssButton from "./css/button";
+import { html, css, LitElement } from "lit"
+import { customElement, state } from "lit/decorators.js"
+import cssReset from "./css/reset"
+import cssButton from "./css/button"
 
 interface entityConfig {
-  unique_id: string;
-  domain: string;
-  id: string;
-  state: string;
-  detail: string;
-  value: string;
-  name: string;
-  when: string;
-  icon?: string;
-  option?: string[];
-  target_temperature?: Number;
-  current_temperature?: Number;
-  mode?: Number;
+  unique_id: string
+  domain: string
+  id: string
+  state: string
+  detail: string
+  value: string
+  name: string
+  when: string
+  icon?: string
+  option?: string[]
+  target_temperature?: Number
+  current_temperature?: Number
+  mode?: Number
+  speed_count?: Number
+  speed_level?: Number
+  speed: string
 }
 
 @customElement("esp-entity-table")
 export class EntityTable extends LitElement {
-  @state({ type: Array, reflect: true }) entities: entityConfig[] = [];
+  @state({ type: Array, reflect: true }) entities: entityConfig[] = []
 
   constructor() {
     super();
@@ -30,12 +33,12 @@ export class EntityTable extends LitElement {
   connectedCallback() {
     super.connectedCallback();
     window.source?.addEventListener("state", (e: Event) => {
-      const messageEvent = e as MessageEvent;
-      const data = JSON.parse(messageEvent.data);
-      let idx = this.entities.findIndex((x) => x.unique_id === data.id);
-      if (idx === -1) {
+      const messageEvent = e as MessageEvent
+      const data = JSON.parse(messageEvent.data)
+      let idx = this.entities.findIndex((x) => x.unique_id === data.id)
+      if (idx === -1 && data.id) {
         // Dynamically add discovered..
-        let parts = data.id.split("-");
+        let parts = data.id.split("-")
         let entity = {
           ...data,
           domain: parts[0],
@@ -43,12 +46,17 @@ export class EntityTable extends LitElement {
           id: parts.slice(1).join("-"),
         } as entityConfig;
         this.entities.push(entity);
-        this.entities.sort((a, b) => (a.name < b.name ? -1 : 1));
+        this.entities.sort((a, b) => (a.name < b.name ? -1 : 1))
         this.requestUpdate();
       } else {
-        this.entities[idx].state = data.state;
-        this.entities[idx].value = data.value;
-        this.requestUpdate();
+        console.dir(data)
+        //this.entities[idx].state = data.state
+        //this.entities[idx].value = data.value
+        delete data.id
+        delete data.domain
+        delete data.unique_id
+        Object.assign(this.entities[idx], data)
+        this.requestUpdate()
       }
     });
   }
@@ -56,7 +64,7 @@ export class EntityTable extends LitElement {
     let a = action || label.toLowerCase();
     return html`<button class="rnd" @click=${() => this.restAction(entity, a)}>
       ${label}
-    </button>`;
+    </button>`
   }
 
   select(
@@ -75,12 +83,12 @@ export class EntityTable extends LitElement {
       ${options.map(
         (option) =>
           html`
-            <option value="${option}" ?selected=${val === option}>
-              ${option}
+            <option value="${option}" ?selected="${option == val}">
+                ${option}
             </option>
           `
       )}
-    </select>`;
+    </select>`
   }
 
   range(
@@ -103,10 +111,10 @@ export class EntityTable extends LitElement {
         max="${max}"
         @change="${(e: Event) => {
           let val = e.target?.value;
-          this.restAction(entity, `${action}?${opt}=${val}`);
+          this.restAction(entity, `${action}?${opt}=${val}`)
         }}"
       />
-      <label>${max || 100}</label>`;
+      <label>${max || 100}</label>`
   }
 
   switch(entity: entityConfig) {
@@ -121,8 +129,20 @@ export class EntityTable extends LitElement {
   }
 
   control(entity: entityConfig) {
-    if (entity.domain === "fan" || entity.domain === "switch")
-      return this.switch(entity);
+    if (entity.domain === "switch")
+      return [this.switch(entity)]
+
+    if (entity.domain === "fan") {
+      return [entity.speed,' ',entity.speed_level,this.switch(entity),entity.speed_count ? this.range(
+        entity,
+        `turn_${entity.state.toLowerCase()}`,
+        "speed_level",
+        entity.speed_level,
+        0,
+        entity.speed_count,
+        1
+      ):'']
+    }
 
     if (entity.domain === "light")
       return [
@@ -134,15 +154,19 @@ export class EntityTable extends LitElement {
             "effect",
             entity.effects,
             entity.effect
-          ),
+          )
       ];
-
+    if (entity.domain === "lock")
+      return html`${this.actionButton(entity, "🔐", "lock")}
+      ${this.actionButton(entity, "🔓", "unlock")}
+      ${this.actionButton(entity, "↑", "open")}
+      `
     if (entity.domain === "cover")
       return html`${this.actionButton(entity, "↑", "open")}
       ${this.actionButton(entity, "☐", "stop")}
-      ${this.actionButton(entity, "↓", "close")}`;
+      ${this.actionButton(entity, "↓", "close")}`
     if (entity.domain === "button")
-      return html`${this.actionButton(entity, "☐", "press ")}`;
+      return html`${this.actionButton(entity, "☐", "press ")}`
     if (entity.domain === "select") {
       return this.select(entity, "set", "option", entity.option, entity.value);
     }

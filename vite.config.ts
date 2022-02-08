@@ -90,6 +90,7 @@ export default defineConfig({
       "/switch": proxy_target,
       "/button": proxy_target,
       "/fan": proxy_target,
+      "/lock": proxy_target,
       "/number": proxy_target,
       "/climate": proxy_target,
       "/events": proxy_target,
