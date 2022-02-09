@@ -2,6 +2,7 @@
 cat <<EOT > ./$1/$2
 #pragma once
 // Generated from https://github.com/esphome/esphome-webserver
+#include "esphome/core/hal.h"
 namespace esphome {
 
 namespace $3 {
