@@ -13,7 +13,6 @@ export default css`
     );
     color: inherit;
     border: 1px solid rgba(127, 127, 127, 0.5);
-    height: 1.2rem;
     padding: 2px;
   }
 

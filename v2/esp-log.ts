@@ -41,8 +41,8 @@ export class DebugLog extends LitElement {
         detail: detail,
         when: new Date().toTimeString().split(" ")[0],
       } as recordConfig;
-      this.logs.unshift(record);
-      this.logs = this.logs.slice(0, this.rows);
+      this.logs.push(record);
+      this.logs = this.logs.slice(-this.rows);
     });
   }
 
@@ -52,10 +52,10 @@ export class DebugLog extends LitElement {
         <table>
           <thead>
             <tr>
-              <th>Debug</th>
-              <th>Detail</th>
               <th>Time</th>
               <th>level</th>
+              <th>Tag</th>
+              <th>Message</th>              
             </tr>
           </thead>
           <tbody>
@@ -63,10 +63,10 @@ export class DebugLog extends LitElement {
               (log: recordConfig) =>
                 html`
                 <tr class="${log.type}">
-                  <td>${log.tag}</td>
-                  <td><pre>${log.detail}</pre></td>
                   <td>${log.when}</td>
                   <td>${log.level}</td>
+                  <td>${log.tag}</td>
+                  <td><pre>${log.detail}</pre></td>
                 </td>
                 </tr>
               `
