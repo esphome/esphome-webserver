@@ -5,7 +5,7 @@
     "context": ".."
   },
   "appPort": "8081:8081",
-  "postCreateCommand": "script/bootstrap",
+  "postCreateCommand": "npm install",
   "extensions": [
     "github.vscode-pull-request-github",
     "dbaeumer.vscode-eslint",
