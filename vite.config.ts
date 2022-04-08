@@ -31,10 +31,8 @@ export default defineConfig({
     },
     replace({
       "@license": "license",
-      "Value passed to 'css' function must be a 'css' function result:":
-        "use css function",
-      "Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.":
-        "Use unsafeCSS",
+      "Value passed to 'css' function must be a 'css' function result:": "use css function",
+      "Use 'unsafeCSS' to pass non-literal values, but take care to ensure page security.": "Use unsafeCSS",
       delimiters: ["", ""],
       preventAssignment: true,
     }),
@@ -43,8 +41,7 @@ export default defineConfig({
       ...gzipPlugin({
         filter: /\.(js|css|html|svg)$/,
         additionalFiles: [],
-        customCompression: (content) =>
-          brotliCompressSync(Buffer.from(content)),
+        customCompression: (content) => brotliCompressSync(Buffer.from(content)),
         fileName: ".br",
       }),
       enforce: "post",
@@ -83,6 +80,8 @@ export default defineConfig({
   server: {
     open: "/", // auto open browser in dev mode
     host: true, // dev on local and network
+    port: 8081,
+    strictPort: true,
     proxy: {
       "/light": proxy_target,
       "/select": proxy_target,

@@ -55,7 +55,7 @@ export class DebugLog extends LitElement {
               <th>Time</th>
               <th>level</th>
               <th>Tag</th>
-              <th>Message</th>              
+              <th>Message</th>
             </tr>
           </thead>
           <tbody>
@@ -122,7 +122,7 @@ export class DebugLog extends LitElement {
         font-weight: bold;
       }
       .flow-x {
-        overflow-x:auto
+        overflow-x: auto;
       }
     `;
   }
