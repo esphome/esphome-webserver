@@ -1,4 +1,4 @@
-import { LitElement, html, css } from "lit";
+import { LitElement, html, css, PropertyValues } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 
 import "./esp-entity-table";
@@ -10,29 +10,30 @@ import cssButton from "./css/button";
 
 window.source = new EventSource("/events");
 
+interface Config {
+  ota: boolean;
+  title: string;
+}
+
 @customElement("esp-app")
 export default class EspApp extends LitElement {
-  @state({ type: String }) scheme = "";
-  @state({ type: String }) ping = "";
+  @state() scheme: string = "";
+  @state() ping: string = "";
   @query("#beat")
   beat!: HTMLSpanElement;
 
   version: String = import.meta.env.PACKAGE_VERSION;
-  config: Object = { ota: false, title: "" };
+  config: Config = { ota: false, title: "" };
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
-  frames = [
-    { color: "inherit" },
-    { color: "red", transform: "scale(1.25) translateY(-30%)" },
-    { color: "inherit" },
-  ];
+  frames = [{ color: "inherit" }, { color: "red", transform: "scale(1.25) translateY(-30%)" }, { color: "inherit" }];
 
   constructor() {
     super();
   }
 
-  firstUpdated(changedProperties) {
+  firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     document.getElementsByTagName("head")[0].innerHTML +=
       '<meta name=viewport content="width=device-width, initial-scale=1,user-scalable=no">';
@@ -107,6 +108,7 @@ export default class EspApp extends LitElement {
               labelOff="☀️"
               stateOn="dark"
               stateOff="light"
+              optimistic
             >
             </esp-switch>
             Scheme
@@ -176,7 +178,7 @@ export default class EspApp extends LitElement {
           color: inherit;
         }
         .right {
-          float:right
+          float: right;
         }
       `,
     ];

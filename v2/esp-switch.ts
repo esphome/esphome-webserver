@@ -2,8 +2,13 @@ import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
 import cssReset from "./css/reset";
 
+const checkboxID: string = "checkbox-lever";
+
 @customElement("esp-switch")
 export class EspSwitch extends LitElement {
+  private checkbox: HTMLInputElement | null = null;
+  private toggleCallback: CallableFunction | null = null;
+
   // Use arrays - or slots
   @property({ type: String }) labelOn = "On";
   @property({ type: String }) labelOff = "Off";
@@ -11,28 +16,53 @@ export class EspSwitch extends LitElement {
   @property({ type: String }) stateOff = "OFF";
   @property({ type: String }) state = "OFF";
   @property({ type: String }) color = "currentColor";
-  @property({ type: Boolean }) checked = false;
   @property({ type: Boolean }) disabled = false;
+  @property({ type: Boolean }) optimistic = false;
 
-  toggle(): void {
-    this.checked = !this.checked;
-    this.state = this.checked ? this.stateOn : this.stateOff;
+  protected firstUpdated(
+    _changedProperties: Map<string | number | symbol, unknown>
+  ): void {
+    this.checkbox = this.shadowRoot?.getElementById(
+      checkboxID
+    ) as HTMLInputElement;
+  }
+
+  private isOn(): boolean {
+    return this.state === this.stateOn;
+  }
+
+  toggle(ev: Event): void {
+    let prevState = this.state;
+    this.state = this.isOn() ? this.stateOff : this.stateOn;
     let event = new CustomEvent("state", {
       detail: { state: this.state, id: this.id },
     });
     this.dispatchEvent(event);
+    if (!this.optimistic) {
+      // Wait for state or set back to previous
+      new Promise((resolve, reject) => {
+        this.toggleCallback = resolve;
+        setTimeout(() => {
+          reject();
+        }, 250);
+      }).catch(() => {
+        this.state = prevState;
+        this.requestUpdate();
+      });
+    }
   }
 
+  // triggered when a new state is received
   requestUpdate(name?: PropertyKey, oldValue?: unknown) {
-    if (name && name == "state" && this.state !== oldValue) {
-      this.checked = this.state === this.stateOn;
+    if (name && name == "state") {
+      if (this.checkbox) {
+        this.checkbox.checked = this.isOn();
+      }
+      if (this.toggleCallback) {
+        this.toggleCallback();
+      }
     }
     return super.requestUpdate(name, oldValue);
-  }
-
-  connectedCallback() {
-    super.connectedCallback();
-    this.checked = this.state === this.stateOn;
   }
 
   render() {
@@ -41,8 +71,9 @@ export class EspSwitch extends LitElement {
         <label>
           ${this.labelOff}
           <input
+            id="${checkboxID}"
             type="checkbox"
-            ?checked="${this.checked}"
+            ?checked="${this.isOn()}"
             ?disabled="${this.disabled}"
             @click="${this.toggle}"
           />
