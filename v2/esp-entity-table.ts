@@ -198,8 +198,7 @@ export class EntityTable extends LitElement {
             entity.target_temperature_low,
             entity.min_temp,
             entity.max_temp,
-            entity.step,
-            0
+            entity.step
           )}
           ${this.range(
              entity,
@@ -208,8 +207,7 @@ export class EntityTable extends LitElement {
             entity.target_temperature_high,
             entity.min_temp,
             entity.max_temp,
-            entity.step,
-            0
+            entity.step
           )}
         `;
       } else {
@@ -222,8 +220,7 @@ export class EntityTable extends LitElement {
             entity.target_temperature,
             entity.min_temp,
             entity.max_temp,
-            entity.step,
-            0
+            entity.step
           )}
         `;
       }
