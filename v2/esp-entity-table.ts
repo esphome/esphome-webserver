@@ -189,7 +189,7 @@ export class EntityTable extends LitElement {
     if (entity.domain === "climate") {
       let target_temp_slider, target_temp_label;
       if (entity.target_temperature_low !== undefined) {
-        target_temp_label= html`${entity.target_temperature_low} .. ${entity.target_temperature_high}`;
+        target_temp_label= html`${entity.target_temperature_low}&nbsp;..&nbsp;${entity.target_temperature_high}`;
         target_temp_slider = html`
           ${this.range(
             entity,
@@ -225,7 +225,7 @@ export class EntityTable extends LitElement {
         `;
       }
       return html`
-        <label>Current: ${entity.current_temperature}, &nbsp;Target: ${target_temp_label}</label>
+        <label>Current:&nbsp;${entity.current_temperature}, Target:&nbsp;${target_temp_label}</label>
         ${target_temp_slider}
         <br />Mode:
         ${entity.modes.map(
