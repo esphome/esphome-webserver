@@ -104,10 +104,10 @@ export class EntityTable extends LitElement {
         type="${entity.mode == 1 ? "number" : "range"}"
         name="${entity.unique_id}"
         id="${entity.unique_id}"
-        value="${value}"
         step="${step}"
         min="${min}"
         max="${max}"
+        value="${value}"
         @change="${(e: Event) => {
           let val = e.target?.value;
           this.restAction(entity, `${action}?${opt}=${val}`);
