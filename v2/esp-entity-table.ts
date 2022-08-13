@@ -230,17 +230,16 @@ export class EntityTable extends LitElement {
       return html`
         <label>Current: ${entity.current_temperature}, &nbsp;Target: ${target_temp_label}</label>
         ${target_temp_slider}
-        <br /><label
-          >Mode:
-          ${entity.modes.map(
-            (mode) => html`
-      <input type="radio" name="${entity.unique_id}_mode" @change="${(e: Event) => {
-        let val = e.target?.value;
-        this.restAction(entity, `set?mode=${val}`);
-      }}"
-         value="${mode}" ?checked=${entity.mode === mode}>${mode}</input> `
-          )}
-        </label>
+        <br />Mode:
+        ${entity.modes.map(
+          (mode) => html`
+            <label><input type="radio" name="${entity.unique_id}_mode" @change="${(e: Event) => {
+              let val = e.target?.value;
+              this.restAction(entity, `set?mode=${val}`);
+            }}"
+            value="${mode}" ?checked=${entity.mode === mode}>${mode}</label>`
+          )
+        }
       `;
     }
     return html``;
