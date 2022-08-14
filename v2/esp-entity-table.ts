@@ -104,10 +104,10 @@ export class EntityTable extends LitElement {
         type="${entity.mode == 1 ? "number" : "range"}"
         name="${entity.unique_id}"
         id="${entity.unique_id}"
-        value="${value}"
         step="${step}"
         min="${min}"
         max="${max}"
+        value="${value}"
         @change="${(e: Event) => {
           let val = e.target?.value;
           this.restAction(entity, `${action}?${opt}=${val}`);
@@ -189,7 +189,7 @@ export class EntityTable extends LitElement {
     if (entity.domain === "climate") {
       let target_temp_slider, target_temp_label;
       if (entity.target_temperature_low !== undefined) {
-        target_temp_label= html`${entity.target_temperature_low} .. ${entity.target_temperature_high}`;
+        target_temp_label= html`${entity.target_temperature_low}&nbsp;..&nbsp;${entity.target_temperature_high}`;
         target_temp_slider = html`
           ${this.range(
             entity,
@@ -198,8 +198,7 @@ export class EntityTable extends LitElement {
             entity.target_temperature_low,
             entity.min_temp,
             entity.max_temp,
-            entity.step,
-            0
+            entity.step
           )}
           ${this.range(
              entity,
@@ -208,8 +207,7 @@ export class EntityTable extends LitElement {
             entity.target_temperature_high,
             entity.min_temp,
             entity.max_temp,
-            entity.step,
-            0
+            entity.step
           )}
         `;
       } else {
@@ -222,25 +220,23 @@ export class EntityTable extends LitElement {
             entity.target_temperature,
             entity.min_temp,
             entity.max_temp,
-            entity.step,
-            0
+            entity.step
           )}
         `;
       }
       return html`
-        <label>Current: ${entity.current_temperature}, &nbsp;Target: ${target_temp_label}</label>
+        <label>Current:&nbsp;${entity.current_temperature}, Target:&nbsp;${target_temp_label}</label>
         ${target_temp_slider}
-        <br /><label
-          >Mode:
-          ${entity.modes.map(
-            (mode) => html`
-      <input type="radio" name="${entity.unique_id}_mode" @change="${(e: Event) => {
-        let val = e.target?.value;
-        this.restAction(entity, `set?mode=${val}`);
-      }}"
-         value="${mode}" ?checked=${entity.mode === mode}>${mode}</input> `
-          )}
-        </label>
+        <br />Mode:
+        ${entity.modes.map(
+          (mode) => html`
+            <label><input type="radio" name="${entity.unique_id}_mode" @change="${(e: Event) => {
+              let val = e.target?.value;
+              this.restAction(entity, `set?mode=${val}`);
+            }}"
+            value="${mode}" ?checked=${entity.mode === mode}>${mode}</label>`
+          )
+        }
       `;
     }
     return html``;
