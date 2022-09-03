@@ -39,7 +39,7 @@ export default class EspApp extends LitElement {
       '<meta name=viewport content="width=device-width, initial-scale=1,user-scalable=no">';
     const l = <HTMLLinkElement>document.querySelector("link[rel~='icon']"); // Set favicon to house
     l.href =
-      'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" width="25" height="25"><path d="M1 12.5h2.9v7.8h17v-7.8h2.9l-2.9-2.9V4.5h-1.8v3.3L12.3 1 1 12.5Z"/></svg>';
+      'data:image/svg+xml,<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg"><style>path{stroke-width:1;fill:black;stroke:black;stroke-linecap:round;stroke-linejoin:round}@media (prefers-color-scheme:dark){path{fill:white;stroke:white}}</style><path d="M1.3 18H5v10h21.8V18h3.7l-3.7-3.7V7.8h-2.4V12l-8.7-8.7L1.3 18Z"/></svg>';
     this.darkQuery.addEventListener("change", () => {
       this.scheme = this.isDark();
     });
