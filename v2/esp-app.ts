@@ -8,7 +8,13 @@ import "./esp-logo";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
-window.source = new EventSource("/events");
+function getEventsUrl(){
+  url = window.location.pathname;
+  url += url.endsWith("/") ? "" : "/";
+  return url + "events";
+};
+
+window.source = new EventSource(getEventsUrl());
 
 interface Config {
   ota: boolean;
