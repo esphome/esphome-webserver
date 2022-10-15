@@ -243,7 +243,7 @@ export class EntityTable extends LitElement {
   }
 
   restAction(entity: entityConfig, action: String) {
-    fetch(`/${entity.domain}/${entity.id}/${action}`, {
+    fetch(`${window.location.pathname}/${entity.domain}/${entity.id}/${action}`, {
       method: "POST",
       body: "true",
     }).then((r) => {

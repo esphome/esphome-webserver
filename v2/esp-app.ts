@@ -86,7 +86,7 @@ export default class EspApp extends LitElement {
   ota() {
     if (this.config.ota)
       return html`<h2>OTA Update</h2>
-        <form method="POST" action="/update" enctype="multipart/form-data">
+      <form method="POST" action="${window.location.pathname}/update" enctype="multipart/form-data">
           <input class="btn" type="file" name="update" />
           <input class="btn" type="submit" value="Update" />
         </form>`;
