@@ -24,6 +24,13 @@ interface entityConfig {
   speed: string;
 }
 
+function getBasePath() {
+  let str = window.location.pathname;
+  return str.endsWith("/") ? str.slice(0, -1) : str;
+}
+
+let basePath = getBasePath();
+
 @customElement("esp-entity-table")
 export class EntityTable extends LitElement {
   @state({ type: Array, reflect: true }) entities: entityConfig[] = [];
@@ -243,7 +250,7 @@ export class EntityTable extends LitElement {
   }
 
   restAction(entity: entityConfig, action: String) {
-    fetch(`${window.location.pathname}/${entity.domain}/${entity.id}/${action}`, {
+    fetch(`${basePath}/${entity.domain}/${entity.id}/${action}`, {
       method: "POST",
       body: "true",
     }).then((r) => {
