@@ -1,5 +1,6 @@
 import { LitElement, html, css, PropertyValues } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
+import { getBasePath } from "./esp-entity-table";
 
 import "./esp-entity-table";
 import "./esp-log";
@@ -7,11 +8,6 @@ import "./esp-switch";
 import "./esp-logo";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
-
-function getBasePath() {
-  let str = window.location.pathname;
-  return str.endsWith("/") ? str.slice(0, -1) : str;
-}
 
 window.source = new EventSource(getBasePath() + "/events");
 
