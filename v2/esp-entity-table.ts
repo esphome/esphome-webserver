@@ -165,14 +165,15 @@ export class EntityTable extends LitElement {
               1
             )
           : "",
-        entity.effects &&
-          this.select(
-            entity,
-            "turn_on",
-            "effect",
-            entity.effects,
-            entity.effect
-          ),
+        entity.effects.filter((v) => v != "None").length
+          ? this.select(
+              entity,
+              "turn_on",
+              "effect",
+              entity.effects,
+              entity.effect
+            )
+          : "",
       ];
     }
 
