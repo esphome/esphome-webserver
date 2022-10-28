@@ -93,6 +93,10 @@ export default defineConfig({
       "/number": proxy_target,
       "/climate": proxy_target,
       "/events": proxy_target,
+      "/keyboard": {
+        target: proxy_target,
+        ws: true,
+      }
     },
   },
 });
