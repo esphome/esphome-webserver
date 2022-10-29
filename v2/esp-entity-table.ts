@@ -76,7 +76,7 @@ export class EntityTable extends LitElement {
     return html`<select
       @change="${(e: Event) => {
         let val = e.target?.value;
-        this.restAction(entity, `${action}?${opt}=${val}`);
+        this.restAction(entity, `${action}?${opt}=${encodeURIComponent(val)}`);
       }}"
     >
       ${options.map(
