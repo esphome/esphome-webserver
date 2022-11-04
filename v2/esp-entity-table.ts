@@ -331,7 +331,7 @@ export class EntityTable extends LitElement {
           background-color: var(--primary-color, currentColor);
         }
         input[type="range"] {
-          width: calc(100% - 4rem);
+          width: calc(100% - 8rem);
           height: 0.75rem;
         }
         .range {
