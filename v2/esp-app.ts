@@ -1,5 +1,6 @@
 import { LitElement, html, css, PropertyValues } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
+import { getBasePath } from "./esp-entity-table";
 
 import "./esp-entity-table";
 import "./esp-log";
@@ -8,13 +9,7 @@ import "./esp-logo";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
-function getEventsUrl(){
-  url = window.location.pathname;
-  url += url.endsWith("/") ? "" : "/";
-  return url + "events";
-};
-
-window.source = new EventSource(getEventsUrl());
+window.source = new EventSource(getBasePath() + "/events");
 
 interface Config {
   ota: boolean;
@@ -84,12 +79,18 @@ export default class EspApp extends LitElement {
   }
 
   ota() {
-    if (this.config.ota)
+    if (this.config.ota) {
+      let basePath = getBasePath();
       return html`<h2>OTA Update</h2>
-        <form method="POST" action="/update" enctype="multipart/form-data">
+        <form
+          method="POST"
+          action="${basePath}/update"
+          enctype="multipart/form-data"
+        >
           <input class="btn" type="file" name="update" />
           <input class="btn" type="submit" value="Update" />
         </form>`;
+    }
   }
 
   render() {
