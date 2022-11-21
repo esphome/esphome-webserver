@@ -1,5 +1,5 @@
 import { html, css, LitElement } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { customElement, state, property } from "lit/decorators.js";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
@@ -35,6 +35,8 @@ let basePath = getBasePath();
 @customElement("esp-entity-table")
 export class EntityTable extends LitElement {
   @state({ type: Array, reflect: true }) entities: entityConfig[] = [];
+  @property()
+  keyboard_id = ''
 
   constructor() {
     super();
@@ -65,6 +67,9 @@ export class EntityTable extends LitElement {
         Object.assign(this.entities[idx], data);
         this.requestUpdate();
       }
+    });
+    window.addEventListener('kbd-closed', (evt) => {
+      this.keyboard_id = ''
     });
   }
   actionButton(entity: entityConfig, label: String, action?: String) {
@@ -136,6 +141,12 @@ export class EntityTable extends LitElement {
   }
 
   control(entity: entityConfig) {
+    if (entity.domain === "keyboard") {
+      return html`<button @click=${
+        () => this.update_kbd_id(this.keyboard_id == entity.id ? '' : entity.id)
+      }>${this.keyboard_id == entity.id ? 'Hide' : 'Show'}</button>`;
+    }
+    
     if (entity.domain === "switch") return [this.switch(entity)];
 
     if (entity.domain === "fan") {
@@ -271,6 +282,15 @@ export class EntityTable extends LitElement {
     }).then((r) => {
       console.log(r);
     });
+  }
+
+  update_kbd_id(id: string) {
+    this.dispatchEvent(new CustomEvent('update-kbd-id', {
+      detail: id,
+      composed: true,
+      bubbles: true
+    }));
+    this.keyboard_id = id
   }
 
   render() {

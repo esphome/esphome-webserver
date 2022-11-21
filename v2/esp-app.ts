@@ -6,6 +6,7 @@ import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
 import "./esp-logo";
+import "./esp-keyboard";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
@@ -102,6 +103,7 @@ export default class EspApp extends LitElement {
         ${this.config.title}
         <span id="beat" title="${this.version}">❤</span>
       </h1>
+      <esp-keyboard ></esp-keyboard>
       <main class="flex-grid-half">
         <section class="col">
           <esp-entity-table></esp-entity-table>
