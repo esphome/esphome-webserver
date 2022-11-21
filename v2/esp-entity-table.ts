@@ -14,6 +14,7 @@ interface entityConfig {
   when: string;
   icon?: string;
   option?: string[];
+  brightness?: Number;
   target_temperature?: Number;
   target_temperature_low?: Number;
   target_temperature_high?: Number;
@@ -157,18 +158,32 @@ export class EntityTable extends LitElement {
       ];
     }
 
-    if (entity.domain === "light")
+    if (entity.domain === "light") {
       return [
         this.switch(entity),
-        entity.effects &&
-          this.select(
-            entity,
-            "turn_on",
-            "effect",
-            entity.effects,
-            entity.effect
-          ),
+        entity.brightness
+          ? this.range(
+              entity,
+              "turn_on",
+              "brightness",
+              entity.brightness,
+              0,
+              255,
+              1
+            )
+          : "",
+        entity.effects.filter((v) => v != "None").length
+          ? this.select(
+              entity,
+              "turn_on",
+              "effect",
+              entity.effects,
+              entity.effect
+            )
+          : "",
       ];
+    }
+
     if (entity.domain === "lock")
       return html`${this.actionButton(entity, "🔐", "lock")}
       ${this.actionButton(entity, "🔓", "unlock")}
