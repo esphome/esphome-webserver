@@ -8,12 +8,14 @@ import "./esp-switch";
 import "./esp-logo";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
+import { throws } from "assert";
 
 window.source = new EventSource(getBasePath() + "/events");
 
 interface Config {
   ota: boolean;
   title: string;
+  comment: string;
 }
 
 @customElement("esp-app")
@@ -24,11 +26,15 @@ export default class EspApp extends LitElement {
   beat!: HTMLSpanElement;
 
   version: String = import.meta.env.PACKAGE_VERSION;
-  config: Config = { ota: false, title: "" };
+  config: Config = { ota: false, title: "", comment: "" };
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
-  frames = [{ color: "inherit" }, { color: "red", transform: "scale(1.25) translateY(-30%)" }, { color: "inherit" }];
+  frames = [
+    { color: "inherit" },
+    { color: "red", transform: "scale(1.25) translateY(-30%)" },
+    { color: "inherit" },
+  ];
 
   constructor() {
     super();
@@ -94,6 +100,12 @@ export default class EspApp extends LitElement {
   }
 
   render() {
+    let comment_header;
+    if (this.config.comment != undefined) {
+      comment_header = html` <h3>${this.config.comment}</h3> `;
+    } else {
+      comment_header = html``;
+    }
     return html`
       <h1>
         <a href="https://esphome.io/web-api" class="logo">
@@ -102,6 +114,7 @@ export default class EspApp extends LitElement {
         ${this.config.title}
         <span id="beat" title="${this.version}">❤</span>
       </h1>
+      ${comment_header}
       <main class="flex-grid-half">
         <section class="col">
           <esp-entity-table></esp-entity-table>
@@ -174,6 +187,10 @@ export default class EspApp extends LitElement {
         h2 {
           border-bottom: 1px solid #eaecef;
           margin-bottom: 0.25rem;
+        }
+        h3 {
+          text-align: center;
+          margin: 0.5rem 0;
         }
         #beat {
           float: right;
