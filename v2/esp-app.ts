@@ -1,4 +1,4 @@
-import { LitElement, html, css, PropertyValues } from "lit";
+import { LitElement, html, css, PropertyValues, nothing } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
 
@@ -99,13 +99,13 @@ export default class EspApp extends LitElement {
     }
   }
 
+  renderComment() {
+    return this.config.comment
+      ? html`<h3>${this.config.comment}</h3>`
+      : nothing;
+  }
+
   render() {
-    let comment_header;
-    if (this.config.comment != undefined) {
-      comment_header = html` <h3>${this.config.comment}</h3> `;
-    } else {
-      comment_header = html``;
-    }
     return html`
       <h1>
         <a href="https://esphome.io/web-api" class="logo">
@@ -114,7 +114,7 @@ export default class EspApp extends LitElement {
         ${this.config.title}
         <span id="beat" title="${this.version}">❤</span>
       </h1>
-      ${comment_header}
+      ${this.renderComment()}
       <main class="flex-grid-half">
         <section class="col">
           <esp-entity-table></esp-entity-table>
