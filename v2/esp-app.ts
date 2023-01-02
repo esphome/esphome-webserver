@@ -8,7 +8,6 @@ import "./esp-switch";
 import "./esp-logo";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
-import { throws } from "assert";
 
 window.source = new EventSource(getBasePath() + "/events");
 
