@@ -1,4 +1,4 @@
-import { LitElement, html, css, PropertyValues } from "lit";
+import { LitElement, html, css, PropertyValues, nothing } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
 
@@ -14,6 +14,7 @@ window.source = new EventSource(getBasePath() + "/events");
 interface Config {
   ota: boolean;
   title: string;
+  comment: string;
 }
 
 @customElement("esp-app")
@@ -24,11 +25,15 @@ export default class EspApp extends LitElement {
   beat!: HTMLSpanElement;
 
   version: String = import.meta.env.PACKAGE_VERSION;
-  config: Config = { ota: false, title: "" };
+  config: Config = { ota: false, title: "", comment: "" };
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
-  frames = [{ color: "inherit" }, { color: "red", transform: "scale(1.25) translateY(-30%)" }, { color: "inherit" }];
+  frames = [
+    { color: "inherit" },
+    { color: "red", transform: "scale(1.25) translateY(-30%)" },
+    { color: "inherit" },
+  ];
 
   constructor() {
     super();
@@ -93,6 +98,12 @@ export default class EspApp extends LitElement {
     }
   }
 
+  renderComment() {
+    return this.config.comment
+      ? html`<h3>${this.config.comment}</h3>`
+      : nothing;
+  }
+
   render() {
     return html`
       <h1>
@@ -102,6 +113,7 @@ export default class EspApp extends LitElement {
         ${this.config.title}
         <span id="beat" title="${this.version}">❤</span>
       </h1>
+      ${this.renderComment()}
       <main class="flex-grid-half">
         <section class="col">
           <esp-entity-table></esp-entity-table>
@@ -174,6 +186,10 @@ export default class EspApp extends LitElement {
         h2 {
           border-bottom: 1px solid #eaecef;
           margin-bottom: 0.25rem;
+        }
+        h3 {
+          text-align: center;
+          margin: 0.5rem 0;
         }
         #beat {
           float: right;
