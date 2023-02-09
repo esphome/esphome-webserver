@@ -14,6 +14,7 @@ interface entityConfig {
   when: string;
   icon?: string;
   option?: string[];
+  brightness?: Number;
   target_temperature?: Number;
   target_temperature_low?: Number;
   target_temperature_high?: Number;
@@ -23,6 +24,13 @@ interface entityConfig {
   speed_level?: Number;
   speed: string;
 }
+
+export function getBasePath() {
+  let str = window.location.pathname;
+  return str.endsWith("/") ? str.slice(0, -1) : str;
+}
+
+let basePath = getBasePath();
 
 @customElement("esp-entity-table")
 export class EntityTable extends LitElement {
@@ -76,7 +84,7 @@ export class EntityTable extends LitElement {
     return html`<select
       @change="${(e: Event) => {
         let val = e.target?.value;
-        this.restAction(entity, `${action}?${opt}=${val}`);
+        this.restAction(entity, `${action}?${opt}=${encodeURIComponent(val)}`);
       }}"
     >
       ${options.map(
@@ -150,18 +158,32 @@ export class EntityTable extends LitElement {
       ];
     }
 
-    if (entity.domain === "light")
+    if (entity.domain === "light") {
       return [
         this.switch(entity),
-        entity.effects &&
-          this.select(
-            entity,
-            "turn_on",
-            "effect",
-            entity.effects,
-            entity.effect
-          ),
+        entity.brightness
+          ? this.range(
+              entity,
+              "turn_on",
+              "brightness",
+              entity.brightness,
+              0,
+              255,
+              1
+            )
+          : "",
+        entity.effects.filter((v) => v != "None").length
+          ? this.select(
+              entity,
+              "turn_on",
+              "effect",
+              entity.effects,
+              entity.effect
+            )
+          : "",
       ];
+    }
+
     if (entity.domain === "lock")
       return html`${this.actionButton(entity, "🔐", "lock")}
       ${this.actionButton(entity, "🔓", "unlock")}
@@ -243,7 +265,7 @@ export class EntityTable extends LitElement {
   }
 
   restAction(entity: entityConfig, action: String) {
-    fetch(`/${entity.domain}/${entity.id}/${action}`, {
+    fetch(`${basePath}/${entity.domain}/${entity.id}/${action}`, {
       method: "POST",
       body: "true",
     }).then((r) => {
