@@ -35,6 +35,7 @@ let basePath = getBasePath();
 @customElement("esp-entity-table")
 export class EntityTable extends LitElement {
   @state({ type: Array, reflect: true }) entities: entityConfig[] = [];
+  @state({ type: Boolean, reflect: true }) has_controls: boolean = false;
 
   constructor() {
     super();
@@ -57,6 +58,7 @@ export class EntityTable extends LitElement {
         } as entityConfig;
         this.entities.push(entity);
         this.entities.sort((a, b) => (a.name < b.name ? -1 : 1));
+        this.has_controls ||= this.control(entity).length||0>0
         this.requestUpdate();
       } else {
         delete data.id;
@@ -280,7 +282,7 @@ export class EntityTable extends LitElement {
           <tr>
             <th>Name</th>
             <th>State</th>
-            <th>Actions</th>
+            ${this.has_controls ? html`<th>Actions</th>` : html``}
           </tr>
         </thead>
         <tbody>
@@ -289,7 +291,7 @@ export class EntityTable extends LitElement {
               <tr>
                 <td>${component.name}</td>
                 <td>${component.state}</td>
-                <td>${this.control(component)}</td>
+                ${this.has_controls ? html`<td>${this.control(component)}</td>` : html``}
               </tr>
             `
           )}
