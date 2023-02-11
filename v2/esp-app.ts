@@ -38,6 +38,15 @@ export default class EspApp extends LitElement {
 
   constructor() {
     super();
+    const conf = document.querySelector('script#config');
+    if ( conf ) this.setConfig(JSON.parse(conf.innerText));
+  }
+
+  setConfig(config: any) {
+    this.config = config;
+
+    document.title = config.title;
+    document.documentElement.lang = config.lang;
   }
 
   firstUpdated(changedProperties: PropertyValues) {
@@ -55,11 +64,7 @@ export default class EspApp extends LitElement {
       const messageEvent = e as MessageEvent;
       const d: String = messageEvent.data;
       if (d.length) {
-        const config = JSON.parse(messageEvent.data);
-        this.config = config;
-
-        document.title = config.title;
-        document.documentElement.lang = config.lang;
+        this.setConfig(JSON.parse(messageEvent.data));
       }
       this.ping = messageEvent.lastEventId;
     });
