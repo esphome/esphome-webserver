@@ -13,6 +13,7 @@ window.source = new EventSource(getBasePath() + "/events");
 
 interface Config {
   ota: boolean;
+  log: boolean;
   title: string;
   comment: string;
 }
@@ -25,7 +26,7 @@ export default class EspApp extends LitElement {
   beat!: HTMLSpanElement;
 
   version: String = import.meta.env.PACKAGE_VERSION;
-  config: Config = { ota: false, title: "", comment: "" };
+  config: Config = { ota: false, log: true, title: "", comment: "" };
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
@@ -104,6 +105,12 @@ export default class EspApp extends LitElement {
       : nothing;
   }
 
+  renderLog() {
+    return this.config.log
+      ? html`<section class="col"><esp-log rows="50"></esp-log></section>`
+      : nothing;
+  }
+
   render() {
     return html`
       <h1>
@@ -134,9 +141,7 @@ export default class EspApp extends LitElement {
           </h2>
           ${this.ota()}
         </section>
-        <section class="col">
-          <esp-log rows="50"></esp-log>
-        </section>
+        ${this.renderLog()}
       </main>
     `;
   }
