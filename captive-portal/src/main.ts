@@ -21,7 +21,7 @@ function html(h: String[]) {
 fetch("/config.json").then(function (response) {
   response.json().then(function (config) {
     document.title = config.name;
-    document.body.getElementsByTagName("legend")[0].innerText = "WiFi Networks: " + config.name
+    document.getElementById("h1").innerText = config.name
     let result = config.aps.slice(1).map(function (ap) {
       return `<div class="network" 
       onclick="document.getElementById('ssid').value = this.innerText;document.getElementById('psk').focus()">
