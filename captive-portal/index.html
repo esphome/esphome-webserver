@@ -10,9 +10,9 @@
   <body>
     <main>
       <aside>
-        The ESP will now try to connect to the network...<br>
-        Please give it some time to connect.<br>
-        Note: Copy the changed network to your YAML file - the next OTA update will overwrite these settings.
+        <p>The ESP will now try to connect to the network...</p>
+        <p>Please give it some time to connect.</p>
+        <p><b>Note:</b> Copy the changed network to your YAML file - the next OTA update will overwrite these settings.</p>
       </aside>
       <h1 id="h1">ESPHome</h1>
       <fieldset>
@@ -24,7 +24,7 @@
       <form method="GET" action="/wifisave">
       <fieldset>
         <legend>WiFi Settings</legend>        
-        <input id="ssid" name="ssid" length="32" placeholder="SSID" />
+        <input id="ssid" name="ssid" length="32" placeholder="SSID" onclick="this.select();" />
         <input id="psk" name="psk" length="64" type="password" placeholder="Password" />
         <button type="submit">Save</button>
       </fieldset>
