@@ -14,6 +14,7 @@ interface entityConfig {
   when: string;
   icon?: string;
   option?: string[];
+  assumed_state?: boolean;
   brightness?: Number;
   target_temperature?: Number;
   target_temperature_low?: Number;
@@ -136,7 +137,12 @@ export class EntityTable extends LitElement {
   }
 
   control(entity: entityConfig) {
-    if (entity.domain === "switch") return [this.switch(entity)];
+    if (entity.domain === "switch") {
+      if (entity.assumed_state)
+        return html`${this.actionButton(entity, "❌", "turn_off")}
+        ${this.actionButton(entity, "✔️", "turn_on")}`;
+      else return [this.switch(entity)];
+    }
 
     if (entity.domain === "fan") {
       return [
@@ -344,7 +350,6 @@ export class EntityTable extends LitElement {
         .range {
           text-align: center;
         }
-
       `,
     ];
   }
