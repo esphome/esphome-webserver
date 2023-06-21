@@ -1,63 +1,121 @@
+:root{
+  color-scheme: light dark;
+  --text: #000;
+  --background: #fff;
+  --gray: #808080; /* 255/2 */
+  --grayLight: rgba(128,128,128,0.5); /* gray/2 */
+  --border-radius: 2px;
+  --link: #6A5EFF; /* https://webaim.org/blog/wcag-2-0-and-link-colors/ */
+  --padding: 0.5rem;
+  --margin: var(--padding);
+}
+
+@media (prefers-color-scheme: dark) {
+  :root{
+    --background: #000;
+    --text: #fff;
+  }
+}
+  
 * {
-  box-sizing: inherit;
-}
-
-div,
-input {
-  padding: 5px;
-  font-size: 1em;
-}
-
-input {
-  width: 95%;
+  box-sizing: border-box;
 }
 
 body {
   text-align: center;
-  font-family: sans-serif;
+  font-family: system-ui,"Segoe UI",Roboto,Helvetica,Cantarell,"Helvetica Neue",Arial,sans-serif;
+  background: var(--background);
+  color: var(--text);
+}
+
+a{
+  color: var(--link);
+  text-decoration: none;
+}
+
+p{
+  margin: var(--margin) 0;
+}
+
+fieldset{
+  margin: calc(var(--margin)*2) 0;
+  padding: var(--padding);
+  border-radius: calc(var(--border-radius)*2);
+  border: 1px solid var(--grayLight);
+}
+
+legend, h1{
+  font-size: 1em;
+  color: var(--gray);
+  display: block;
+  text-align: center;
+  padding: 0 calc(var(--padding)*2);
+}
+
+h1{
+  font-weight: 600;
+  color:var(--text);
+}
+
+input, button {
+  font-size: 1em;
+  width: 100%;
+  border: 1px solid var(--grayLight);
+  border-radius: var(--border-radius);
+  margin: var(--margin) 0 0 0;
+  padding: var(--padding);
 }
 
 button {
+  background: var(--link);
   border: 0;
-  border-radius: 0.3rem;
-  background-color: #1fa3ec;
   color: #fff;
-  line-height: 2.4rem;
-  font-size: 1.2rem;
-  width: 100%;
-  padding: 0;
   cursor: pointer;
+  font-weight: 600;
 }
 
 main {
   text-align: left;
   display: inline-block;
-  min-width: 260px;
+  min-width: 15em;
+  max-width: 40em;
 }
 
-.network {
+.ap {
   display: flex;
   justify-content: space-between;
   align-items: center;
+  color: var(--link);
+  padding: var(--padding);    
 }
 
-.network-left {
+.ssid {
+  flex: 1;
   display: flex;
   align-items: center;
-}
-
-.network-ssid {
-  margin-bottom: -7px;
-  margin-left: 10px;
+  margin: 0 var(--margin);  
 }
 
 aside {
-  border: 1px solid;
-  margin: 10px 0px;
-  padding: 15px 10px;
-  color: #4f8a10;
-  background-color: #dff2bf;
+  margin: var(--margin) 0;
+  border-radius: var(--border-radius);
+  padding: calc(var(--padding)*2);
+  color: var(--background);
+  background: var(--text);
   display: none
+}
+
+svg{
+  width: 1em;
+  height: 1em;
+}
+
+svg path{
+  fill:currentColor;
+}
+
+.ap svg:nth-child(1) path:nth-child(1){
+  fill:none;
 }
 
 i {

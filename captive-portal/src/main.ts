@@ -5,7 +5,7 @@ function wifi(dBm: number) {
               <path d="m12.008 19.25-11.3-15c7-5 14-5 22.5 0z" transform="scale(${quality} ${quality})" transform-origin="12 18"/>`)
 }
 function svg(el:String) {
-  return html([`<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24">${el}</svg>`])
+  return html([`<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">${el}</svg>`])
 }
 function lock(show: boolean) {
   return show
@@ -21,16 +21,13 @@ function html(h: String[]) {
 fetch("/config.json").then(function (response) {
   response.json().then(function (config) {
     document.title = config.name;
-    document.body.getElementsByTagName("h1")[0].innerText = "WiFi Networks: " + config.name
+    document.getElementById("h1").innerText = config.name
     let result = config.aps.slice(1).map(function (ap) {
-      return `<div class="network" 
-      onclick="document.getElementById('ssid').value = this.innerText;document.getElementById('psk').focus()">
-      <a href="#" class="network-left">
+      return `<a href="#" class="ap" onclick="document.getElementById('ssid').value = this.innerText;document.getElementById('psk').focus();return false;">
         ${wifi(ap.rssi)}
-        <span class="network-ssid">${ap.ssid}</span>
-      </a>
-      ${lock(ap.lock)}
-      </div>`
+        <span class="ssid">${ap.ssid}</span>
+        ${lock(ap.lock)}        
+      </a>`
     })
     document.querySelector("#net").innerHTML = html(result)
     document.querySelector("link[rel~='icon']").href = `data:image/svg+xml,${wifi(-65)}`;
