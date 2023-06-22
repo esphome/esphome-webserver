@@ -43,6 +43,9 @@ export default class EspApp extends LitElement {
   }
 
   setConfig(config: any) {
+    if (!("log" in config)) {
+      config.log = this.config.log;
+    }
     this.config = config;
 
     document.title = config.title;
