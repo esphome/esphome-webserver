@@ -59,7 +59,8 @@ export class EntityTable extends LitElement {
         } as entityConfig;
         this.entities.push(entity);
         this.entities.sort((a, b) => (a.name < b.name ? -1 : 1));
-        this.has_controls ||= this.control(entity) !== html``;
+        this.has_controls ||=
+          JSON.stringify(this.control(entity)) !== JSON.stringify(html``);
         this.requestUpdate();
       } else {
         delete data.id;
