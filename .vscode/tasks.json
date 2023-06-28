@@ -10,8 +10,7 @@
     {
       "label": "Build",
       "type": "shell",
-      "command": "npm build",
-      "console": "integratedTerminal",
+      "command": "npm run build",
       "problemMatcher": []
     }
   ]
