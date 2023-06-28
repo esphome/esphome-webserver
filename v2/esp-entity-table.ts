@@ -1,4 +1,4 @@
-import { html, css, LitElement } from "lit";
+import { html, css, LitElement, TemplateResult } from "lit";
 import { customElement, state } from "lit/decorators.js";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
@@ -15,15 +15,24 @@ interface entityConfig {
   icon?: string;
   option?: string[];
   assumed_state?: boolean;
-  brightness?: Number;
-  target_temperature?: Number;
-  target_temperature_low?: Number;
-  target_temperature_high?: Number;
-  current_temperature?: Number;
-  mode?: Number;
-  speed_count?: Number;
-  speed_level?: Number;
+  brightness?: number;
+  target_temperature?: number;
+  target_temperature_low?: number;
+  target_temperature_high?: number;
+  min_temp?: number;
+  max_temp?: number;
+  min_value?: number;
+  max_value?: number;
+  step?: number;
+  current_temperature?: number;
+  modes?: number[];
+  mode?: number;
+  speed_count?: number;
+  speed_level?: number;
   speed: string;
+  effects?: string[];
+  effect?: string;
+  actionTemplate?: any;
 }
 
 export function getBasePath() {
@@ -35,8 +44,8 @@ let basePath = getBasePath();
 
 @customElement("esp-entity-table")
 export class EntityTable extends LitElement {
-  @state({ type: Array, reflect: true }) entities: entityConfig[] = [];
-  @state({ type: Boolean, reflect: true }) has_controls: boolean = false;
+  @state() entities: entityConfig[] = [];
+  @state() has_controls: boolean = false;
 
   constructor() {
     super();
@@ -57,9 +66,12 @@ export class EntityTable extends LitElement {
           unique_id: data.id,
           id: parts.slice(1).join("-"),
         } as entityConfig;
+        entity.actionTemplate = this.control(entity);
+        if (entity.actionTemplate != undefined) {
+          this.has_controls = true;
+        }
         this.entities.push(entity);
         this.entities.sort((a, b) => (a.name < b.name ? -1 : 1));
-        this.has_controls ||= this.control(entity).length||0>0
         this.requestUpdate();
       } else {
         delete data.id;
@@ -70,7 +82,8 @@ export class EntityTable extends LitElement {
       }
     });
   }
-  actionButton(entity: entityConfig, label: String, action?: String) {
+
+  actionButton(entity: entityConfig, label: string, action?: string) {
     let a = action || label.toLowerCase();
     return html`<button class="rnd" @click=${() => this.restAction(entity, a)}>
       ${label}
@@ -80,9 +93,9 @@ export class EntityTable extends LitElement {
   select(
     entity: entityConfig,
     action: string,
-    opt: String,
-    options: String[],
-    val: string
+    opt: string,
+    options: string[],
+    val: string | undefined
   ) {
     return html`<select
       @change="${(e: Event) => {
@@ -104,13 +117,14 @@ export class EntityTable extends LitElement {
   range(
     entity: entityConfig,
     action: string,
-    opt: String,
-    value: Number,
-    min: Number,
-    max: Number,
-    step: Number
+    opt: string,
+    value: string | number,
+    min: number,
+    max: number,
+    step: number
   ) {
-    return html`<div class=range><label>${min || 0}</label>
+    return html`<div class="range">
+      <label>${min || 0}</label>
       <input
         type="${entity.mode == 1 ? "number" : "range"}"
         name="${entity.unique_id}"
@@ -124,7 +138,8 @@ export class EntityTable extends LitElement {
           this.restAction(entity, `${action}?${opt}=${val}`);
         }}"
       />
-      <label>${max || 100}</label></div>`;
+      <label>${max || 100}</label>
+    </div>`;
   }
 
   switch(entity: entityConfig) {
@@ -143,7 +158,7 @@ export class EntityTable extends LitElement {
       if (entity.assumed_state)
         return html`${this.actionButton(entity, "❌", "turn_off")}
         ${this.actionButton(entity, "✔️", "turn_on")}`;
-      else return [this.switch(entity)];
+      else return this.switch(entity);
     }
 
     if (entity.domain === "fan") {
@@ -157,7 +172,7 @@ export class EntityTable extends LitElement {
               entity,
               `turn_${entity.state.toLowerCase()}`,
               "speed_level",
-              entity.speed_level,
+              entity.speed_level ? entity.speed_level : 0,
               0,
               entity.speed_count,
               1
@@ -180,12 +195,12 @@ export class EntityTable extends LitElement {
               1
             )
           : "",
-        entity.effects.filter((v) => v != "None").length
+        entity.effects?.filter((v) => v != "None").length
           ? this.select(
               entity,
               "turn_on",
               "effect",
-              entity.effects,
+              entity.effects || [],
               entity.effect
             )
           : "",
@@ -203,7 +218,13 @@ export class EntityTable extends LitElement {
     if (entity.domain === "button")
       return html`${this.actionButton(entity, "☐", "press ")}`;
     if (entity.domain === "select") {
-      return this.select(entity, "set", "option", entity.option, entity.value);
+      return this.select(
+        entity,
+        "set",
+        "option",
+        entity.option || [],
+        entity.value
+      );
     }
     if (entity.domain === "number") {
       return this.range(
@@ -211,68 +232,79 @@ export class EntityTable extends LitElement {
         "set",
         "value",
         entity.value,
-        entity.min_value,
-        entity.max_value,
-        entity.step
+        entity.min_value || 0,
+        entity.max_value || 1,
+        entity.step || 1
       );
     }
     if (entity.domain === "climate") {
       let target_temp_slider, target_temp_label;
-      if (entity.target_temperature_low !== undefined) {
-        target_temp_label= html`${entity.target_temperature_low}&nbsp;..&nbsp;${entity.target_temperature_high}`;
+      if (
+        entity.target_temperature_low !== undefined &&
+        entity.target_temperature_high !== undefined
+      ) {
+        target_temp_label = html`${entity.target_temperature_low}&nbsp;..&nbsp;${entity.target_temperature_high}`;
         target_temp_slider = html`
           ${this.range(
             entity,
             "set",
             "target_temperature_low",
             entity.target_temperature_low,
-            entity.min_temp,
-            entity.max_temp,
-            entity.step
+            entity.min_temp || 0,
+            entity.max_temp || 1,
+            entity.step || 1
           )}
           ${this.range(
-             entity,
+            entity,
             "set",
             "target_temperature_high",
             entity.target_temperature_high,
-            entity.min_temp,
-            entity.max_temp,
-            entity.step
+            entity.min_temp || 0,
+            entity.max_temp || 1,
+            entity.step || 1
           )}
         `;
       } else {
-        target_temp_label= html`${entity.target_temperature}`;
+        target_temp_label = html`${entity.target_temperature}`;
         target_temp_slider = html`
           ${this.range(
             entity,
             "set",
             "target_temperature",
-            entity.target_temperature,
-            entity.min_temp,
-            entity.max_temp,
-            entity.step
+            entity.target_temperature!!,
+            entity.min_temp || 0,
+            entity.max_temp || 1,
+            entity.step || 1
           )}
         `;
       }
       return html`
-        <label>Current:&nbsp;${entity.current_temperature}, Target:&nbsp;${target_temp_label}</label>
+        <label
+          >Current:&nbsp;${entity.current_temperature},
+          Target:&nbsp;${target_temp_label}</label
+        >
         ${target_temp_slider}
         <br />Mode:
-        ${entity.modes.map(
-          (mode) => html`
-            <label><input type="radio" name="${entity.unique_id}_mode" @change="${(e: Event) => {
-              let val = e.target?.value;
-              this.restAction(entity, `set?mode=${val}`);
-            }}"
-            value="${mode}" ?checked=${entity.mode === mode}>${mode}</label>`
-          )
-        }
+        ${entity.modes?.map(
+          (mode) => html` <label
+            ><input
+              type="radio"
+              name="${entity.unique_id}_mode"
+              @change="${(e: Event) => {
+                let val = e.target?.value;
+                this.restAction(entity, `set?mode=${val}`);
+              }}"
+              value="${mode}"
+              ?checked=${entity.mode === mode}
+            />${mode}</label
+          >`
+        )}
       `;
     }
-    return html``;
+    return undefined;
   }
 
-  restAction(entity: entityConfig, action: String) {
+  restAction(entity: entityConfig, action: string) {
     fetch(`${basePath}/${entity.domain}/${entity.id}/${action}`, {
       method: "POST",
       body: "true",
@@ -297,7 +329,13 @@ export class EntityTable extends LitElement {
               <tr>
                 <td>${component.name}</td>
                 <td>${component.state}</td>
-                ${this.has_controls ? html`<td>${this.control(component)}</td>` : html``}
+                ${this.has_controls
+                  ? html`<td>
+                      ${component.actionTemplate
+                        ? component.actionTemplate
+                        : html``}
+                    </td>`
+                  : html``}
               </tr>
             `
           )}
