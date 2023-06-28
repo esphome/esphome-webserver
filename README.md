@@ -77,5 +77,5 @@ web_server:
 serve
 =====
 `npm run server`
-Starts a production test server on http://localhost:5000
+Starts a production test server on http://localhost:5001
 Events and the json api are proxied.

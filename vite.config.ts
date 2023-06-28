@@ -83,7 +83,7 @@ export default defineConfig({
   server: {
     open: "/", // auto open browser in dev mode
     host: true, // dev on local and network
-    port: 5000,
+    port: 5001,
     strictPort: true,
     proxy: {
       "/light": proxy_target,
