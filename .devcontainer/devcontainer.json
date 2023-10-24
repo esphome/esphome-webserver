@@ -6,6 +6,9 @@
   },
   "appPort": "5001:5001",
   "postCreateCommand": "npm install",
+  "features": {
+    "ghcr.io/devcontainers/features/github-cli": {}
+  },
   "customizations": {
     "vscode": {
       "extensions": [
