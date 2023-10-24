@@ -48,8 +48,8 @@ export class EspSwitch extends LitElement {
           <input
             id="${checkboxID}"
             type="checkbox"
-            ?checked="${this.isOn()}"
-            ?disabled="${this.disabled}"
+            .checked="${this.isOn()}"
+            .disabled="${this.disabled}"
             @click="${this.toggle}"
           />
           <span style="color:${this.color}" class="lever"></span>
