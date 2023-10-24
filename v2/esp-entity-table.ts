@@ -296,6 +296,7 @@ class ActionRenderer {
   ) {
     return html`<div class="text">
       <input
+        type="${entity.mode == 1 ? "password" : "text"}"
         name="${entity.unique_id}"
         id="${entity.unique_id}"
         minlength="${min || Math.min(0, value as number)}"
