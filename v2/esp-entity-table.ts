@@ -24,6 +24,9 @@ interface entityConfig {
   min_value?: number;
   max_value?: number;
   step?: number;
+  min_length?: number;
+  max_length?: number;
+  pattern?: string;
   current_temperature?: number;
   modes?: number[];
   mode?: number;
@@ -174,11 +177,11 @@ export class EntityTable extends LitElement implements RestAction {
           color: currentColor;
           background-color: var(--primary-color, currentColor);
         }
-        input[type="range"] {
+        input[type="range"], input[type="text"] {
           width: calc(100% - 8rem);
           height: 0.75rem;
         }
-        .range {
+        .range, .text {
           text-align: center;
         }
       `,
@@ -281,6 +284,33 @@ class ActionRenderer {
     </div>`;
   }
 
+
+  private _textinput(
+    entity: entityConfig,
+    action: string,
+    opt: string,
+    value: string | number,
+    min: number | undefined,
+    max: number | undefined,
+    pattern: string | undefined
+  ) {
+    return html`<div class="text">
+      <input
+        type="${entity.mode == 1 ? "password" : "text"}"
+        name="${entity.unique_id}"
+        id="${entity.unique_id}"
+        minlength="${min || Math.min(0, value as number)}"
+        maxlength="${max || Math.max(255, value as number)}"
+        pattern="${pattern || ''}"
+        value="${value!}"
+        @change="${(e: Event) => {
+          let val = e.target?.value;
+          this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
+        }}"
+      />
+    </div>`;
+  }
+
   render_switch() {
     if (!this.entity) return;
     if (this.entity.assumed_state)
@@ -377,6 +407,19 @@ class ActionRenderer {
       this.entity.min_value,
       this.entity.max_value,
       this.entity.step
+    );
+  }
+
+  render_text() {
+    if (!this.entity) return;
+    return this._textinput(
+      this.entity,
+      "set",
+      "value",
+      this.entity.value,
+      this.entity.min_length,
+      this.entity.max_length,
+      this.entity.pattern,
     );
   }
 
