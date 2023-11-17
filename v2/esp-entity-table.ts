@@ -304,7 +304,7 @@ class ActionRenderer {
         pattern="${pattern || ''}"
         value="${value!}"
         @change="${(e: Event) => {
-          let val = e.target?.value;
+          let val = encodeURIComponent(e.target?.value);
           this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
         }}"
       />
