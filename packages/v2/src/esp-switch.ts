@@ -94,6 +94,10 @@ export class EspSwitch extends LitElement {
           background-color: currentColor;
         }
 
+        input[type="checkbox"]:not(:checked) + .lever:after {
+          background-color: rgba(127, 127, 127, 0.5);
+        }
+
         .lever {
           content: "";
           display: inline-block;
@@ -147,7 +151,7 @@ export class EspSwitch extends LitElement {
         input[type="checkbox"]:checked:not(:disabled).tabbed:focus
           ~ .lever::before {
           transform: scale(2.4);
-          background-color: currentColor;
+          background-color: rgba(255, 255, 255, 0.9) 0%;
           background-image: linear-gradient(
             0deg,
             rgba(255, 255, 255, 0.9) 0%,

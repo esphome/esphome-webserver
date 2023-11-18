@@ -8,8 +8,10 @@ import "./esp-switch";
 import "./esp-logo";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
+import Iconify from '@iconify/iconify';
 
-window.source = new EventSource(getBasePath() + "/events");
+//window.source = new EventSource(getBasePath() + "/events");
+window.source = new EventSource("http://192.168.0.54" + "/events");
 
 interface Config {
   ota: boolean;
@@ -131,7 +133,7 @@ export default class EspApp extends LitElement {
       ${this.renderComment()}
       <main class="flex-grid-half">
         <section class="col">
-          <esp-entity-table></esp-entity-table>
+          <esp-entity-table title="${this.config.title}"></esp-entity-table>
           <h2>
             <esp-switch
               color="var(--primary-color,currentColor)"
@@ -159,27 +161,27 @@ export default class EspApp extends LitElement {
       cssReset,
       cssButton,
       css`
-        .flex-grid {
-          display: flex;
+        .flex-grid-half .col {
+          margin: 8px;
         }
-        .flex-grid .col {
+        .flex-grid-half .col:nth-child(1) {
+          flex: 1;
+        }
+        .flex-grid-half .col:nth-child(2) {
           flex: 2;
         }
         .flex-grid-half {
           display: flex;
           justify-content: space-evenly;
         }
-        .col {
-          width: 48%;
-        }
 
-        @media (max-width: 600px) {
+        @media (max-width: 1024px) {
           .flex-grid,
           .flex-grid-half {
             display: block;
           }
           .col {
-            width: 100%;
+            width: 100% !important;
             margin: 0 0 10px 0;
           }
         }
