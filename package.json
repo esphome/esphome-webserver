@@ -13,6 +13,7 @@
   },
   "dependencies": {
     "http-proxy-middleware": "^2.0.1",
+    "iconify-icon": "^1.0.8",
     "lit": "^2.0.2",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-gzip": "^2.5.0",

@@ -48,82 +48,102 @@ export class DebugLog extends LitElement {
 
   render() {
     return html`
-      <div class="flow-x">
-        <table>
-          <thead>
-            <tr>
-              <th>Time</th>
-              <th>level</th>
-              <th>Tag</th>
-              <th>Message</th>
-            </tr>
-          </thead>
-          <tbody>
-            ${this.logs.map(
-              (log: recordConfig) =>
-                html`
-                <tr class="${log.type}">
-                  <td>${log.when}</td>
-                  <td>${log.level}</td>
-                  <td>${log.tag}</td>
-                  <td><pre>${log.detail}</pre></td>
-                </td>
-                </tr>
-              `
-            )}
-          </tbody>
-        </table>
+      <div class="logs">
+        <div class='thead trow'>
+            <div>Time</div>
+            <div>level</div>
+            <div>Tag</div>
+            <div>Message</div>
+        </div>
+        <div class='tbody'>
+          ${this.logs.map(
+            (log: recordConfig) =>
+              html`
+              <div class="trow ${log.type}">
+                <div>${log.when}</div>
+                <div>${log.level}</div>
+                <div>${log.tag}</div>
+                <div><pre>${log.detail}</pre></div>
+              </td>
+            `
+          )}
+        </div>
       </div>
     `;
   }
 
   static get styles() {
     return css`
-      table {
+      .thead,
+      .tbody .trow:nth-child(2n) {
+        background-color: rgba(127,127,127,0.05);
+      }
+      .trow div {
         font-family: monospace;
-        background-color: #1c1c1c;
         color: white;
         width: 100%;
-        border: 1px solid #dfe2e5;
-        line-height: 1;
+        line-height: 1.2rem;
       }
-
-      thead {
-        border: 1px solid #dfe2e5;
+      .trow {
+        display: flex;
+      }
+      .thead {
         line-height: 1rem;
       }
-      th {
+      .thead .trow {
         text-align: left;
-      }
-      th,
-      td {
         padding: 0.25rem 0.5rem;
+      }
+      .trow {
+        display: flex;
+      }
+      .trow > div {
+        // padding-right: 3em;
+        //flex: 1 1 auto;
+        flex: 1;
+        align-self: flex-start;
+        padding-right: 2em;
+      }
+      .trow > div:last-child {
+        // flex: 5 1 auto;
+        flex: 5;
+        overflow: hidden;
+        padding-right: 0em;
       }
       pre {
         margin: 0;
       }
-      .v {
+      .v div {
         color: #888888;
       }
-      .d {
+      .d div {
         color: #00dddd;
       }
-      .c {
+      .c div {
         color: magenta;
       }
-      .i {
+      .i div {
         color: limegreen;
       }
-      .w {
+      .w div {
         color: yellow;
       }
-      .e {
+      .e div {
         color: red;
         font-weight: bold;
       }
-      .flow-x {
+      .logs {
         overflow-x: auto;
-      }
+
+        border-radius: 12px;
+        border-width: 1px;
+        border-style: solid;
+        border-color: rgba(127,127,127,0.12);
+        transition: all 0.3s ease-out 0s;
+        font-size: 14px;
+        background-color: rgba(127,127,127,0.05);
+        padding: 16px;
+    }
     `;
   }
 }

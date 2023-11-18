@@ -1,7 +1,10 @@
-import { html, css, LitElement, TemplateResult } from "lit";
-import { customElement, state } from "lit/decorators.js";
+import { html, css, LitElement, TemplateResult, nothing } from "lit";
+import { customElement, state, property } from "lit/decorators.js";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
+import cssInput from "./css/input";
+import cssEntityTable from "./css/esp-entity-table";
+import 'iconify-icon';
 
 interface entityConfig {
   unique_id: string;
@@ -40,6 +43,7 @@ interface entityConfig {
 
 export function getBasePath() {
   let str = window.location.pathname;
+  str = "//192.168.0.54"; //!!
   return str.endsWith("/") ? str.slice(0, -1) : str;
 }
 
@@ -53,6 +57,7 @@ interface RestAction {
 export class EntityTable extends LitElement implements RestAction {
   @state() entities: entityConfig[] = [];
   @state() has_controls: boolean = false;
+  @property() title: string = '';
 
   private _actionRenderer = new ActionRenderer();
 
@@ -111,30 +116,27 @@ export class EntityTable extends LitElement implements RestAction {
 
   render() {
     return html`
-      <table>
-        <thead>
-          <tr>
-            <th>Name</th>
-            <th>State</th>
-            ${this.has_controls ? html`<th>Actions</th>` : html``}
-          </tr>
-        </thead>
-        <tbody>
+      <div>
+      <div class='entities'>
           ${this.entities.map(
             (component) => html`
-              <tr>
-                <td>${component.name}</td>
-                <td>${component.state}</td>
+              <div class='entity-row'>
+                <div>${component.icon ? html`<iconify-icon icon="${component.icon}" height="24px"></iconify-icon>` : nothing}</div>
+                <div>${component.name.indexOf(this.title) != 0 ? 
+                    component.name : 
+                    html`<i>${this.title}</i>${component.name.substring(this.title.length+1)}`
+                  }
+                </div>
+                <div>
+                <div>${component.state}</div>
                 ${this.has_controls
-                  ? html`<td>
-                      ${component.has_action ? this.control(component) : html``}
-                    </td>`
-                  : html``}
-              </tr>
+                  ? html`${component.has_action ? this.control(component) : nothing}`
+                  : nothing}
+                </div>
+              </div>
             `
           )}
-        </tbody>
-      </table>
+      </div>
     `;
   }
 
@@ -142,49 +144,8 @@ export class EntityTable extends LitElement implements RestAction {
     return [
       cssReset,
       cssButton,
-      css`
-        table {
-          border-spacing: 0;
-          border-collapse: collapse;
-          width: 100%;
-          border: 1px solid currentColor;
-          background-color: var(--c-bg);
-        }
-        th {
-          font-weight: 600;
-          text-align: left;
-        }
-        th,
-        td {
-          padding: 0.25rem 0.5rem;
-          border: 1px solid currentColor;
-        }
-        td:nth-child(2),
-        th:nth-child(2) {
-          text-align: center;
-        }
-        tr th,
-        tr:nth-child(2n) {
-          background-color: rgba(127, 127, 127, 0.3);
-        }
-        select {
-          background-color: inherit;
-          color: inherit;
-          width: 100%;
-          border-radius: 4px;
-        }
-        option {
-          color: currentColor;
-          background-color: var(--primary-color, currentColor);
-        }
-        input[type="range"], input[type="text"] {
-          width: calc(100% - 8rem);
-          height: 0.75rem;
-        }
-        .range, .text {
-          text-align: center;
-        }
-      `,
+      cssInput,
+      cssEntityTable
     ];
   }
 }
@@ -211,7 +172,7 @@ class ActionRenderer {
     if (!entity) return;
     let a = action || label.toLowerCase();
     return html`<button
-      class="rnd"
+      class="abutton"
       @click=${() => this.actioner?.restAction(entity, a)}
     >
       ${label}
@@ -343,8 +304,9 @@ class ActionRenderer {
   render_light() {
     if (!this.entity) return;
     return [
-      this._switch(this.entity),
-      this.entity.brightness
+      html`<div class='entity'>
+      ${this._switch(this.entity)}
+      ${this.entity.brightness
         ? this._range(
             this.entity,
             "turn_on",
@@ -354,8 +316,8 @@ class ActionRenderer {
             255,
             1
           )
-        : "",
-      this.entity.effects?.filter((v) => v != "None").length
+        : ""}
+      ${this.entity.effects?.filter((v) => v != "None").length
         ? this._select(
             this.entity,
             "turn_on",
@@ -363,7 +325,9 @@ class ActionRenderer {
             this.entity.effects || [],
             this.entity.effect
           )
-        : "",
+        : ""}
+      </div>
+      `
     ];
   }
 
@@ -383,7 +347,7 @@ class ActionRenderer {
 
   render_button() {
     if (!this.entity) return;
-    return html`${this._actionButton(this.entity, "☐", "press ")}`;
+    return html`${this._actionButton(this.entity, "PRESS", "press")}`;
   }
 
   render_select() {
