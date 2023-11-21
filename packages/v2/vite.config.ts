@@ -86,6 +86,7 @@ export default defineConfig({
       "/number": proxy_target,
       "/climate": proxy_target,
       "/events": proxy_target,
+      "/text": proxy_target,
     },
   },
 });
