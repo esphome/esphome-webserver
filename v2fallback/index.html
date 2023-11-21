@@ -1,0 +1,48 @@
+<script>
+(() => {
+  window.s = new EventSource('events');
+
+  let entities = [];
+  let uptime = -1;
+  let config = {};
+
+  window.s?.addEventListener("ping", (e) => {
+    // data: {"title":"garazs-temp","comment":"Garage Temp and Light Module","ota":true,"log":true,"lang":"en"}
+    uptime = e.lastEventId;
+
+    if (e.data) {
+      const data = JSON.parse(e.data);
+      config = data;
+
+      let div = document.createElement("tr");
+      div.innerHTML = `<th colspan=2>${data.title} - ${data.comment}</th>`;
+      const main = document.getElementById("m");
+      main.insertBefore(div, main.firstChild);
+    }
+  });
+
+  window.s?.addEventListener("state", (e) => {
+    uptime = e.lastEventId;
+
+    const data = JSON.parse(e.data);
+    let idx = entities.findIndex((x) => x.id === data.id);
+    if (idx === -1 && data.id) {
+      //let parts = data.id.split("-");
+      entities.push(data);
+      //entities.sort((a, b) => (a.name < b.name ? -1 : 1));
+
+      let tr1 = document.createElement("tr");
+      tr1.id = data.id;
+      tr1.innerHTML = `<td>${data.name.replace(config.title,`<n>${config.title}</n>`)}</td><td >${data.value??''}</td>`;
+      const main = document.getElementById("m");
+      main.append(tr1);
+    } else {
+      document.querySelector(`#${data.id} .v`).innerHTML = data.value;
+    }
+  });
+})();
+</script>
+
+<style>html,td{font-family:Calibri} n{font-size:smaller;color:lightgray} td:first-child{padding-right:2em}</style>
+<table id="m">
+</table>
