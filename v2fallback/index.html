@@ -1,14 +1,13 @@
 <script>
 (() => {
-  window.s = new EventSource('events');
+  window.s = new EventSource('/events');
+  // window.s = new EventSource('http://192.168.0.56/events');
 
   let entities = [];
-  let uptime = -1;
   let config = {};
 
   window.s?.addEventListener("ping", (e) => {
     // data: {"title":"garazs-temp","comment":"Garage Temp and Light Module","ota":true,"log":true,"lang":"en"}
-    uptime = e.lastEventId;
 
     if (e.data) {
       const data = JSON.parse(e.data);
@@ -22,22 +21,24 @@
   });
 
   window.s?.addEventListener("state", (e) => {
-    uptime = e.lastEventId;
+    try {
+      const data = JSON.parse(e.data);
+      let idx = entities.findIndex((x) => x.id === data.id);
+      if (idx === -1 && data.id) {
+        //let parts = data.id.split("-");
+        entities.push(data);
+        //entities.sort((a, b) => (a.name < b.name ? -1 : 1));
 
-    const data = JSON.parse(e.data);
-    let idx = entities.findIndex((x) => x.id === data.id);
-    if (idx === -1 && data.id) {
-      //let parts = data.id.split("-");
-      entities.push(data);
-      //entities.sort((a, b) => (a.name < b.name ? -1 : 1));
-
-      let tr1 = document.createElement("tr");
-      tr1.id = data.id;
-      tr1.innerHTML = `<td>${data.name.replace(config.title,`<n>${config.title}</n>`)}</td><td >${data.value??''}</td>`;
-      const main = document.getElementById("m");
-      main.append(tr1);
-    } else {
-      document.querySelector(`#${data.id} .v`).innerHTML = data.value;
+        let tr1 = document.createElement("tr");
+        tr1.id = data.id;
+        tr1.innerHTML = `<td>${data.name}</td><td>${data.state??''}</td>`;
+        const main = document.getElementById("m");
+        main.append(tr1);
+      } else {
+        document.querySelector(`#${data.id} td:last-child`).innerHTML = data?.state;
+      }
+    } catch (e) {
+      console.dir(e);
     }
   });
 })();
