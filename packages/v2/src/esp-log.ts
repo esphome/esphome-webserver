@@ -46,12 +46,17 @@ export class DebugLog extends LitElement {
     });
   }
 
+  _handleClick() {
+    const event = new Event('toggle-entitites-visible', {bubbles: true, composed: true});
+    this.dispatchEvent(event);    
+  }
+
   render() {
     return html`
       <div class="logs">
-        <div class='thead trow'>
+        <div class='thead trow' @click="${this._handleClick}">
             <div>Time</div>
-            <div>level</div>
+            <div>Level</div>
             <div>Tag</div>
             <div>Message</div>
         </div>
@@ -63,7 +68,7 @@ export class DebugLog extends LitElement {
                 <div>${log.when}</div>
                 <div>${log.level}</div>
                 <div>${log.tag}</div>
-                <div><pre>${log.detail}</pre></div>
+                <div>${log.detail}</div>
               </td>
             `
           )}
@@ -80,7 +85,6 @@ export class DebugLog extends LitElement {
       }
       .trow div {
         font-family: monospace;
-        color: white;
         width: 100%;
         line-height: 1.2rem;
       }
@@ -98,16 +102,20 @@ export class DebugLog extends LitElement {
         display: flex;
       }
       .trow > div {
-        // padding-right: 3em;
-        //flex: 1 1 auto;
-        flex: 1;
         align-self: flex-start;
-        padding-right: 2em;
+        padding-right: 0.25em;
+        flex: 2 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+      }
+      .trow > div:nth-child(2) {
+        flex: 1 0;
+      }
+      .trow > div:nth-child(3) {
+        flex: 3 0;
       }
       .trow > div:last-child {
-        // flex: 5 1 auto;
-        flex: 5;
-        overflow: hidden;
+        flex: 15 0;
         padding-right: 0em;
       }
       pre {
@@ -134,14 +142,12 @@ export class DebugLog extends LitElement {
       }
       .logs {
         overflow-x: auto;
-
         border-radius: 12px;
         border-width: 1px;
         border-style: solid;
         border-color: rgba(127,127,127,0.12);
         transition: all 0.3s ease-out 0s;
         font-size: 14px;
-        background-color: rgba(127,127,127,0.05);
         padding: 16px;
     }
     `;

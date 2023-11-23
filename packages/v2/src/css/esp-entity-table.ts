@@ -28,6 +28,15 @@ export default css`
     background-color: rgba(127,127,127,0.05);
     padding: 16px;
   }
+  div.category-row > div:first-child {
+    font-weight: 400;
+    background-color: rgba(127,127,127,0.3);
+    min-height: 40px;
+    padding-inline: 16px;
+    vertical-align: middle;
+    display: flex;
+    align-items: center;
+  }
   div.entity-row {
     display: flex;
     align-items: center;
@@ -52,6 +61,7 @@ export default css`
     flex: 1 1 50%;
     margin-left: 16px;
     margin-right: 8px;
+    text-wrap: nowrap;
   }
   div.entity-row > div:nth-child(3) {
     flex: 1 1 50%;
@@ -61,7 +71,7 @@ export default css`
     display: flex;
     justify-content: space-between;
   }
-  div.entity-row > div:nth-child(3) > div:only-child {
+  div.entity-row > div:nth-child(3) > :only-child {
     margin-left: auto;
   }
   div.entity-row > div:nth-child(2) > i {
@@ -69,5 +79,8 @@ export default css`
     color: rgba(127,127,127,0.8);
     font-size: 80%;
     display: block;
+  }
+  .binary_sensor_off {
+    color: rgba(127,127,127,0.7);
   }
 `;
