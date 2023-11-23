@@ -305,7 +305,7 @@ class ActionRenderer {
         value="${value!}"
         @change="${(e: Event) => {
           let val = e.target?.value;
-          this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
+          this.actioner?.restAction(entity, `${action}?${opt}=${encodeURIComponent(val)}`);
         }}"
       />
     </div>`;
