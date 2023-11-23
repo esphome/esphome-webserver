@@ -4,7 +4,7 @@ import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssInput from "./css/input";
 import cssEntityTable from "./css/esp-entity-table";
-import 'iconify-icon';
+import "iconify-icon";
 
 interface entityConfig {
   unique_id: string;
@@ -14,6 +14,7 @@ interface entityConfig {
   detail: string;
   value: string;
   name: string;
+  entity_category: number;
   when: string;
   icon?: string;
   option?: string[];
@@ -41,13 +42,14 @@ interface entityConfig {
   has_action?: boolean;
 }
 
-export function getBasePath() {
-  let str = window.location.pathname;
-  str = "//192.168.0.54"; //!!
-  return str.endsWith("/") ? str.slice(0, -1) : str;
-}
+export const stateOn = "ON";
+export const stateOff = "OFF";
 
-let basePath = getBasePath();
+export function getBasePath() {
+  const url = new URL(window.location);
+  url.hostname = window.location.search.replace("?", "") || url.hostname;
+  return `${url.protocol}//${url.hostname}`;
+}
 
 interface RestAction {
   restAction(entity?: entityConfig, action?: string): void;
@@ -57,9 +59,10 @@ interface RestAction {
 export class EntityTable extends LitElement implements RestAction {
   @state() entities: entityConfig[] = [];
   @state() has_controls: boolean = false;
-  @property() title: string = '';
 
   private _actionRenderer = new ActionRenderer();
+  private _basePath = getBasePath();
+  private static ENTITY_CATEGORIES = ["Sensor and Control", "Configuration", "Diagnostic"];
 
   connectedCallback() {
     super.connectedCallback();
@@ -75,13 +78,15 @@ export class EntityTable extends LitElement implements RestAction {
           domain: parts[0],
           unique_id: data.id,
           id: parts.slice(1).join("-"),
+          entity_category: data.entity_category
         } as entityConfig;
         entity.has_action = this.hasAction(entity);
         if (entity.has_action) {
           this.has_controls = true;
         }
         this.entities.push(entity);
-        this.entities.sort((a, b) => (a.name < b.name ? -1 : 1));
+        this.entities.sort((a, b) => (a.entity_category < b.entity_category) ? -1 : 
+            (a.entity_category == b.entity_category ? (a.name < b.name ? -1 : 1) : 1));
         this.requestUpdate();
       } else {
         delete data.id;
@@ -106,7 +111,7 @@ export class EntityTable extends LitElement implements RestAction {
   }
 
   restAction(entity: entityConfig, action: string) {
-    fetch(`${basePath}/${entity.domain}/${entity.id}/${action}`, {
+    fetch(`${this._basePath}/${entity.domain}/${entity.id}/${action}`, {
       method: "POST",
       body: "true",
     }).then((r) => {
@@ -115,38 +120,44 @@ export class EntityTable extends LitElement implements RestAction {
   }
 
   render() {
+    const elems = Object.entries(Object.groupBy(this.entities, (e)=>e.entity_category));
     return html`
       <div>
-      <div class='entities'>
-          ${this.entities.map(
-            (component) => html`
-              <div class='entity-row'>
-                <div>${component.icon ? html`<iconify-icon icon="${component.icon}" height="24px"></iconify-icon>` : nothing}</div>
-                <div>${component.name.indexOf(this.title) != 0 ? 
-                    component.name : 
-                    html`<i>${this.title}</i>${component.name.substring(this.title.length+1)}`
-                  }
+        <div class="entities">
+          ${elems.map(
+            (group) => html`
+              ${(elems.length>1?html`<div class="category-row"><div>${EntityTable.ENTITY_CATEGORIES[parseInt(group[0])]}</div>`:'')}
+              ${group[1].map((component) => html`
+              <div class="entity-row">
+                <div>
+                  ${component.icon
+                    ? html`<iconify-icon
+                        icon="${component.icon}"
+                        height="24px"
+                      ></iconify-icon>`
+                    : nothing}
                 </div>
                 <div>
-                <div>${component.state}</div>
-                ${this.has_controls
-                  ? html`${component.has_action ? this.control(component) : nothing}`
-                  : nothing}
+                  ${component.name}
+                </div>
+                <div>
+                  ${this.has_controls && component.has_action
+                    ? this.control(component)
+                    : html`<div>${component.state}</div>`}
                 </div>
               </div>
+              `
+              )}
+            </div>
             `
           )}
+        </div>
       </div>
     `;
   }
 
   static get styles() {
-    return [
-      cssReset,
-      cssButton,
-      cssInput,
-      cssEntityTable
-    ];
+    return [cssReset, cssButton, cssInput, cssEntityTable];
   }
 }
 
@@ -262,14 +273,27 @@ class ActionRenderer {
         id="${entity.unique_id}"
         minlength="${min || Math.min(0, value as number)}"
         maxlength="${max || Math.max(255, value as number)}"
-        pattern="${pattern || ''}"
+        pattern="${pattern || ""}"
         value="${value!}"
         @change="${(e: Event) => {
           let val = e.target?.value;
-          this.actioner?.restAction(entity, `${action}?${opt}=${encodeURIComponent(val)}`);
+          this.actioner?.restAction(
+            entity,
+            `${action}?${opt}=${encodeURIComponent(val)}`
+          );
         }}"
       />
     </div>`;
+  }
+
+  render_binary_sensor() {
+    if (!this.entity) return;
+    const isOn = this.entity.state == stateOn;
+    return html`<iconify-icon
+      class="binary_sensor_${this.entity.state?.toLowerCase()}"
+      icon="mdi:checkbox-${isOn ? "marked-circle" : "blank-circle-outline"}"
+      height="24px"
+    ></iconify-icon>`;
   }
 
   render_switch() {
@@ -304,30 +328,29 @@ class ActionRenderer {
   render_light() {
     if (!this.entity) return;
     return [
-      html`<div class='entity'>
-      ${this._switch(this.entity)}
-      ${this.entity.brightness
-        ? this._range(
-            this.entity,
-            "turn_on",
-            "brightness",
-            this.entity.brightness,
-            0,
-            255,
-            1
-          )
-        : ""}
-      ${this.entity.effects?.filter((v) => v != "None").length
-        ? this._select(
-            this.entity,
-            "turn_on",
-            "effect",
-            this.entity.effects || [],
-            this.entity.effect
-          )
-        : ""}
-      </div>
-      `
+      html`<div class="entity">
+        ${this._switch(this.entity)}
+        ${this.entity.brightness
+          ? this._range(
+              this.entity,
+              "turn_on",
+              "brightness",
+              this.entity.brightness,
+              0,
+              255,
+              1
+            )
+          : ""}
+        ${this.entity.effects?.filter((v) => v != "None").length
+          ? this._select(
+              this.entity,
+              "turn_on",
+              "effect",
+              this.entity.effects || [],
+              this.entity.effect
+            )
+          : ""}
+      </div> `,
     ];
   }
 
