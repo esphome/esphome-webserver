@@ -20,6 +20,8 @@ interface entityConfig {
   option?: string[];
   assumed_state?: boolean;
   brightness?: number;
+  color_mode?: string;
+  color: object;
   target_temperature?: number;
   target_temperature_low?: number;
   target_temperature_high?: number;
@@ -62,7 +64,11 @@ export class EntityTable extends LitElement implements RestAction {
 
   private _actionRenderer = new ActionRenderer();
   private _basePath = getBasePath();
-  private static ENTITY_CATEGORIES = ["Sensor and Control", "Configuration", "Diagnostic"];
+  private static ENTITY_CATEGORIES = [
+    "Sensor and Control",
+    "Configuration",
+    "Diagnostic",
+  ];
 
   connectedCallback() {
     super.connectedCallback();
@@ -78,15 +84,22 @@ export class EntityTable extends LitElement implements RestAction {
           domain: parts[0],
           unique_id: data.id,
           id: parts.slice(1).join("-"),
-          entity_category: data.entity_category
+          entity_category: data.entity_category,
         } as entityConfig;
         entity.has_action = this.hasAction(entity);
         if (entity.has_action) {
           this.has_controls = true;
         }
         this.entities.push(entity);
-        this.entities.sort((a, b) => (a.entity_category < b.entity_category) ? -1 : 
-            (a.entity_category == b.entity_category ? (a.name < b.name ? -1 : 1) : 1));
+        this.entities.sort((a, b) =>
+          a.entity_category < b.entity_category
+            ? -1
+            : a.entity_category == b.entity_category
+            ? a.name < b.name
+              ? -1
+              : 1
+            : 1
+        );
         this.requestUpdate();
       } else {
         delete data.id;
@@ -120,33 +133,47 @@ export class EntityTable extends LitElement implements RestAction {
   }
 
   render() {
-    const elems = Object.entries(Object.groupBy(this.entities, (e)=>e.entity_category));
+    function groupBy(xs:Array<any>, key:string): Map<string, Array<any>> {
+      return xs.reduce(function(rv, x) {
+        (rv.get(x[key]) || (() => { let tmp:Array<string>=[]; rv.set(x[key], tmp); return tmp; })()).push(x);
+        return rv;
+      }, new Map<string, Array<any>>());
+    };
+    const map = groupBy(this.entities, "entity_category");
+    const elems = Array.from(map, ([name, value]) => ({ name, value }));
     return html`
       <div>
         <div class="entities">
           ${elems.map(
             (group) => html`
-              ${(elems.length>1?html`<div class="category-row"><div>${EntityTable.ENTITY_CATEGORIES[parseInt(group[0])]}</div>`:'')}
-              ${group[1].map((component) => html`
-              <div class="entity-row">
-                <div>
-                  ${component.icon
-                    ? html`<iconify-icon
-                        icon="${component.icon}"
-                        height="24px"
-                      ></iconify-icon>`
-                    : nothing}
-                </div>
-                <div>
-                  ${component.name}
-                </div>
-                <div>
-                  ${this.has_controls && component.has_action
-                    ? this.control(component)
-                    : html`<div>${component.state}</div>`}
-                </div>
-              </div>
-              `
+              ${
+                elems.length > 1
+                  ? html`<div class="category-row">
+                      <div>
+                        ${EntityTable.ENTITY_CATEGORIES[parseInt(group.name)]}
+                      </div>
+                    </div>`
+                  : ""
+              }
+              ${group.value.map(
+                (component) => html`
+                  <div class="entity-row">
+                    <div>
+                      ${component.icon
+                        ? html`<iconify-icon
+                            icon="${component.icon}"
+                            height="24px"
+                          ></iconify-icon>`
+                        : nothing}
+                    </div>
+                    <div>${component.name}</div>
+                    <div>
+                      ${this.has_controls && component.has_action
+                        ? this.control(component)
+                        : html`<div>${component.state}</div>`}
+                    </div>
+                  </div>
+                `
               )}
             </div>
             `
@@ -210,7 +237,7 @@ class ActionRenderer {
   ) {
     return html`<select
       @change="${(e: Event) => {
-        let val = e.target?.value;
+        const val = (<HTMLTextAreaElement>e.target)?.value;
         this.actioner?.restAction(
           entity,
           `${action}?${opt}=${encodeURIComponent(val)}`
@@ -248,14 +275,13 @@ class ActionRenderer {
         max="${max || Math.max(10, value as number)}"
         value="${value!}"
         @change="${(e: Event) => {
-          let val = e.target?.value;
+          const val = (<HTMLTextAreaElement>e.target)?.value;
           this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
         }}"
       />
       <label>${max || 100}</label>
     </div>`;
   }
-
 
   private _textinput(
     entity: entityConfig,
@@ -276,11 +302,43 @@ class ActionRenderer {
         pattern="${pattern || ""}"
         value="${value!}"
         @change="${(e: Event) => {
-          let val = e.target?.value;
+          const val = (<HTMLTextAreaElement>e.target)?.value;
           this.actioner?.restAction(
             entity,
             `${action}?${opt}=${encodeURIComponent(val)}`
           );
+        }}"
+      />
+    </div>`;
+  }
+
+  private _colorpicker(entity: entityConfig, action: string, value: any) {
+    function u16tohex(d: number) {
+      return Number(d).toString(16).padStart(2, "0");
+    }
+    // function relativeLuminance(rgbarray: Array<number>) {
+    //   return Math.round(
+    //     (rgbarray[0] * 299 + rgbarray[1] * 587 + rgbarray[2] * 114) / 1000
+    //   );
+    // }
+    function rgb_to_str(rgbhex: string) {
+      const rgb = rgbhex
+        .match(/[0-9a-f]{2}/gi)
+        ?.map((x) => parseInt(x, 16)) || [0, 0, 0];
+      //let brightness = relativeLuminance(rgb);
+      //return `r=${rgb[0]}&g=${rgb[1]}&b=${rgb[2]}&brightness=${brightness}`;
+      return `r=${rgb[0]}&g=${rgb[1]}&b=${rgb[2]}`;
+    }
+
+    return html`<div class="colorpicker">
+      <input
+        type="color"
+        name="${entity.unique_id}"
+        id="${entity.unique_id}"
+        value="#${u16tohex(value?.r)}${u16tohex(value?.g)}${u16tohex(value?.b)}"
+        @change="${(e: Event) => {
+          const val = (<HTMLTextAreaElement>e.target)?.value;
+          this.actioner?.restAction(entity, `${action}?${rgb_to_str(val)}`);
         }}"
       />
     </div>`;
@@ -340,6 +398,9 @@ class ActionRenderer {
               255,
               1
             )
+          : ""}
+        ${this.entity.color_mode === "rgb"
+          ? this._colorpicker(this.entity, "turn_on", this.entity?.color)
           : ""}
         ${this.entity.effects?.filter((v) => v != "None").length
           ? this._select(
@@ -406,7 +467,7 @@ class ActionRenderer {
       this.entity.value,
       this.entity.min_length,
       this.entity.max_length,
-      this.entity.pattern,
+      this.entity.pattern
     );
   }
 

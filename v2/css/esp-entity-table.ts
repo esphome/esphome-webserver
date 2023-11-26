@@ -83,4 +83,8 @@ export default css`
   .binary_sensor_off {
     color: rgba(127,127,127,0.7);
   }
+
+  input[type="color"]::-webkit-color-swatch-wrapper {
+    padding: 0 !important;
+  }
 `;
