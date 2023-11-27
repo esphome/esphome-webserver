@@ -1,6 +1,6 @@
 import { LitElement, html, css, PropertyValues, nothing } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
-import { classMap } from 'lit-html/directives/class-map.js';
+import { classMap } from "lit-html/directives/class-map.js";
 import { getBasePath } from "./esp-entity-table";
 
 import "./esp-entity-table";
@@ -9,7 +9,7 @@ import "./esp-switch";
 import "./esp-logo";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
-import Iconify from '@iconify/iconify';
+import cssApp from "./css/app";
 
 window.source = new EventSource(getBasePath() + "/events");
 
@@ -23,22 +23,25 @@ interface Config {
 function getRelativeTime(diff: number) {
   const mark = Math.sign(diff);
 
-  if (diff === 0) return new Intl.RelativeTimeFormat('en').format(0, 'second');
+  if (diff === 0) return new Intl.RelativeTimeFormat("en").format(0, "second");
 
   const times = [
-    { type: 'year', seconds: 12 * 30 * 24 * 60 * 60 * 1000 },
-    { type: 'month', seconds: 30 * 24 * 60 * 60 * 1000 },
-    { type: 'week', seconds: 7 * 24 * 60 * 60 * 1000 },
-    { type: 'day', seconds: 24 * 60 * 60 * 1000 },
-    { type: 'hour', seconds: 60 * 60 * 1000 },
-    { type: 'minute', seconds: 60 * 1000 },
-    { type: 'second', seconds: 1000 },
+    { type: "year", seconds: 12 * 30 * 24 * 60 * 60 * 1000 },
+    { type: "month", seconds: 30 * 24 * 60 * 60 * 1000 },
+    { type: "week", seconds: 7 * 24 * 60 * 60 * 1000 },
+    { type: "day", seconds: 24 * 60 * 60 * 1000 },
+    { type: "hour", seconds: 60 * 60 * 1000 },
+    { type: "minute", seconds: 60 * 1000 },
+    { type: "second", seconds: 1000 },
   ];
 
   for (let t of times) {
     const segment = Math.round(Math.abs(diff / t.seconds));
     if (segment > 0)
-      return new Intl.RelativeTimeFormat('en').format(segment * mark, t.type as Intl.RelativeTimeFormatUnit);
+      return new Intl.RelativeTimeFormat("en").format(
+        segment * mark,
+        t.type as Intl.RelativeTimeFormatUnit
+      );
   }
 }
 
@@ -64,8 +67,8 @@ export default class EspApp extends LitElement {
 
   constructor() {
     super();
-    const conf = document.querySelector('script#config');
-    if ( conf ) this.setConfig(JSON.parse(conf.innerText));
+    const conf = document.querySelector("script#config");
+    if (conf) this.setConfig(JSON.parse(conf.innerText));
   }
 
   setConfig(config: any) {
@@ -103,7 +106,7 @@ export default class EspApp extends LitElement {
       //console.log("Lost event stream!")
       this.ping = 0;
       this.requestUpdate();
-    })
+    });
     window.addEventListener("toggle-entitites-visible", (e: Event) => {
       this.entities_visible = !this.entities_visible;
     });
@@ -147,7 +150,6 @@ export default class EspApp extends LitElement {
     }
   }
 
-  
   renderLog() {
     return this.config.log
       ? html`<section class="col"><esp-log rows="50"></esp-log></section>`
@@ -177,24 +179,40 @@ export default class EspApp extends LitElement {
   renderTitle() {
     return html`
       <h1>${this.config.title}</h1>
-      <div>${[this.config.comment, `started ${this.uptime()}`].filter(n=>n).join(' · ')}</div>
+      <div>
+        ${[this.config.comment, `started ${this.uptime()}`]
+          .filter((n) => n)
+          .map((e) => `${e}`)
+          .join(" · ")}
+      </div>
     `;
   }
 
   render() {
     return html`
       <header>
-        <a href="https://esphome.io/web-api" class="logo" title="${this.version}">
+        <a
+          href="https://esphome.io/web-api"
+          class="logo"
+          title="${this.version}"
+        >
           <esp-logo></esp-logo>
         </a>
-        <span id="beat" title="${this.version}" class="${classMap({disconnected:!this.ping})}">❤</span>
+        <span
+          id="beat"
+          title="${this.version}"
+          class="${classMap({ disconnected: !this.ping })}"
+          >❤</span
+        >
         ${this.renderTitle()}
       </header>
       <main class="flex-grid-half">
-        <section id="col_entities" class="col ${!this.entities_visible?'entities_hidden':''}">
+        <section
+          id="col_entities"
+          class="col ${!this.entities_visible ? "entities_hidden" : ""}"
+        >
           <esp-entity-table></esp-entity-table>
-          ${this.renderScheme()}
-          ${this.ota()}
+          ${this.renderScheme()} ${this.ota()}
         </section>
         ${this.renderLog()}
       </main>
@@ -202,75 +220,6 @@ export default class EspApp extends LitElement {
   }
 
   static get styles() {
-    return [
-      cssReset,
-      cssButton,
-      css`
-      .flex-grid-half {
-        display: grid;
-        grid-template-columns: 500px 2fr;
-        // grid-auto-rows: 1fr;
-      }
-      .flex-grid-half .col {
-          margin: 8px;
-        }
-        .flex-grid-half .col:nth-child(2) {
-          overflow: hidden;
-        }
-        .entities_hidden {
-          display: none;
-        }
-
-        @media (max-width: 1024px) {
-          .flex-grid,
-          .flex-grid-half {
-            display: block;
-          }
-          .col {
-            width: 100% !important;
-            margin: 0 0 10px 0;
-          }
-          .toggled_entities_hidden {
-            display: inherit;
-          }
-        }
-
-        * {
-          box-sizing: border-box;
-        }
-        .flex-grid {
-          margin: 0 0 20px 0;
-        }
-        h1 {
-          text-align: center;
-          width: 100%;
-          line-height: 4rem;
-        }
-        h1,
-        h2 {
-          border-bottom: 1px solid #eaecef;
-          margin-bottom: 0.25rem;
-        }
-        header div {
-          text-align: center;
-          width: 100%;
-        }
-        #beat {
-          float: right;
-          font-size: 3rem;
-        }
-        #beat.disconnected {
-          color: #333;
-        }
-        a.logo {
-          height: 4rem;
-          float: left;
-          color: inherit;
-        }
-        .right {
-          float: right;
-        }
-      `,
-    ];
+    return [cssReset, cssButton, cssApp];
   }
 }
