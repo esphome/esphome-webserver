@@ -4,16 +4,12 @@ export default css`
   .flex-grid-half {
     display: grid;
     grid-template-columns: 500px 2fr;
-    // grid-auto-rows: 1fr;
   }
   .flex-grid-half .col {
     margin: 8px;
   }
   .flex-grid-half .col:nth-child(2) {
     overflow: hidden;
-  }
-  .entities_hidden {
-    display: none;
   }
 
   @media (max-width: 1024px) {
@@ -24,9 +20,6 @@ export default css`
     .flex-grid-half .col {
       width: 100% !important;
       margin: 0 0 10px 0 !important;
-    }
-    .toggled_entities_hidden {
-      display: inherit;
     }
   }
 

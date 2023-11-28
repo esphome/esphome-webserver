@@ -46,15 +46,10 @@ export class DebugLog extends LitElement {
     });
   }
 
-  _handleClick() {
-    const event = new Event('toggle-entitites-visible', {bubbles: true, composed: true});
-    this.dispatchEvent(event);    
-  }
-
   render() {
     return html`
       <div class="logs">
-        <div class='thead trow' @click="${this._handleClick}">
+        <div class='thead trow'>
             <div>Time</div>
             <div>Level</div>
             <div>Tag</div>
@@ -150,6 +145,11 @@ export class DebugLog extends LitElement {
         font-size: 14px;
         padding: 16px;
     }
+    @media (max-width: 1024px) {
+      .trow > div:nth-child(2) {
+        display: none !important;
+      }
+    }  
     `;
   }
 }
