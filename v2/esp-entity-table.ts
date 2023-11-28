@@ -274,7 +274,7 @@ class ActionRenderer {
         step="${step || 1}"
         min="${min || Math.min(0, value as number)}"
         max="${max || Math.max(10, value as number)}"
-        value="${value!}"
+        .value="${value!}"
         @change="${(e: Event) => {
           const val = (<HTMLTextAreaElement>e.target)?.value;
           this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
