@@ -49,7 +49,6 @@ function getRelativeTime(diff: number) {
 export default class EspApp extends LitElement {
   @state() scheme: string = "";
   @state() ping: string = "";
-  @state() entities_visible: boolean = true;
   @query("#beat")
   beat!: HTMLSpanElement;
   lastUpdate: number = 0;
@@ -107,9 +106,6 @@ export default class EspApp extends LitElement {
       this.ping = 0;
       this.requestUpdate();
     });
-    window.addEventListener("toggle-entitites-visible", (e: Event) => {
-      this.entities_visible = !this.entities_visible;
-    });
   }
 
   isDark() {
@@ -124,9 +120,6 @@ export default class EspApp extends LitElement {
     }
     if (changedProperties.has("ping")) {
       if (!!this.ping) this.beat.animate(this.frames, 1000);
-    }
-    if (changedProperties.has("toggle-entitites-visible")) {
-      this.requestUpdate();
     }
   }
 
@@ -209,7 +202,7 @@ export default class EspApp extends LitElement {
       <main class="flex-grid-half">
         <section
           id="col_entities"
-          class="col ${!this.entities_visible ? "entities_hidden" : ""}"
+          class="col"
         >
           <esp-entity-table></esp-entity-table>
           ${this.renderScheme()} ${this.ota()}
