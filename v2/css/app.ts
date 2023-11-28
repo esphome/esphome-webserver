@@ -51,8 +51,8 @@ export default css`
   }
   #beat {
     float: right;
-    font-size: 3rem;
-    top: -0.3em;
+    font-size: 2.5rem;
+    top: -0.25em;
     position: relative;    
   }
   #beat.disconnected {
