@@ -49,7 +49,8 @@ export const stateOff = "OFF";
 
 export function getBasePath() {
   const url = new URL(window.location);
-  url.hostname = window.location.search.replace("?", "") || url.hostname;
+  // testing purposes
+  // url.hostname = window.location.search.replace("?", "") || url.hostname;
   return `${url.protocol}//${url.hostname}`;
 }
 
@@ -316,17 +317,10 @@ class ActionRenderer {
     function u16tohex(d: number) {
       return Number(d).toString(16).padStart(2, "0");
     }
-    // function relativeLuminance(rgbarray: Array<number>) {
-    //   return Math.round(
-    //     (rgbarray[0] * 299 + rgbarray[1] * 587 + rgbarray[2] * 114) / 1000
-    //   );
-    // }
     function rgb_to_str(rgbhex: string) {
       const rgb = rgbhex
         .match(/[0-9a-f]{2}/gi)
         ?.map((x) => parseInt(x, 16)) || [0, 0, 0];
-      //let brightness = relativeLuminance(rgb);
-      //return `r=${rgb[0]}&g=${rgb[1]}&b=${rgb[2]}&brightness=${brightness}`;
       return `r=${rgb[0]}&g=${rgb[1]}&b=${rgb[2]}`;
     }
 

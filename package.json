@@ -8,9 +8,7 @@
     "dev": "vite",
     "build": "vite build && npm run deploy",
     "serve": "vite preview",
-    "deploy": "npm run deploy-v2",
-    "deploy-v2": "bash -c './scripts/make_header.sh ./_static/v2 server_index.h web_server'",
-    "deploy-v2fallback": "bash -c 'cp ./v2fallback/index_fallback.html.gz ./_static/v2' && bash -c './scripts/make_header.sh _static/v2 server_index_fallback.h web_server index_fallback.html.gz'",
+    "deploy": "bash -c './scripts/make_header.sh _static/v2 server_index.h web_server'",
     "build-v1": ""
   },
   "dependencies": {
