@@ -15,7 +15,7 @@ export default css`
     width: calc(100% - 3rem);
     height: 0.75rem;
   }
-  .range, .text {
+  .range {
     text-align: center;
   }
   div.entities {
@@ -65,7 +65,6 @@ export default css`
   }
   div.entity-row > div:nth-child(3) {
     flex: 1 1 50%;
-    margin-left: 16px;
     margin-right: 8px;
     text-align: right;
     display: flex;
