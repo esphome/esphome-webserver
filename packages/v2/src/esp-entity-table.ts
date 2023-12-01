@@ -50,7 +50,7 @@ export const stateOff = "OFF";
 export function getBasePath() {
   const url = new URL(window.location);
   // testing purposes
-  // url.hostname = window.location.search.replace("?", "") || url.hostname;
+  url.hostname = window.location.search.replace("?", "") || url.hostname;
   return `${url.protocol}//${url.hostname}`;
 }
 
@@ -293,7 +293,7 @@ class ActionRenderer {
     max: number | undefined,
     pattern: string | undefined
   ) {
-    return html`<div class="text">
+    return html`
       <input
         type="${entity.mode == 1 ? "password" : "text"}"
         name="${entity.unique_id}"
@@ -310,7 +310,7 @@ class ActionRenderer {
           );
         }}"
       />
-    </div>`;
+    `;
   }
 
   private _colorpicker(entity: entityConfig, action: string, value: any) {
@@ -393,7 +393,7 @@ class ActionRenderer {
               1
             )
           : ""}
-        ${this.entity.color_mode === "rgb"
+        ${this.entity.color_mode === "rgb" || this.entity.color_mode === "rgbw"
           ? this._colorpicker(this.entity, "turn_on", this.entity?.color)
           : ""}
         ${this.entity.effects?.filter((v) => v != "None").length
