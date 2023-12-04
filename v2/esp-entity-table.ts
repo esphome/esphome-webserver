@@ -50,7 +50,7 @@ export const stateOff = "OFF";
 export function getBasePath() {
   const url = new URL(window.location);
   // testing purposes
-  url.hostname = window.location.search.replace("?", "") || url.hostname;
+  // url.hostname = window.location.search.replace("?", "") || url.hostname;
   return `${url.protocol}//${url.hostname}`;
 }
 
