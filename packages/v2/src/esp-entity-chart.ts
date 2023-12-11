@@ -2,8 +2,6 @@ import { html, css, LitElement, TemplateResult, nothing } from "lit";
 import { customElement, state, property } from "lit/decorators.js";
 import Chart from "chart.js/auto";
 
-const debuglog = false;
-
 @customElement("esp-entity-chart")
 export class ChartElement extends LitElement {
   @property({ type: Array }) chartdata = [];
@@ -14,8 +12,6 @@ export class ChartElement extends LitElement {
   }
 
   updated(changedProperties: Map<string, unknown>) {
-    if (debuglog) console.log("updated>", this.chartdata, changedProperties);
-
     super.updated(changedProperties);
     if (changedProperties.has("chartdata")) {
       this.chartSubComponent.data.datasets[0].data = this.chartdata;
@@ -25,10 +21,7 @@ export class ChartElement extends LitElement {
   }
 
   firstUpdated() {
-    if (debuglog) console.log("firstUpdated", this.chartdata);
     const ctx = this.renderRoot.querySelector("canvas").getContext("2d");
-    if (debuglog) console.log(ctx);
-
     this.chartSubComponent = new Chart(ctx, {
       type: "line",
       data: {
@@ -37,7 +30,7 @@ export class ChartElement extends LitElement {
           {
             data: this.chartdata,
             borderWidth: 1,
-            tension: 0.3
+            tension: 0.3,
           },
         ],
       },
