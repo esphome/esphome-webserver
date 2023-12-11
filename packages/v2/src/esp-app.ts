@@ -199,17 +199,25 @@ export default class EspApp extends LitElement {
         >
         ${this.renderTitle()}
       </header>
-      <main class="flex-grid-half">
-        <section
-          id="col_entities"
-          class="col"
-        >
+      <main class="flex-grid-half" @toggle-layout="${this._handleLayoutToggle}">
+        <section id="col_entities" class="col">
           <esp-entity-table></esp-entity-table>
           ${this.renderScheme()} ${this.ota()}
         </section>
         ${this.renderLog()}
       </main>
     `;
+  }
+
+  _handleLayoutToggle(e: Event) {
+    e.currentTarget?.classList.toggle(
+      "expanded_entity",
+      e.detail === "entity-table" ? undefined : false
+    );
+    e.currentTarget?.classList.toggle(
+      "expanded_logs",
+      e.detail === "logs-table" ? undefined : false
+    );
   }
 
   static get styles() {

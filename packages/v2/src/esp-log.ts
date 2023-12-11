@@ -46,16 +46,27 @@ export class DebugLog extends LitElement {
     });
   }
 
+  _handleClick(e: Event) {
+    if (e?.ctrlKey) {
+      const options = {
+        detail: "logs-table",
+        bubbles: true,
+        composed: true,
+      };
+      this.dispatchEvent(new CustomEvent("toggle-layout", options));
+    }
+  }
+
   render() {
     return html`
-      <div class="logs">
-        <div class='thead trow'>
-            <div>Time</div>
-            <div>Level</div>
-            <div>Tag</div>
-            <div>Message</div>
+      <div class="logs" @click="${this._handleClick}">
+        <div class="thead trow">
+          <div>Time</div>
+          <div>Level</div>
+          <div>Tag</div>
+          <div>Message</div>
         </div>
-        <div class='tbody'>
+        <div class="tbody">
           ${this.logs.map(
             (log: recordConfig) =>
               html`
@@ -76,7 +87,7 @@ export class DebugLog extends LitElement {
     return css`
       .thead,
       .tbody .trow:nth-child(2n) {
-        background-color: rgba(127,127,127,0.05);
+        background-color: rgba(127, 127, 127, 0.05);
       }
       .trow div {
         font-family: monospace;
@@ -140,16 +151,16 @@ export class DebugLog extends LitElement {
         border-radius: 12px;
         border-width: 1px;
         border-style: solid;
-        border-color: rgba(127,127,127,0.12);
+        border-color: rgba(127, 127, 127, 0.12);
         transition: all 0.3s ease-out 0s;
         font-size: 14px;
         padding: 16px;
-    }
-    @media (max-width: 1024px) {
-      .trow > div:nth-child(2) {
-        display: none !important;
       }
-    }  
+      @media (max-width: 1024px) {
+        .trow > div:nth-child(2) {
+          display: none !important;
+        }
+      }
     `;
   }
 }
