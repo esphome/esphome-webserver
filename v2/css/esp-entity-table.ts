@@ -1,6 +1,9 @@
 import { css } from "lit";
 
 export default css`
+  :host {
+    position: relative;
+  }
   select {
     background-color: inherit;
     color: inherit;
@@ -11,7 +14,8 @@ export default css`
     color: currentColor;
     background-color: var(--primary-color, currentColor);
   }
-  input[type="range"], input[type="text"] {
+  input[type="range"],
+  input[type="text"] {
     width: calc(100% - 3rem);
     height: 0.75rem;
   }
@@ -22,15 +26,15 @@ export default css`
     border-radius: 12px;
     border-width: 1px;
     border-style: solid;
-    border-color: rgba(127,127,127,0.12);
+    border-color: rgba(127, 127, 127, 0.12);
     transition: all 0.3s ease-out 0s;
     font-size: 14px;
-    background-color: rgba(127,127,127,0.05);
+    background-color: rgba(127, 127, 127, 0.05);
     padding: 16px;
   }
   div.category-row > div:first-child {
     font-weight: 400;
-    background-color: rgba(127,127,127,0.3);
+    background-color: rgba(127, 127, 127, 0.3);
     min-height: 40px;
     padding-inline: 16px;
     vertical-align: middle;
@@ -44,8 +48,11 @@ export default css`
     transition: all 0.3s ease-out 0s;
     min-height: 40px;
   }
+  div.entity-row.expanded {
+    min-height: 240px;
+  }
   div.entity-row:nth-child(2n) {
-    background-color: rgba(127,127,127,0.05);
+    background-color: rgba(127, 127, 127, 0.05);
     border-radius: 6px;
   }
   div.entity-row iconify-icon {
@@ -75,12 +82,12 @@ export default css`
   }
   div.entity-row > div:nth-child(2) > i {
     margin-right: 0.2rem;
-    color: rgba(127,127,127,0.8);
+    color: rgba(127, 127, 127, 0.8);
     font-size: 80%;
     display: block;
   }
   .binary_sensor_off {
-    color: rgba(127,127,127,0.7);
+    color: rgba(127, 127, 127, 0.7);
   }
 
   input[type="color"]::-webkit-color-swatch-wrapper {

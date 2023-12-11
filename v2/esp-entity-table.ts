@@ -4,6 +4,7 @@ import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssInput from "./css/input";
 import cssEntityTable from "./css/esp-entity-table";
+import "./esp-entity-chart";
 import "iconify-icon";
 
 interface entityConfig {
@@ -42,6 +43,7 @@ interface entityConfig {
   effects?: string[];
   effect?: string;
   has_action?: boolean;
+  value_numeric_history: number[];
 }
 
 export const stateOn = "ON";
@@ -50,7 +52,7 @@ export const stateOff = "OFF";
 export function getBasePath() {
   const url = new URL(window.location);
   // testing purposes
-  // url.hostname = window.location.search.replace("?", "") || url.hostname;
+  url.hostname = window.location.search.replace("?", "") || url.hostname; //!!
   return `${url.protocol}//${url.hostname}`;
 }
 
@@ -86,6 +88,7 @@ export class EntityTable extends LitElement implements RestAction {
           unique_id: data.id,
           id: parts.slice(1).join("-"),
           entity_category: data.entity_category,
+          value_numeric_history: [data.value],
         } as entityConfig;
         entity.has_action = this.hasAction(entity);
         if (entity.has_action) {
@@ -103,6 +106,12 @@ export class EntityTable extends LitElement implements RestAction {
         );
         this.requestUpdate();
       } else {
+        if (typeof data.value === "number") {
+          let history = [...this.entities[idx].value_numeric_history];
+          history.push(data.value);
+          this.entities[idx].value_numeric_history = history.splice(-50);
+        }
+
         delete data.id;
         delete data.domain;
         delete data.unique_id;
@@ -134,16 +143,24 @@ export class EntityTable extends LitElement implements RestAction {
   }
 
   render() {
-    function groupBy(xs:Array<any>, key:string): Map<string, Array<any>> {
-      return xs.reduce(function(rv, x) {
-        (rv.get(x[key]) || (() => { let tmp:Array<string>=[]; rv.set(x[key], tmp); return tmp; })()).push(x);
+    function groupBy(xs: Array<any>, key: string): Map<string, Array<any>> {
+      return xs.reduce(function (rv, x) {
+        (
+          rv.get(x[key]) ||
+          (() => {
+            let tmp: Array<string> = [];
+            rv.set(x[key], tmp);
+            return tmp;
+          })()
+        ).push(x);
         return rv;
       }, new Map<string, Array<any>>());
-    };
-    const map = groupBy(this.entities, "entity_category");
-    const elems = Array.from(map, ([name, value]) => ({ name, value }));
+    }
+
+    const grouped = groupBy(this.entities, "entity_category");
+    const elems = Array.from(grouped, ([name, value]) => ({ name, value }));
     return html`
-      <div>
+      <div @click="${this._handleClick}">
         <div class="entities">
           ${elems.map(
             (group) => html`
@@ -157,8 +174,12 @@ export class EntityTable extends LitElement implements RestAction {
                   : ""
               }
               ${group.value.map(
-                (component) => html`
-                  <div class="entity-row">
+                (component, idx) => html`
+                  <div
+                    class="entity-row"
+                    .domain="${component.domain}"
+                    @click="${this._handleEntityRowClick}"
+                  >
                     <div>
                       ${component.icon
                         ? html`<iconify-icon
@@ -173,6 +194,12 @@ export class EntityTable extends LitElement implements RestAction {
                         ? this.control(component)
                         : html`<div>${component.state}</div>`}
                     </div>
+                    ${component.domain === "sensor"
+                      ? html`<esp-entity-chart
+                          class=""
+                          .chartdata="${component.value_numeric_history}"
+                        ></esp-entity-chart>`
+                      : nothing}
                   </div>
                 `
               )}
@@ -186,6 +213,27 @@ export class EntityTable extends LitElement implements RestAction {
 
   static get styles() {
     return [cssReset, cssButton, cssInput, cssEntityTable];
+  }
+
+  _handleClick(e: Event) {
+    if (e?.ctrlKey) {
+      const options = {
+        detail: "entity-table",
+        bubbles: true,
+        composed: true,
+      };
+      this.dispatchEvent(new CustomEvent("toggle-layout", options));
+    }
+  }
+
+  _handleEntityRowClick(e: any) {
+    if (e?.currentTarget?.domain === "sensor") {
+      if (!e?.ctrlKey) e.stopPropagation();
+      e?.currentTarget?.classList.toggle(
+        "expanded",
+        !e.ctrlKey ? undefined : true
+      );
+    }
   }
 }
 

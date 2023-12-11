@@ -12,6 +12,7 @@
     "build-v1": ""
   },
   "dependencies": {
+    "chart.js": "^4.4.1",
     "http-proxy-middleware": "^2.0.1",
     "iconify-icon": "^1.0.8",
     "lit": "^2.0.2",
