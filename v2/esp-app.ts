@@ -35,14 +35,27 @@ function getRelativeTime(diff: number) {
     { type: "second", seconds: 1000 },
   ];
 
+  let result;
+  const timeformat = new Intl.RelativeTimeFormat("en");
   for (let t of times) {
-    const segment = Math.round(Math.abs(diff / t.seconds));
-    if (segment > 0)
-      return new Intl.RelativeTimeFormat("en").format(
+    const segment = Math.trunc(Math.abs(diff / t.seconds));
+    if (segment > 0) {
+      const part = timeformat.format(
         segment * mark,
         t.type as Intl.RelativeTimeFormatUnit
       );
+      diff -= segment * t.seconds * mark;
+      if (!result) {
+        // remove "ago" from the first segment
+        result = part.replace(" ago", " ");
+      } else {
+        // do not display detail after two segments
+        result += part;
+        break;
+      }
+    }
   }
+  return result;
 }
 
 @customElement("esp-app")
@@ -80,6 +93,13 @@ export default class EspApp extends LitElement {
     document.documentElement.lang = config.lang;
   }
 
+  private _updateUptime(e: MessageEvent) {
+    if (e.lastEventId) {
+      this.ping = e.lastEventId;
+      this.requestUpdate();
+    }
+  }
+
   firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     document.getElementsByTagName("head")[0].innerHTML +=
@@ -91,14 +111,15 @@ export default class EspApp extends LitElement {
       this.scheme = this.isDark();
     });
     this.scheme = this.isDark();
-    window.source.addEventListener("ping", (e: Event) => {
-      const messageEvent = e as MessageEvent;
-      const d: String = messageEvent.data;
-      if (d.length) {
-        this.setConfig(JSON.parse(messageEvent.data));
+    window.source.addEventListener("ping", (e: MessageEvent) => {
+      if (e.data.length) {
+        this.setConfig(JSON.parse(e.data));
+        this.requestUpdate();
       }
-      this.ping = messageEvent.lastEventId;
-      this.requestUpdate();
+      this._updateUptime(e);
+    });
+    window.source.addEventListener("log", (e: MessageEvent) => {
+      this._updateUptime(e);
     });
     window.source.addEventListener("error", (e: Event) => {
       console.dir(e);
