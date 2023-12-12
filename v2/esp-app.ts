@@ -35,8 +35,9 @@ function getRelativeTime(diff: number) {
     { type: "second", seconds: 1000 },
   ];
 
-  let result;
+  let result = "";
   const timeformat = new Intl.RelativeTimeFormat("en");
+  let count = 0;
   for (let t of times) {
     const segment = Math.trunc(Math.abs(diff / t.seconds));
     if (segment > 0) {
@@ -45,14 +46,10 @@ function getRelativeTime(diff: number) {
         t.type as Intl.RelativeTimeFormatUnit
       );
       diff -= segment * t.seconds * mark;
-      if (!result) {
-        // remove "ago" from the first segment
-        result = part.replace(" ago", " ");
-      } else {
-        // do not display detail after two segments
-        result += part;
-        break;
-      }
+      // remove "ago" from the first segment - if not the only one
+      result +=
+        count === 0 && t.type != "second" ? part.replace(" ago", " ") : part;
+      if (count++ >= 1) break; // do not display detail after two segments
     }
   }
   return result;
@@ -93,13 +90,6 @@ export default class EspApp extends LitElement {
     document.documentElement.lang = config.lang;
   }
 
-  private _updateUptime(e: MessageEvent) {
-    if (e.lastEventId) {
-      this.ping = e.lastEventId;
-      this.requestUpdate();
-    }
-  }
-
   firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
     document.getElementsByTagName("head")[0].innerHTML +=
@@ -112,7 +102,7 @@ export default class EspApp extends LitElement {
     });
     this.scheme = this.isDark();
     window.source.addEventListener("ping", (e: MessageEvent) => {
-      if (e.data.length) {
+      if (e.data?.length) {
         this.setConfig(JSON.parse(e.data));
         this.requestUpdate();
       }
@@ -240,6 +230,13 @@ export default class EspApp extends LitElement {
       e.detail === "logs-table" ? undefined : false
     );
   }
+
+  private _updateUptime(e: MessageEvent) {
+    if (e.lastEventId) {
+      this.ping = e.lastEventId;
+      this.requestUpdate();
+    }
+  }  
 
   static get styles() {
     return [cssReset, cssButton, cssApp];
