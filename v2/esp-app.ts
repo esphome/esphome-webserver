@@ -35,14 +35,24 @@ function getRelativeTime(diff: number) {
     { type: "second", seconds: 1000 },
   ];
 
+  let result = "";
+  const timeformat = new Intl.RelativeTimeFormat("en");
+  let count = 0;
   for (let t of times) {
-    const segment = Math.round(Math.abs(diff / t.seconds));
-    if (segment > 0)
-      return new Intl.RelativeTimeFormat("en").format(
+    const segment = Math.trunc(Math.abs(diff / t.seconds));
+    if (segment > 0) {
+      const part = timeformat.format(
         segment * mark,
         t.type as Intl.RelativeTimeFormatUnit
       );
+      diff -= segment * t.seconds * mark;
+      // remove "ago" from the first segment - if not the only one
+      result +=
+        count === 0 && t.type != "second" ? part.replace(" ago", " ") : part;
+      if (count++ >= 1) break; // do not display detail after two segments
+    }
   }
+  return result;
 }
 
 @customElement("esp-app")
@@ -91,14 +101,15 @@ export default class EspApp extends LitElement {
       this.scheme = this.isDark();
     });
     this.scheme = this.isDark();
-    window.source.addEventListener("ping", (e: Event) => {
-      const messageEvent = e as MessageEvent;
-      const d: String = messageEvent.data;
-      if (d.length) {
-        this.setConfig(JSON.parse(messageEvent.data));
+    window.source.addEventListener("ping", (e: MessageEvent) => {
+      if (e.data?.length) {
+        this.setConfig(JSON.parse(e.data));
+        this.requestUpdate();
       }
-      this.ping = messageEvent.lastEventId;
-      this.requestUpdate();
+      this._updateUptime(e);
+    });
+    window.source.addEventListener("log", (e: MessageEvent) => {
+      this._updateUptime(e);
     });
     window.source.addEventListener("error", (e: Event) => {
       console.dir(e);
@@ -200,16 +211,20 @@ export default class EspApp extends LitElement {
         ${this.renderTitle()}
       </header>
       <main class="flex-grid-half">
-        <section
-          id="col_entities"
-          class="col"
-        >
+        <section id="col_entities" class="col">
           <esp-entity-table></esp-entity-table>
           ${this.renderScheme()} ${this.ota()}
         </section>
         ${this.renderLog()}
       </main>
     `;
+  }
+
+  private _updateUptime(e: MessageEvent) {
+    if (e.lastEventId) {
+      this.ping = e.lastEventId;
+      this.requestUpdate();
+    }
   }
 
   static get styles() {
