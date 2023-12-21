@@ -139,8 +139,8 @@ export default class EspApp extends LitElement {
     return `${getRelativeTime(-pingms | 0)}`;
   }
 
-  ota() {
-    if (this.config.ota) {
+  renderOta() {
+    if (!this.config.ota) {
       let basePath = getBasePath();
       return html`<h2>OTA Update</h2>
         <form
@@ -161,23 +161,21 @@ export default class EspApp extends LitElement {
   }
 
   renderScheme() {
-    if (this.config.scheme) {
-      return html`<h2>
-        <esp-switch
-          color="var(--primary-color,currentColor)"
-          class="right"
-          .state="${this.scheme}"
-          @state="${(e: CustomEvent) => (this.scheme = e.detail.state)}"
-          labelOn="🌒"
-          labelOff="☀️"
-          stateOn="dark"
-          stateOff="light"
-          optimistic
-        >
-        </esp-switch>
-        Scheme
-      </h2>`;
-    }
+    return html`<h3>
+      <esp-switch
+        color="var(--primary-color,currentColor)"
+        class="right"
+        .state="${this.scheme}"
+        @state="${(e: CustomEvent) => (this.scheme = e.detail.state)}"
+        labelOn="🌒"
+        labelOff="☀️"
+        stateOn="dark"
+        stateOff="light"
+        optimistic
+      >
+      </esp-switch>
+      Dark scheme
+    </h3>`;
   }
 
   renderTitle() {
@@ -213,7 +211,7 @@ export default class EspApp extends LitElement {
       <main class="flex-grid-half" @toggle-layout="${this._handleLayoutToggle}">
         <section id="col_entities" class="col">
           <esp-entity-table></esp-entity-table>
-          ${this.renderScheme()} ${this.ota()}
+          ${this.renderScheme()} ${this.renderOta()}
         </section>
         ${this.renderLog()}
       </main>
@@ -236,7 +234,7 @@ export default class EspApp extends LitElement {
       this.ping = e.lastEventId;
       this.requestUpdate();
     }
-  }  
+  }
 
   static get styles() {
     return [cssReset, cssButton, cssApp];
