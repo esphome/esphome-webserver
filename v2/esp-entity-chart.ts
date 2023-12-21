@@ -1,6 +1,26 @@
 import { html, css, LitElement, TemplateResult, nothing } from "lit";
 import { customElement, state, property } from "lit/decorators.js";
-import Chart from "chart.js/auto";
+// import Chart from "chart.js/auto";
+
+// import Chart from "chart.js/auto";
+import {
+  Chart,
+  Colors,
+  LineController,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement,
+} from "chart.js";
+
+Chart.register(
+  Colors,
+  LineController,
+  CategoryScale,
+  LinearScale,
+  PointElement,
+  LineElement
+);
 
 @customElement("esp-entity-chart")
 export class ChartElement extends LitElement {
