@@ -44,6 +44,7 @@ interface entityConfig {
   effect?: string;
   has_action?: boolean;
   value_numeric_history: number[];
+  uom?: string;
 }
 
 export const stateOn = "ON";
@@ -51,8 +52,9 @@ export const stateOff = "OFF";
 
 export function getBasePath() {
   const url = new URL(window.location);
-  // testing purposes
-  if (import.meta.env?.DEV) url.hostname = window.location.search.replace("?", "") || url.hostname;
+  // // kept for local testing purposes
+  // if (import.meta.env?.DEV)
+  //   url.hostname = window.location.search.replace("?", "") || url.hostname;
   return `${url.protocol}//${url.hostname}`;
 }
 
@@ -489,15 +491,18 @@ class ActionRenderer {
 
   render_number() {
     if (!this.entity) return;
-    return this._range(
-      this.entity,
-      "set",
-      "value",
-      this.entity.value,
-      this.entity.min_value,
-      this.entity.max_value,
-      this.entity.step
-    );
+    return html`
+      ${this._range(
+        this.entity,
+        "set",
+        "value",
+        this.entity.value,
+        this.entity.min_value,
+        this.entity.max_value,
+        this.entity.step
+      )}
+      ${this.entity.uom}
+    `;
   }
 
   render_text() {
