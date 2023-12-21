@@ -45,6 +45,7 @@ interface entityConfig {
   has_action?: boolean;
   value_numeric_history: number[];
   uom?: string;
+  is_disabled_by_default?: boolean;
 }
 
 export const stateOn = "ON";
@@ -66,6 +67,7 @@ interface RestAction {
 export class EntityTable extends LitElement implements RestAction {
   @state() entities: entityConfig[] = [];
   @state() has_controls: boolean = false;
+  @state() show_all: boolean = false;
 
   private _actionRenderer = new ActionRenderer();
   private _basePath = getBasePath();
@@ -144,6 +146,22 @@ export class EntityTable extends LitElement implements RestAction {
     });
   }
 
+  renderShowAll() {
+    if (
+      !this.show_all &&
+      this.entities.find((elem) => elem.is_disabled_by_default)
+    ) {
+      return html`<div class="singlebutton-row">
+        <button
+          class="abutton"
+          @click="${(e: Event) => (this.show_all = true)}"
+        >
+          Show All
+        </button>
+      </div>`;
+    }
+  }
+
   render() {
     function groupBy(xs: Array<any>, key: string): Map<string, Array<any>> {
       return xs.reduce(function (rv, x) {
@@ -159,7 +177,10 @@ export class EntityTable extends LitElement implements RestAction {
       }, new Map<string, Array<any>>());
     }
 
-    const grouped = groupBy(this.entities, "entity_category");
+    const entities = this.show_all
+      ? this.entities
+      : this.entities.filter((elem) => !elem.is_disabled_by_default);
+    const grouped = groupBy(entities, "entity_category");
     const elems = Array.from(grouped, ([name, value]) => ({ name, value }));
     return html`
       <div @click="${this._handleClick}">
@@ -208,6 +229,7 @@ export class EntityTable extends LitElement implements RestAction {
             </div>
             `
           )}
+          ${this.renderShowAll()}
         </div>
       </div>
     `;
