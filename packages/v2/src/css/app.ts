@@ -40,12 +40,11 @@ export default css`
   .flex-grid {
     margin: 0 0 20px 0;
   }
-  h1,
-  h2 {
+  h1 {
     text-align: center;
     width: 100%;
     line-height: 1.1em;
-    margin-bottom: 0.25em;
+    margin-block: 0.25em;
     padding-bottom: 0.3em;
     border-bottom: 1px solid #eaecef;
   }
@@ -53,21 +52,26 @@ export default css`
     text-align: center;
     width: 100%;
   }
-  #beat {
+  header #logo,
+  header iconify-icon {
     float: right;
     font-size: 2.5rem;
-    top: -0.25em;
-    position: relative;
+    color: rgba(127, 127, 127, 0.5);
   }
-  #beat.disconnected {
-    color: #333;
-  }
-  a.logo {
-    height: 2.5em !important;
+  header #logo {
     float: left;
-    color: inherit;
+    color: rgba(127, 127, 127, 0.5);
   }
-  .right {
-    float: right;
+  form {
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(127, 127, 127, 0.05);
+    border-radius: 12px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(127, 127, 127, 0.12);
+  }
+  form .btn {
+    margin-right: 0px;
   }
 `;

@@ -22,65 +22,45 @@ export default css`
   .range {
     text-align: center;
   }
-  div.entities {
-    border-radius: 12px;
-    border-width: 1px;
-    border-style: solid;
-    border-color: rgba(127, 127, 127, 0.12);
-    transition: all 0.3s ease-out 0s;
-    font-size: 14px;
-    background-color: rgba(127, 127, 127, 0.05);
-    padding: 16px;
-  }
-  div.category-row > div:first-child {
-    font-weight: 400;
-    background-color: rgba(127, 127, 127, 0.3);
-    min-height: 40px;
-    padding-inline: 16px;
-    vertical-align: middle;
-    display: flex;
-    align-items: center;
-  }
-  div.entity-row {
+  .entity-row {
     display: flex;
     align-items: center;
     flex-direction: row;
     transition: all 0.3s ease-out 0s;
     min-height: 40px;
   }
-  div.entity-row.expanded {
+  .entity-row.expanded {
     min-height: 240px;
   }
-  div.entity-row:nth-child(2n) {
-    background-color: rgba(127, 127, 127, 0.05);
-    border-radius: 6px;
+  .entity-row:nth-child(2n) {
+    background-color: rgba(90, 90, 90, 0.1);
   }
-  div.entity-row iconify-icon {
+  .entity-row iconify-icon {
     vertical-align: middle;
   }
-  div.entity-row > div:nth-child(1) {
+  .entity-row > :nth-child(1) {
     flex: 0 0 40px;
     color: #44739e;
     line-height: 40px;
     text-align: center;
   }
-  div.entity-row > div:nth-child(2) {
+  .entity-row > :nth-child(2) {
     flex: 1 1 50%;
     margin-left: 16px;
     margin-right: 8px;
     text-wrap: nowrap;
   }
-  div.entity-row > div:nth-child(3) {
+  .entity-row > :nth-child(3) {
     flex: 1 1 50%;
     margin-right: 8px;
     text-align: right;
     display: flex;
     justify-content: space-between;
   }
-  div.entity-row > div:nth-child(3) > :only-child {
+  .entity-row > :nth-child(3) > :only-child {
     margin-left: auto;
   }
-  div.entity-row > div:nth-child(2) > i {
+  .entity-row > :nth-child(2) > i {
     margin-right: 0.2rem;
     color: rgba(127, 127, 127, 0.8);
     font-size: 80%;

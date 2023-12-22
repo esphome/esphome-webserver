@@ -4,6 +4,7 @@ import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssInput from "./css/input";
 import cssEntityTable from "./css/esp-entity-table";
+import cssTab from "./css/tab";
 import "./esp-entity-chart";
 import "iconify-icon";
 
@@ -53,9 +54,9 @@ export const stateOff = "OFF";
 
 export function getBasePath() {
   const url = new URL(window.location);
-  // // kept for local testing purposes
-  // if (import.meta.env?.DEV)
-  //   url.hostname = window.location.search.replace("?", "") || url.hostname;
+  // kept for local testing purposes
+  if (import.meta.env?.DEV)
+    url.hostname = window.location.search.replace("?", "") || url.hostname;
   return `${url.protocol}//${url.hostname}`;
 }
 
@@ -184,18 +185,12 @@ export class EntityTable extends LitElement implements RestAction {
     const elems = Array.from(grouped, ([name, value]) => ({ name, value }));
     return html`
       <div @click="${this._handleClick}">
-        <div class="entities">
-          ${elems.map(
-            (group) => html`
-              ${
-                elems.length > 1
-                  ? html`<div class="category-row">
-                      <div>
-                        ${EntityTable.ENTITY_CATEGORIES[parseInt(group.name)]}
-                      </div>
-                    </div>`
-                  : ""
-              }
+        ${elems.map(
+          (group) => html`
+            <div class="tab-header">
+              ${EntityTable.ENTITY_CATEGORIES[parseInt(group.name)]}
+            </div>
+            <div class="tab-container">
               ${group.value.map(
                 (component, idx) => html`
                   <div
@@ -227,16 +222,15 @@ export class EntityTable extends LitElement implements RestAction {
                 `
               )}
             </div>
-            `
-          )}
-          ${this.renderShowAll()}
-        </div>
+          `
+        )}
+        ${this.renderShowAll()}
       </div>
     `;
   }
 
   static get styles() {
-    return [cssReset, cssButton, cssInput, cssEntityTable];
+    return [cssReset, cssButton, cssInput, cssEntityTable, cssTab];
   }
 
   _handleClick(e: Event) {
