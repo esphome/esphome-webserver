@@ -45,8 +45,6 @@ export default css`
     width: 100%;
     line-height: 1.1em;
     margin-block: 0.25em;
-    padding-bottom: 0.3em;
-    border-bottom: 1px solid #eaecef;
   }
   header div {
     text-align: center;
@@ -61,6 +59,11 @@ export default css`
   header #logo {
     float: left;
     color: rgba(127, 127, 127, 0.5);
+  }
+  esp-logo {
+    float: left;
+    line-height: 1em;
+    font-size: initial;
   }
   form {
     display: flex;
