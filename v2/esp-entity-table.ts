@@ -214,7 +214,6 @@ export class EntityTable extends LitElement implements RestAction {
                     </div>
                     ${component.domain === "sensor"
                       ? html`<esp-entity-chart
-                          class=""
                           .chartdata="${component.value_numeric_history}"
                         ></esp-entity-chart>`
                       : nothing}

@@ -28,6 +28,7 @@ export default css`
     flex-direction: row;
     transition: all 0.3s ease-out 0s;
     min-height: 40px;
+    position: relative;
   }
   .entity-row.expanded {
     min-height: 240px;
@@ -60,16 +61,10 @@ export default css`
   .entity-row > :nth-child(3) > :only-child {
     margin-left: auto;
   }
-  .entity-row > :nth-child(2) > i {
-    margin-right: 0.2rem;
-    color: rgba(127, 127, 127, 0.8);
-    font-size: 80%;
-    display: block;
-  }
   .binary_sensor_off {
     color: rgba(127, 127, 127, 0.7);
   }
-  div.singlebutton-row button {
+  .singlebutton-row button {
     margin: auto;
     display: flex;
   }
