@@ -1,5 +1,6 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property, state } from "lit/decorators.js";
+import cssTab from "./css/tab";
 
 interface recordConfig {
   type: string;
@@ -12,6 +13,7 @@ interface recordConfig {
 @customElement("esp-log")
 export class DebugLog extends LitElement {
   @property({ type: Number }) rows = 10;
+  @property({ type: String }) scheme = "";
   @state() logs: recordConfig[] = [];
 
   constructor() {
@@ -46,19 +48,36 @@ export class DebugLog extends LitElement {
     });
   }
 
+  _handleClick(e: Event) {
+    if (e?.ctrlKey) {
+      const options = {
+        detail: "logs-table",
+        bubbles: true,
+        composed: true,
+      };
+      this.dispatchEvent(new CustomEvent("toggle-layout", options));
+    }
+  }
+
   render() {
     return html`
-      <div class="logs">
-        <div class='thead trow'>
+      <div class="tab-header">Debug Log</div>
+      <div class="tab-container">
+        <div
+          class="logs"
+          @click="${this._handleClick}"
+          color-scheme="${this.scheme}"
+        >
+          <div class="thead trow">
             <div>Time</div>
             <div>Level</div>
             <div>Tag</div>
             <div>Message</div>
-        </div>
-        <div class='tbody'>
-          ${this.logs.map(
-            (log: recordConfig) =>
-              html`
+          </div>
+          <div class="tbody">
+            ${this.logs.map(
+              (log: recordConfig) =>
+                html`
               <div class="trow ${log.type}">
                 <div>${log.when}</div>
                 <div>${log.level}</div>
@@ -66,90 +85,103 @@ export class DebugLog extends LitElement {
                 <div>${log.detail}</div>
               </td>
             `
-          )}
+            )}
+          </div>
         </div>
       </div>
     `;
   }
 
   static get styles() {
-    return css`
-      .thead,
-      .tbody .trow:nth-child(2n) {
-        background-color: rgba(127,127,127,0.05);
-      }
-      .trow div {
-        font-family: monospace;
-        width: 100%;
-        line-height: 1.2rem;
-      }
-      .trow {
-        display: flex;
-      }
-      .thead {
-        line-height: 1rem;
-      }
-      .thead .trow {
-        text-align: left;
-        padding: 0.25rem 0.5rem;
-      }
-      .trow {
-        display: flex;
-      }
-      .trow > div {
-        align-self: flex-start;
-        padding-right: 0.25em;
-        flex: 2 0;
-        overflow: hidden;
-        text-overflow: ellipsis;
-      }
-      .trow > div:nth-child(2) {
-        flex: 1 0;
-      }
-      .trow > div:nth-child(3) {
-        flex: 3 0;
-      }
-      .trow > div:last-child {
-        flex: 15 0;
-        padding-right: 0em;
-      }
-      pre {
-        margin: 0;
-      }
-      .v div {
-        color: #888888;
-      }
-      .d div {
-        color: #00dddd;
-      }
-      .c div {
-        color: magenta;
-      }
-      .i div {
-        color: limegreen;
-      }
-      .w div {
-        color: yellow;
-      }
-      .e div {
-        color: red;
-        font-weight: bold;
-      }
-      .logs {
-        overflow-x: auto;
-        border-radius: 12px;
-        border-width: 1px;
-        border-style: solid;
-        border-color: rgba(127,127,127,0.12);
-        transition: all 0.3s ease-out 0s;
-        font-size: 14px;
-        padding: 16px;
-    }
-    @media (max-width: 1024px) {
-      .trow > div:nth-child(2) {
-        display: none !important;
-      }
-    }  
-    `;
+    return [
+      cssTab,
+      css`
+        .thead,
+        .tbody .trow:nth-child(2n) {
+          background-color: rgba(127, 127, 127, 0.05);
+        }
+        .trow div {
+          font-family: monospace;
+          width: 100%;
+          line-height: 1.2rem;
+        }
+        .trow {
+          display: flex;
+        }
+        .thead {
+          line-height: 1rem;
+        }
+        .thead .trow {
+          text-align: left;
+          padding: 0.25rem 0.5rem;
+        }
+        .trow {
+          display: flex;
+        }
+        .trow > div {
+          align-self: flex-start;
+          padding-right: 0.25em;
+          flex: 2 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+        .trow > div:nth-child(2) {
+          flex: 1 0;
+        }
+        .trow > div:nth-child(3) {
+          flex: 3 0;
+        }
+        .trow > div:last-child {
+          flex: 15 0;
+          padding-right: 0em;
+        }
+        pre {
+          margin: 0;
+        }
+        .v {
+          color: #888888;
+        }
+        .d {
+          color: #00dddd;
+        }
+        .c {
+          color: magenta;
+        }
+        .i {
+          color: limegreen;
+        }
+        .w {
+          color: yellow;
+        }
+        .e {
+          color: red;
+          font-weight: bold;
+        }
+        .logs[color-scheme="light"] {
+          font-weight: bold;
+        }
+        .logs[color-scheme="light"] .w {
+          color: #cccc00;
+        }
+        .logs[color-scheme="dark"] .d {
+          color: #00aaaa;
+        }
+        .logs {
+          overflow-x: auto;
+          border-radius: 12px;
+          border-width: 1px;
+          border-style: solid;
+          border-color: rgba(127, 127, 127, 0.12);
+          transition: all 0.3s ease-out 0s;
+          font-size: 14px;
+          padding: 16px;
+        }
+        @media (max-width: 1024px) {
+          .trow > div:nth-child(2) {
+            display: none !important;
+          }
+        }
+      `,
+    ];
   }
 }

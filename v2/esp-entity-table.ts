@@ -4,6 +4,8 @@ import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssInput from "./css/input";
 import cssEntityTable from "./css/esp-entity-table";
+import cssTab from "./css/tab";
+import "./esp-entity-chart";
 import "iconify-icon";
 
 interface entityConfig {
@@ -42,6 +44,9 @@ interface entityConfig {
   effects?: string[];
   effect?: string;
   has_action?: boolean;
+  value_numeric_history: number[];
+  uom?: string;
+  is_disabled_by_default?: boolean;
 }
 
 export const stateOn = "ON";
@@ -49,8 +54,9 @@ export const stateOff = "OFF";
 
 export function getBasePath() {
   const url = new URL(window.location);
-  // testing purposes
-  // url.hostname = window.location.search.replace("?", "") || url.hostname;
+  // kept for local testing purposes
+  if (import.meta.env?.DEV)
+    url.hostname = window.location.search.replace("?", "") || url.hostname;
   return `${url.protocol}//${url.hostname}`;
 }
 
@@ -62,6 +68,7 @@ interface RestAction {
 export class EntityTable extends LitElement implements RestAction {
   @state() entities: entityConfig[] = [];
   @state() has_controls: boolean = false;
+  @state() show_all: boolean = false;
 
   private _actionRenderer = new ActionRenderer();
   private _basePath = getBasePath();
@@ -86,6 +93,7 @@ export class EntityTable extends LitElement implements RestAction {
           unique_id: data.id,
           id: parts.slice(1).join("-"),
           entity_category: data.entity_category,
+          value_numeric_history: [data.value],
         } as entityConfig;
         entity.has_action = this.hasAction(entity);
         if (entity.has_action) {
@@ -103,6 +111,12 @@ export class EntityTable extends LitElement implements RestAction {
         );
         this.requestUpdate();
       } else {
+        if (typeof data.value === "number") {
+          let history = [...this.entities[idx].value_numeric_history];
+          history.push(data.value);
+          this.entities[idx].value_numeric_history = history.splice(-50);
+        }
+
         delete data.id;
         delete data.domain;
         delete data.unique_id;
@@ -133,32 +147,57 @@ export class EntityTable extends LitElement implements RestAction {
     });
   }
 
+  renderShowAll() {
+    if (
+      !this.show_all &&
+      this.entities.find((elem) => elem.is_disabled_by_default)
+    ) {
+      return html`<div class="singlebutton-row">
+        <button
+          class="abutton"
+          @click="${(e: Event) => (this.show_all = true)}"
+        >
+          Show All
+        </button>
+      </div>`;
+    }
+  }
+
   render() {
-    function groupBy(xs:Array<any>, key:string): Map<string, Array<any>> {
-      return xs.reduce(function(rv, x) {
-        (rv.get(x[key]) || (() => { let tmp:Array<string>=[]; rv.set(x[key], tmp); return tmp; })()).push(x);
+    function groupBy(xs: Array<any>, key: string): Map<string, Array<any>> {
+      return xs.reduce(function (rv, x) {
+        (
+          rv.get(x[key]) ||
+          (() => {
+            let tmp: Array<string> = [];
+            rv.set(x[key], tmp);
+            return tmp;
+          })()
+        ).push(x);
         return rv;
       }, new Map<string, Array<any>>());
-    };
-    const map = groupBy(this.entities, "entity_category");
-    const elems = Array.from(map, ([name, value]) => ({ name, value }));
+    }
+
+    const entities = this.show_all
+      ? this.entities
+      : this.entities.filter((elem) => !elem.is_disabled_by_default);
+    const grouped = groupBy(entities, "entity_category");
+    const elems = Array.from(grouped, ([name, value]) => ({ name, value }));
     return html`
-      <div>
-        <div class="entities">
-          ${elems.map(
-            (group) => html`
-              ${
-                elems.length > 1
-                  ? html`<div class="category-row">
-                      <div>
-                        ${EntityTable.ENTITY_CATEGORIES[parseInt(group.name)]}
-                      </div>
-                    </div>`
-                  : ""
-              }
+      <div @click="${this._handleClick}">
+        ${elems.map(
+          (group) => html`
+            <div class="tab-header">
+              ${EntityTable.ENTITY_CATEGORIES[parseInt(group.name)]}
+            </div>
+            <div class="tab-container">
               ${group.value.map(
-                (component) => html`
-                  <div class="entity-row">
+                (component, idx) => html`
+                  <div
+                    class="entity-row"
+                    .domain="${component.domain}"
+                    @click="${this._handleEntityRowClick}"
+                  >
                     <div>
                       ${component.icon
                         ? html`<iconify-icon
@@ -173,19 +212,45 @@ export class EntityTable extends LitElement implements RestAction {
                         ? this.control(component)
                         : html`<div>${component.state}</div>`}
                     </div>
+                    ${component.domain === "sensor"
+                      ? html`<esp-entity-chart
+                          .chartdata="${component.value_numeric_history}"
+                        ></esp-entity-chart>`
+                      : nothing}
                   </div>
                 `
               )}
             </div>
-            `
-          )}
-        </div>
+          `
+        )}
+        ${this.renderShowAll()}
       </div>
     `;
   }
 
   static get styles() {
-    return [cssReset, cssButton, cssInput, cssEntityTable];
+    return [cssReset, cssButton, cssInput, cssEntityTable, cssTab];
+  }
+
+  _handleClick(e: Event) {
+    if (e?.ctrlKey) {
+      const options = {
+        detail: "entity-table",
+        bubbles: true,
+        composed: true,
+      };
+      this.dispatchEvent(new CustomEvent("toggle-layout", options));
+    }
+  }
+
+  _handleEntityRowClick(e: any) {
+    if (e?.currentTarget?.domain === "sensor") {
+      if (!e?.ctrlKey) e.stopPropagation();
+      e?.currentTarget?.classList.toggle(
+        "expanded",
+        !e.ctrlKey ? undefined : true
+      );
+    }
   }
 }
 
@@ -441,15 +506,18 @@ class ActionRenderer {
 
   render_number() {
     if (!this.entity) return;
-    return this._range(
-      this.entity,
-      "set",
-      "value",
-      this.entity.value,
-      this.entity.min_value,
-      this.entity.max_value,
-      this.entity.step
-    );
+    return html`
+      ${this._range(
+        this.entity,
+        "set",
+        "value",
+        this.entity.value,
+        this.entity.min_value,
+        this.entity.max_value,
+        this.entity.step
+      )}
+      ${this.entity.uom}
+    `;
   }
 
   render_text() {

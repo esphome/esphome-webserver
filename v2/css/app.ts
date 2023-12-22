@@ -5,11 +5,21 @@ export default css`
     display: grid;
     grid-template-columns: 500px 2fr;
   }
+  .flex-grid-half.expanded_entity,
+  .flex-grid-half.expanded_logs {
+    grid-template-columns: 1fr;
+  }
   .flex-grid-half .col {
     margin: 8px;
   }
   .flex-grid-half .col:nth-child(2) {
     overflow: hidden;
+  }
+  .flex-grid-half.expanded_logs .col:nth-child(1) {
+    display: none;
+  }
+  .flex-grid-half.expanded_entity .col:nth-child(2) {
+    display: none;
   }
 
   @media (max-width: 1024px) {
@@ -20,6 +30,7 @@ export default css`
     .flex-grid-half .col {
       width: 100% !important;
       margin: 0 0 10px 0 !important;
+      display: block !important;
     }
   }
 
@@ -29,34 +40,41 @@ export default css`
   .flex-grid {
     margin: 0 0 20px 0;
   }
-  h1,
-  h2 {
+  h1 {
     text-align: center;
     width: 100%;
     line-height: 1.1em;
-    margin-bottom: 0.25em;
-    padding-bottom: 0.3em;
-    border-bottom: 1px solid #eaecef;
+    margin-block: 0.25em;
   }
   header div {
     text-align: center;
     width: 100%;
   }
-  #beat {
+  header #logo,
+  header iconify-icon {
     float: right;
     font-size: 2.5rem;
-    top: -0.25em;
-    position: relative;    
+    color: rgba(127, 127, 127, 0.5);
   }
-  #beat.disconnected {
-    color: #333;
-  }
-  a.logo {
-    height: 2.5em!important;
+  header #logo {
     float: left;
-    color: inherit;
+    color: rgba(127, 127, 127, 0.5);
   }
-  .right {
-    float: right;
+  esp-logo {
+    float: left;
+    line-height: 1em;
+    font-size: initial;
+  }
+  form {
+    display: flex;
+    justify-content: space-between;
+    background-color: rgba(127, 127, 127, 0.05);
+    border-radius: 12px;
+    border-width: 1px;
+    border-style: solid;
+    border-color: rgba(127, 127, 127, 0.12);
+  }
+  form .btn {
+    margin-right: 0px;
   }
 `;
