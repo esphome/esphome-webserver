@@ -53,11 +53,8 @@ export const stateOn = "ON";
 export const stateOff = "OFF";
 
 export function getBasePath() {
-  const url = new URL(window.location);
-  // kept for local testing purposes
-  if (import.meta.env?.DEV)
-    url.hostname = window.location.search.replace("?", "") || url.hostname;
-  return `${url.protocol}//${url.hostname}`;
+  let str = window.location.pathname;
+  return str.endsWith("/") ? str.slice(0, -1) : str;
 }
 
 interface RestAction {
