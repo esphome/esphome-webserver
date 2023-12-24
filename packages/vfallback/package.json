@@ -1,17 +1,15 @@
 {
-  "name": "@esphome-webserver/v2",
+  "name": "@esphome-webserver/vfallback",
   "scripts": {
     "start": "npm run dev",
     "dev": "vite",
     "xbuild": "vite build --emptyOutDir",
     "build": "vite build --emptyOutDir && npm run deploy",
     "serve": "vite preview",
-    "deploy": "bash -c '../../scripts/make_header.sh ../../_static/v2 server_index.h web_server INDEX_GZ'"
+    "deploy": "bash -c '../../scripts/make_header.sh ../../_static/vfallback server_fallback_index.h web_server INDEX_FALLBACK_GZ'"
   },
   "dependencies": {
-    "chart.js": "^4.4.1",
     "http-proxy-middleware": "^2.0.1",
-    "iconify-icon": "^1.0.8",
     "lit": "^2.0.2",
     "rollup-plugin-copy": "^3.4.0",
     "rollup-plugin-gzip": "^2.5.0",

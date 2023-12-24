@@ -8,7 +8,7 @@ namespace esphome {
 namespace $3 {
 
 EOT
-echo "const uint8_t INDEX_GZ[] PROGMEM = {" >> ./$1/$2
+echo "const uint8_t $4[] PROGMEM = {" >> ./$1/$2
 xxd -cols 19 -i $1/index.html.gz | sed -e '2,$!d' -e 's/^/  /' -e '$d' | sed  -e '$d' | sed -e '$s/$/};/' >> ./$1/$2
 cat <<EOT >> ./$1/$2
 
