@@ -48,26 +48,11 @@ export class DebugLog extends LitElement {
     });
   }
 
-  _handleClick(e: Event) {
-    if (e?.ctrlKey) {
-      const options = {
-        detail: "logs-table",
-        bubbles: true,
-        composed: true,
-      };
-      this.dispatchEvent(new CustomEvent("toggle-layout", options));
-    }
-  }
-
   render() {
     return html`
       <div class="tab-header">Debug Log</div>
       <div class="tab-container">
-        <div
-          class="logs"
-          @click="${this._handleClick}"
-          color-scheme="${this.scheme}"
-        >
+        <div class="logs" color-scheme="${this.scheme}">
           <div class="thead trow">
             <div>Time</div>
             <div>Level</div>

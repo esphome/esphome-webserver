@@ -10,6 +10,7 @@ export default css`
     border-radius: 12px 12px 0px 0px;
     background-color: rgba(127, 127, 127, 0.3);
     margin-top: 1em;
+    user-select: none;
   }
   .tab-container {
     border: 2px solid rgba(127, 127, 127, 0.3);

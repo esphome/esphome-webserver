@@ -158,7 +158,11 @@ export default class EspApp extends LitElement {
 
   renderLog() {
     return this.config.log
-      ? html`<section class="col">
+      ? html`<section
+          id="col_logs"
+          class="col"
+          @dblclick="${this._handleDblClick}"
+        >
           <esp-log rows="50" .scheme="${this.scheme}"></esp-log>
         </section>`
       : nothing;
@@ -203,7 +207,11 @@ export default class EspApp extends LitElement {
         ${this.renderTitle()}
       </header>
       <main class="flex-grid-half" @toggle-layout="${this._handleLayoutToggle}">
-        <section id="col_entities" class="col">
+        <section
+          id="col_entities"
+          class="col"
+          @dblclick="${this._handleDblClick}"
+        >
           <esp-entity-table .scheme="${this.scheme}"></esp-entity-table>
           ${this.renderOta()}
         </section>
@@ -212,14 +220,14 @@ export default class EspApp extends LitElement {
     `;
   }
 
-  _handleLayoutToggle(e: Event) {
-    e.currentTarget?.classList.toggle(
+  private _handleDblClick(e: Event) {
+    e.currentTarget?.parentNode?.classList.toggle(
       "expanded_entity",
-      e.detail === "entity-table" ? undefined : false
+      e.currentTarget?.id === "col_entities" ? undefined : false
     );
-    e.currentTarget?.classList.toggle(
+    e.currentTarget?.parentNode?.classList.toggle(
       "expanded_logs",
-      e.detail === "logs-table" ? undefined : false
+      e.currentTarget?.id === "col_logs" ? undefined : false
     );
   }
 

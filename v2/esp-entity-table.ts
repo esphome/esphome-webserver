@@ -182,7 +182,7 @@ export class EntityTable extends LitElement implements RestAction {
     const grouped = groupBy(entities, "entity_category");
     const elems = Array.from(grouped, ([name, value]) => ({ name, value }));
     return html`
-      <div @click="${this._handleClick}">
+      <div>
         ${elems.map(
           (group) => html`
             <div class="tab-header">
@@ -229,17 +229,6 @@ export class EntityTable extends LitElement implements RestAction {
 
   static get styles() {
     return [cssReset, cssButton, cssInput, cssEntityTable, cssTab];
-  }
-
-  _handleClick(e: Event) {
-    if (e?.ctrlKey) {
-      const options = {
-        detail: "entity-table",
-        bubbles: true,
-        composed: true,
-      };
-      this.dispatchEvent(new CustomEvent("toggle-layout", options));
-    }
   }
 
   _handleEntityRowClick(e: any) {
