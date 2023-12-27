@@ -16,7 +16,7 @@ interface entityConfig {
   detail: string;
   value: string;
   name: string;
-  entity_category: number;
+  entity_category?: number;
   when: string;
   icon?: string;
   option?: string[];
@@ -69,6 +69,7 @@ export class EntityTable extends LitElement implements RestAction {
 
   private _actionRenderer = new ActionRenderer();
   private _basePath = getBasePath();
+  private static ENTITY_UNDEFINED = "States";
   private static ENTITY_CATEGORIES = [
     "Sensor and Control",
     "Configuration",
@@ -185,7 +186,8 @@ export class EntityTable extends LitElement implements RestAction {
         ${elems.map(
           (group) => html`
             <div class="tab-header">
-              ${EntityTable.ENTITY_CATEGORIES[parseInt(group.name)]}
+              ${EntityTable.ENTITY_CATEGORIES[parseInt(group.name)] ||
+              EntityTable.ENTITY_UNDEFINED}
             </div>
             <div class="tab-container">
               ${group.value.map(
