@@ -10,7 +10,7 @@ import copy from "rollup-plugin-copy";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
 
-const proxy_target = "http://nodemcu.local";
+const proxy_target = "http://chicken-coop-light.local";
 
 export default defineConfig({
   clearScreen: false,
