@@ -178,8 +178,7 @@ export class EntityTable extends LitElement implements RestAction {
           background-color: var(--primary-color, currentColor);
         }
         input[type="range"], input[type="text"] {
-          width: calc(100% - 8rem);
-          min-width: 6rem;
+          width: calc(100% - 0.5rem);
           height: 0.75rem;
         }
         .range, .text {
