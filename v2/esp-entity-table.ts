@@ -366,6 +366,39 @@ class ActionRenderer {
     `;
   }
 
+  private _input_datetime(
+    entity: entityConfig,
+    action: string,
+    opt: string,
+    value: string,
+  ) {
+    let type = ""; 
+    if( value.match(/^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}(:\d{2})?$/) ) { // date and time 
+      type = "datetime-local";
+    } else if(value.match(/^\d{4}-\d{2}-\d{2}$/)) { // only date
+      type = "date";
+    } else if( value.match(/^\d{2}:\d{2}(:\d{2})?$/) ) { // only time
+      type = "time";
+    }
+    return html`
+      <input 
+        type="${type}" 
+        name="${entity.unique_id}"
+        id="${entity.unique_id}"
+        value="${value}"
+        @change="${(e: Event) => {
+          const val = (<HTMLTextAreaElement>e.target)?.value;
+          // const timeControl = document.querySelector('input[type="time"]');
+          // timeControl.value = val;
+          this.actioner?.restAction(
+            entity,
+            `${action}?${opt}=${val}`
+          );
+        }}"
+      />
+    `;
+  }
+
   private _colorpicker(entity: entityConfig, action: string, value: any) {
     function u16tohex(d: number) {
       return Number(d).toString(16).padStart(2, "0");
@@ -503,6 +536,19 @@ class ActionRenderer {
         this.entity.min_value,
         this.entity.max_value,
         this.entity.step
+      )}
+      ${this.entity.uom}
+    `;
+  }
+
+  render_input_datetime() {
+    if (!this.entity) return;
+    return html`
+      ${this._input_datetime(
+        this.entity,
+        "set",
+        "value",
+        this.entity.value,
       )}
       ${this.entity.uom}
     `;

@@ -10,7 +10,7 @@ import copy from "rollup-plugin-copy";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
 
-const proxy_target = "http://nodemcu.local";
+const proxy_target = "http://time-picker-test.local/";
 
 export default defineConfig({
   clearScreen: false,
@@ -94,6 +94,7 @@ export default defineConfig({
       "/fan": proxy_target,
       "/lock": proxy_target,
       "/number": proxy_target,
+      "/input_datetime": proxy_target,
       "/climate": proxy_target,
       "/events": proxy_target,
       "/text": proxy_target,
