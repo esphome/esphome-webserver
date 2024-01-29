@@ -366,7 +366,7 @@ class ActionRenderer {
     `;
   }
 
-  private _input_datetime(
+  private _datetime(
     entity: entityConfig,
     action: string,
     opt: string,
@@ -380,6 +380,8 @@ class ActionRenderer {
     } else if( value.match(/^\d{2}:\d{2}(:\d{2})?$/) ) { // only time
       type = "time";
     }
+    console.log("type");
+    console.log(type);
     return html`
       <input 
         type="${type}" 
@@ -541,10 +543,10 @@ class ActionRenderer {
     `;
   }
 
-  render_input_datetime() {
+  render_datetime() {
     if (!this.entity) return;
     return html`
-      ${this._input_datetime(
+      ${this._datetime(
         this.entity,
         "set",
         "value",
