@@ -1,0 +1,6 @@
+{
+  "name": "@esphome-webserver/v1",
+  "scripts": {
+    "build": "mkdir -p ../../_static/v1 && cp ./src/* ../../_static/v1/"
+  }
+}
