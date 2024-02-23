@@ -9,7 +9,7 @@ import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
 
-const proxy_target = "http://nodemcu.local";
+const proxy_target = process.env.PROXY_TARGET || "http://nodemcu.local";
 
 export default defineConfig({
   clearScreen: false,
