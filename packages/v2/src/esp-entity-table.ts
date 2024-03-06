@@ -179,6 +179,7 @@ export class EntityTable extends LitElement implements RestAction {
         }
         input[type="range"], input[type="text"] {
           width: calc(100% - 8rem);
+          min-width: 5rem;
           height: 0.75rem;
         }
         .range, .text {
