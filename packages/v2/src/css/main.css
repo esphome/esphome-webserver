@@ -1,0 +1,284 @@
+
+/* First, declare your dark mode colors */
+:root {
+  --c-bg: #fff;
+  --c-text: #000;
+  --c-primary: #26a69a;
+  --color:0, 100%; 
+  --l:50%; 
+  /* --color-primary: hsl(var(--color),var(--l));
+  https://blog.jim-nielsen.com/2019/generating-shades-of-color-using-css-variables/
+   */
+   --color-primary: #26a69a;
+   
+  --color-primary-darker: hsl(var(--color),calc(var(--l) - 5%));
+  --color-primary-darkest: hsl(var(--color),calc(var(--l) - 10%));
+  --color-text: #5b3e81;
+  --color-text-rgb: 47, 6, 100;
+  --color-primary-lighter: rgba(var(--color-text-rgb), 50%);
+  --color-slider-thingy: 38, 166, 154;
+
+  --primary-color: hsla(323, 18%, 49%, 0.924);
+  --dark-primary-color: #0288d1;
+  --light-primary-color: #b3e5fC;
+  --c-pri-rgb: 3, 169, 244;
+  --c-pri: rgba(var(--c-pri-rgb),100%);
+  --c-pri-l: rgba(var(--c-pri-rgb), 50%);
+  --c-pri-d: hsl(var(--c-pri-rgb),calc(var(--l) - 5%);
+  --color-primary-lighter2: rgba(var(--c-pri), 50%));
+}
+@media (prefers-color-scheme: dark) {
+  :root {
+    --c-bg: #000;
+    --c-text: #fff;
+  }
+}
+
+html {
+  /* color:blanchedalmond */
+}
+
+      
+html[color-scheme="dark"] img {
+  filter: invert(100%);
+}
+
+/* For browsers that don’t support `color-scheme` and therefore
+   don't handle system dark mode for you automatically 
+   (Firefox), handle it for them. */
+@supports not (color-scheme: light dark) {
+  html {
+    background: var(--c-bg);
+    color: var(--c-text);
+  }
+}
+
+/* For browsers that support automatic dark/light mode
+   As well as system colors, set those */
+@supports (color-scheme: light dark)
+  and (background-color: Canvas)
+  and (color: CanvasText) {
+  :root {
+    --c-bg: Canvas;
+    --c-text: ButtonText;
+  }
+}
+
+/* For Safari on iOS. Hacky, but it works. */
+@supports (background-color: -apple-system-control-background)
+  and (color: text) {
+  :root {
+    --c-bg: -apple-system-control-background;
+    --c-text: text;
+  }
+}
+
+html {
+    color-scheme: light dark;
+    font-family: ui-monospace, system-ui, "Helvetica", "Arial Narrow", "Roboto", "Oxygen", "Ubuntu", sans-serif;
+}
+
+html button, html .btn {
+  cursor: pointer;
+  border-radius: 1rem;
+  background-color: inherit;
+  background-image: linear-gradient( 0deg, rgba(127,127,127,0.5) 0%, rgba(127,127,127,0.5) 100%);
+  color:inherit;
+  border: 1px solid rgba(127,127,127,0.5);
+  height: 1.2rem;
+
+
+html * {
+  /* transition: all 750ms !important; */
+  /* transition-property: color-scheme; */
+  transition-property: color;
+    transition-duration: 450ms !important;
+    transition-timing-function: ease !important;
+    transition-delay: 0s !important;
+}
+
+
+/*
+https://developer.mozilla.org/en-US/docs/Web/CSS/color_value#system_colors
+ActiveText
+Text of active links
+
+ButtonBorder
+Base border color of controls
+
+ButtonFace
+Background color of controls
+
+ButtonText
+Foreground color of controls
+
+Canvas
+Background of application content or documents
+
+CanvasText
+Foreground color in application content or documents
+
+Field
+Background of input fields
+
+FieldText
+Text in input fields
+
+GrayText
+Foreground color for disabled items (e.g. a disabled control)
+
+Highlight
+Background of selected items
+
+HighlightText
+Foreground color of selected items
+
+LinkText
+Text of non-active, non-visited links
+
+Mark
+Background of text that has been specially marked (such as by the HTML mark element)
+
+MarkText
+Text that has been specially marked (such as by the HTML mark element)
+
+VisitedText
+Text of visited links
+*/
+
+/*
+https://github.com/Airmime/minstyle.io/blob/master/css/minstyle.io.css
+
+https://mwichary.medium.com/dark-theme-in-a-day-3518dde2955a
+
+
+https://github.com/material-components/material-web/blob/master/docs/theming.md
+
+--mdc-theme-primary	The theme primary color.	 #6200ee
+--mdc-theme-secondary	The theme secondary color.	 #018786
+--mdc-theme-surface	The theme surface color.	 #ffffff
+--mdc-theme-background	The theme background color.	 #ffffff
+--mdc-theme-on-primary	Text and icons on top of a theme primary color background.	 #ffffff
+--mdc-theme-on-secondary	Text and icons on top of a theme secondary color background.	 #ffffff
+--mdc-theme-on-surface	Text and icons on top of a theme surface color background.	 #000000
+
+https://css-tricks.com/system-things/
+
+
+https://blog.jim-nielsen.com/2021/css-system-colors/
+
+*/
+
+/*
+html, :host {
+  --default-bg: #f3f3f3;
+  --default-font-color: rgba(0, 0, 0, 0.85);
+  --mdc-theme-primary: #6200ee;
+}
+
+html[data-theme="dark"] {
+  --default-bg: #25282c;
+  --default-font-color: #ffffff;
+  --mdc-theme-primary: #deccf8;
+}
+
+html[data-theme='dark'] img {
+  filter: invert(100%);
+  background-color: red;
+}
+
+html {
+  color-scheme: dark;
+}
+*/
+
+/* :root {
+  --color:0, 100%; 
+  --l:50%; 
+  
+  --color-primary: hsl(var(--color),var(--l));
+  --color-primary-darker: hsl(var(--color),calc(var(--l) - 5%));
+  --color-primary-darkest: hsl(var(--color),calc(var(--l) - 10%)); 
+} 
+
+:root .button {
+  display:inline-block;
+  padding:10px 20px;
+  cursor:pointer;
+  color: -internal-light-dark(black, white);
+    padding: 1px 6px;
+    border-width: 2px;
+    border-style: outset;
+    border-color: -internal-light-dark(rgb(118, 118, 118), rgb(133, 133, 133));
+}
+
+.button:hover,
+.button:focus {
+  background: var(--color-primary-darker);
+}
+
+.button:active {
+  background: var(--color-primary-darkest);
+}
+
+html.theme-toggle,
+html.theme-toggle *,
+html.theme-toggle *:before,
+html.theme-toggle *:after {
+  transition: all 250ms !important;
+  transition-delay: 0 !important;
+}
+
+
+html {
+  --text-color-normal: #0a244d;
+  --text-color-light: #8cabd9;
+}
+
+html[data-theme='dark'] {
+  --text-color-normal: hsl(210, 10%, 62%);
+  --text-color-light: hsl(210, 15%, 35%);
+  --text-color-richer: hsl(210, 50%, 72%);
+  --text-color-highlight: hsl(25, 70%, 45%);
+}
+html[data-theme='dark'] {
+  --hue: 210;  
+  --accent-hue: 25; 
+  --text-color-normal: hsl(var(--hue), 10%, 62%);
+  --text-color-highlight: hsl(var(--accent-hue), 70%, 45%);
+}
+
+* {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+*:before,
+*:after {
+  -webkit-box-sizing: content-box;
+  -moz-box-sizing: content-box;
+  box-sizing: content-box;
+}
+
+html {
+  box-sizing: border-box;
+}
+
+body {
+  background-color: var(--default-bg);
+  color: var(--default-font-color);
+  -ms-text-size-adjust: 100%;
+  -webkit-text-size-adjust: 100%;
+  font-family: "Helvetica Neue Thin", "Helvetica", "Arial Narrow", "Roboto", "Oxygen", "Ubuntu", sans-serif;
+  font-size: 16px;
+  line-height: 1.5;
+  word-wrap: break-word;
+}
+
+button {
+  cursor: pointer;
+}
+*/
+
+

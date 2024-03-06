@@ -1,5 +1,6 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
+import { stateOn, stateOff } from "./esp-entity-table";
 import cssReset from "./css/reset";
 
 const checkboxID: string = "checkbox-lever";
@@ -9,11 +10,9 @@ export class EspSwitch extends LitElement {
   private checkbox: HTMLInputElement | null = null;
 
   // Use arrays - or slots
-  @property({ type: String }) labelOn = "On";
-  @property({ type: String }) labelOff = "Off";
-  @property({ type: String }) stateOn = "ON";
-  @property({ type: String }) stateOff = "OFF";
-  @property({ type: String }) state = "OFF";
+  @property({ type: String }) stateOn = stateOn;
+  @property({ type: String }) stateOff = stateOff;
+  @property({ type: String }) state = stateOff;
   @property({ type: String }) color = "currentColor";
   @property({ type: Boolean }) disabled = false;
 
@@ -44,7 +43,6 @@ export class EspSwitch extends LitElement {
     return html`
       <div class="sw">
         <label>
-          ${this.labelOff}
           <input
             id="${checkboxID}"
             type="checkbox"
@@ -53,7 +51,6 @@ export class EspSwitch extends LitElement {
             @click="${this.toggle}"
           />
           <span style="color:${this.color}" class="lever"></span>
-          ${this.labelOn}
         </label>
       </div>
     `;
@@ -94,6 +91,10 @@ export class EspSwitch extends LitElement {
           background-color: currentColor;
         }
 
+        input[type="checkbox"]:not(:checked) + .lever:after {
+          background-color: rgba(127, 127, 127, 0.5);
+        }
+
         .lever {
           content: "";
           display: inline-block;
@@ -107,10 +108,8 @@ export class EspSwitch extends LitElement {
           );
           background-color: inherit;
           border-radius: 15px;
-          margin-right: 10px;
           transition: background 0.3s ease;
           vertical-align: middle;
-          margin: 0 16px;
         }
 
         .lever:before,
@@ -147,7 +146,7 @@ export class EspSwitch extends LitElement {
         input[type="checkbox"]:checked:not(:disabled).tabbed:focus
           ~ .lever::before {
           transform: scale(2.4);
-          background-color: currentColor;
+          background-color: rgba(255, 255, 255, 0.9) 0%;
           background-image: linear-gradient(
             0deg,
             rgba(255, 255, 255, 0.9) 0%,

@@ -1,16 +1,18 @@
 {
-  "name": "@esphome-webserver/v2",
-  "version": "2.0.0",
+  "name": "@esphome-webserver/v3",
+  "version": "3.0.0",
   "scripts": {
     "start": "npm run dev",
     "dev": "vite",
     "xbuild": "vite build --emptyOutDir",
     "build": "vite build --emptyOutDir && npm run deploy",
     "serve": "vite preview",
-    "deploy": "bash -c '../../scripts/make_header.sh ../../_static/v2 server_index.h web_server'"
+    "deploy": "bash -c '../../scripts/make_header.sh ../../_static/v3 server_index.h web_server INDEX_GZ'"
   },
   "dependencies": {
+    "chart.js": "^4.4.1",
     "http-proxy-middleware": "^2.0.1",
+    "iconify-icon": "^1.0.8",
     "lit": "^2.0.2"
   },
   "devDependencies": {
