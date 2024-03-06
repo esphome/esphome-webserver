@@ -1,32 +1,13 @@
 {
   "name": "esphome-webserver",
-  "version": "2.0.5",
-  "main": "index.js",
+  "version": "3.0.0",
   "license": "MIT",
+  "workspaces": [
+    "packages/*"
+  ],
   "scripts": {
-    "start": "npm run dev",
-    "dev": "vite",
-    "build": "vite build && npm run deploy",
-    "serve": "vite preview",
-    "deploy": "bash -c './scripts/make_header.sh _static/v2 server_index.h web_server'",
-    "build-v1": ""
-  },
-  "dependencies": {
-    "http-proxy-middleware": "^2.0.1",
-    "lit": "^2.0.2",
-    "rollup-plugin-copy": "^3.4.0",
-    "rollup-plugin-gzip": "^2.5.0",
-    "rollup-plugin-minify-html-template-literals": "^1.2.0",
-    "vite-plugin-html": "^2.1.1",
-    "vite-plugin-package-version": "^1.0.2",
-    "vite-plugin-singlefile": "^0.5.1"
-  },
-  "devDependencies": {
-    "@rollup/plugin-node-resolve": "^13.0.6",
-    "@rollup/plugin-replace": "^3.0.0",
-    "@types/node": "^15.12.1",
-    "rollup-plugin-strip-banner": "^2.0.0",
-    "typescript": "^4.1.3",
-    "vite": "^2.3.6"
+    "build": "npm run build:packages && npm run deploy",
+    "build:packages": "npm run build --workspaces --if-present",
+    "deploy": "npm run deploy --workspaces --if-present"
   }
 }

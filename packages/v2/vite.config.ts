@@ -6,11 +6,10 @@ import { nodeResolve } from "@rollup/plugin-node-resolve";
 import loadVersion from "vite-plugin-package-version";
 import { viteSingleFile } from "vite-plugin-singlefile";
 import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
-import copy from "rollup-plugin-copy";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
 
-const proxy_target = "http://nodemcu.local";
+const proxy_target = process.env.PROXY_TARGET || "http://nodemcu.local";
 
 export default defineConfig({
   clearScreen: false,
@@ -23,7 +22,6 @@ export default defineConfig({
     stripBanner(),
     loadVersion(),
     { ...minifyHTML(), enforce: "pre", apply: "build" },
-    //
     {
       ...ViteMinifyHtml({ removeComments: true }),
       enforce: "post",
@@ -55,19 +53,11 @@ export default defineConfig({
       enforce: "post",
       apply: "build",
     },
-    {
-      ...copy({
-        targets: [{ src: "v1/*", dest: "_static/v1" }],
-        verbose: true,
-      }),
-      enforce: "pre",
-      apply: "build",
-    },
   ],
   build: {
     brotliSize: false,
     // cssCodeSplit: true,
-    outDir: "_static/v2",
+    outDir: "../../_static/v2",
     polyfillModulePreload: false,
     rollupOptions: {
       output: {
