@@ -1,8 +1,5 @@
 import { html, css, LitElement, TemplateResult, nothing } from "lit";
 import { customElement, state, property } from "lit/decorators.js";
-// import Chart from "chart.js/auto";
-
-// import Chart from "chart.js/auto";
 import {
   Chart,
   Colors,
@@ -55,7 +52,6 @@ export class ChartElement extends LitElement {
         ],
       },
       options: {
-        // responsive: true,
         plugins: { legend: { display: false } },
         scales: { x: { display: false }, y: { position: "right" } },
         responsive: true,

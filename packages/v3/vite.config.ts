@@ -58,7 +58,7 @@ export default defineConfig({
   build: {
     brotliSize: false,
     // cssCodeSplit: true,
-    outDir: "../_static/v3",
+    outDir: "../../_static/v3",
     polyfillModulePreload: false,
     rollupOptions: {
       output: {
