@@ -31,8 +31,6 @@ Light scheme on mobile:
 ## Example entry for `config.yaml`:
 
 ```yaml
-# Example config.yaml
-
 web_server:
   port: 80
   css_url: ""
@@ -71,9 +69,9 @@ PROXY_TARGET=http://nodemcu.local npm run build
 PROXY_TARGET=http://nodemcu.local npm run serve
 ```
 
-Alternatively, update this line in `[version]/vite.config.ts` to point to your real device.
+Alternatively, update this line in `packages/[version]/vite.config.ts` to point to your real device.
 ```js
-const proxy_target = "http://nodemcu.local";
+const proxy_target = process.env.PROXY_TARGET || "http://nodemcu.local";
 ```
 
 The json api will POST to the real device and the events are proxied
@@ -84,16 +82,23 @@ build
 cd packages/v2
 npm run build
 ```
-The build files are copied to _static/v2 usually for deployment to https://esphome.io/_static/v2 or your /local/www homeassistant folder
+The build files are copied to _static/v2 usually for deployment to https://oi.esphome.io/v2 or your /local/www Home Assistant folder
 
-If you customise, you can deploy to your local homeassistant /local/www/_static/v2 and use:
+If you customise, you can deploy to your local Home Assistant /local/www/_static/v2 and use:
 
 ```yaml
 web_server:
   port: 80
   version: 2
   js_url: http://homeassistant.local:8123/local/_static/v2/www.js
+```
 
+To use a specific version of a CDN hosted device dashboard, you can use the following override as an example:
+```yaml
+web_server:
+  port: 80
+  version: 3
+  js_url: https://oi.esphome.io/v3/www.js
 ```
 
 serve
