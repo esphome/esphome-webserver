@@ -22,6 +22,7 @@ export default defineConfig({
     stripBanner(),
     loadVersion(),
     { ...minifyHTML(), enforce: "pre", apply: "build" },
+    //
     {
       ...ViteMinifyHtml({ removeComments: true }),
       enforce: "post",
@@ -43,7 +44,7 @@ export default defineConfig({
         additionalFiles: [],
         customCompression: (content) =>
           brotliCompressSync(Buffer.from(content)),
-        fileName: ".br",
+        fileName: ".gz",
       }),
       enforce: "post",
       apply: "build",
@@ -52,12 +53,12 @@ export default defineConfig({
       ...gzipPlugin({ filter: /\.(js|css|html|svg)$/ }),
       enforce: "post",
       apply: "build",
-    },
+    }
   ],
   build: {
     brotliSize: false,
     // cssCodeSplit: true,
-    outDir: "../../_static/v2",
+    outDir: "../../_static/v3",
     polyfillModulePreload: false,
     rollupOptions: {
       output: {
