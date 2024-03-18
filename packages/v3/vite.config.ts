@@ -44,7 +44,7 @@ export default defineConfig({
         additionalFiles: [],
         customCompression: (content) =>
           brotliCompressSync(Buffer.from(content)),
-        fileName: ".gz",
+        fileName: ".br",
       }),
       enforce: "post",
       apply: "build",
