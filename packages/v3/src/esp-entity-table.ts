@@ -313,21 +313,27 @@ class ActionRenderer {
     entity: entityConfig,
     action: string,
     opt: string,
-    value: string | number,
-    min: number | undefined,
-    max: number | undefined,
-    step: number | undefined
+    value: number | string,
+    min?: number,
+    max?: number,
+    step = 1
   ) {
+    const val = Number(value);
+    let stepString = step.toString();
+    let numDecimalPlaces = 0
+    if (stepString.indexOf('.') !== -1) {
+      numDecimalPlaces = stepString.split('.')[1].length;
+    }
     return html`<div class="range">
       <label>${min || 0}</label>
       <input
         type="${entity.mode == 1 ? "number" : "range"}"
         name="${entity.unique_id}"
         id="${entity.unique_id}"
-        step="${step || 1}"
-        min="${min || Math.min(0, value as number)}"
-        max="${max || Math.max(10, value as number)}"
-        .value="${value!}"
+        step="${step}"
+        min="${min || Math.min(0, val)}"
+        max="${max || Math.max(10, val)}"
+        .value="${(val.toFixed(numDecimalPlaces))}"
         @change="${(e: Event) => {
           const val = (<HTMLTextAreaElement>e.target)?.value;
           this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
