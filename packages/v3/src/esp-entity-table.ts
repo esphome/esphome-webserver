@@ -10,6 +10,8 @@ import "iconify-icon";
 
 interface entityConfig {
   unique_id: string;
+  sorting_weight: number;
+  sorting_group: string;
   domain: string;
   id: string;
   state: string;
@@ -98,15 +100,16 @@ export class EntityTable extends LitElement implements RestAction {
           this.has_controls = true;
         }
         this.entities.push(entity);
-        this.entities.sort((a, b) =>
+        this.entities.sort((a, b) =>          
           a.entity_category < b.entity_category
             ? -1
             : a.entity_category == b.entity_category
-            ? a.name < b.name
+            ? a.sorting_weight < b.sorting_weight
               ? -1
               : 1
             : 1
         );
+        
         this.requestUpdate();
       } else {
         if (typeof data.value === "number") {
