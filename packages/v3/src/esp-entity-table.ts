@@ -11,7 +11,6 @@ import "iconify-icon";
 interface entityConfig {
   unique_id: string;
   sorting_weight: number;
-  sorting_group: string;
   domain: string;
   id: string;
   state: string;
