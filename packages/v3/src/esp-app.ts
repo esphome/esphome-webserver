@@ -150,7 +150,7 @@ export default class EspApp extends LitElement {
           enctype="multipart/form-data"
           class="tab-container"
         >
-          <input class="btn" type="file" name="update" />
+          <input class="btn" type="file" name="update" accept="application/octet-stream" />
           <input class="btn" type="submit" value="Update" />
         </form>`;
     }
