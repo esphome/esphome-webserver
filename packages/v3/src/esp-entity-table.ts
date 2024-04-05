@@ -85,6 +85,7 @@ export class EntityTable extends LitElement implements RestAction {
       if (idx === -1 && data.id) {
         // Dynamically add discovered..
         let parts = data.id.split("-");
+        console.log(parts);
         let entity = {
           ...data,
           domain: parts[0],
@@ -97,6 +98,8 @@ export class EntityTable extends LitElement implements RestAction {
         if (entity.has_action) {
           this.has_controls = true;
         }
+        console.log(entity.id);
+
         this.entities.push(entity);
         this.entities.sort((a, b) =>
           a.entity_category < b.entity_category
@@ -271,6 +274,30 @@ class ActionRenderer {
     </button>`;
   }
 
+  private _date(
+    entity: entityConfig,
+    action: string,
+    opt: string,
+    value: string,
+  ) {
+    return html`
+      <input 
+        type="date" 
+        name="${entity.unique_id}"
+        id="${entity.unique_id}"
+        value="${value}"
+        @change="${(e: Event) => {
+          const val = (<HTMLTextAreaElement>e.target)?.value;
+          this.actioner?.restAction(
+            entity,
+            `${action}?${opt}=${val}`
+          );
+        }}"
+      />
+    `;
+  }
+
+
   private _switch(entity: entityConfig) {
     return html`<esp-switch
       color="var(--primary-color,currentColor)"
@@ -405,6 +432,19 @@ class ActionRenderer {
       icon="mdi:checkbox-${isOn ? "marked-circle" : "blank-circle-outline"}"
       height="24px"
     ></iconify-icon>`;
+  }
+
+  render_date() {
+    if (!this.entity) return;
+    return html`
+      ${this._date(
+        this.entity,
+        "set",
+        "value",
+        this.entity.value,
+      )}
+      ${this.entity.uom}
+    `;
   }
 
   render_switch() {
