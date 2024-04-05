@@ -137,17 +137,17 @@ export class EspRangeSlider extends LitElement {
         }
         .range-value span{
           pointer-events: none;
-          padding: 0 5px 0 5px;
-          height: 24px;
-          line-height: 24px;
+          padding: 0 3px 0 3px;
+          height: 19px;
+          line-height: 18px;
           text-align: center;
           background: #03a9f4;
           color: #fff;
-          font-size: 12px;
+          font-size: 11px;
           display: block;
           position: absolute;
           left: 50%;
-          transform: translate(-50%, 0);
+          transform: translate(-50%, +80%);
           border-radius: 6px;
         }
         .range-value span:before{
