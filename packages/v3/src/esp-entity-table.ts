@@ -85,7 +85,6 @@ export class EntityTable extends LitElement implements RestAction {
       if (idx === -1 && data.id) {
         // Dynamically add discovered..
         let parts = data.id.split("-");
-        console.log(parts);
         let entity = {
           ...data,
           domain: parts[0],
@@ -98,7 +97,6 @@ export class EntityTable extends LitElement implements RestAction {
         if (entity.has_action) {
           this.has_controls = true;
         }
-        console.log(entity.id);
 
         this.entities.push(entity);
         this.entities.sort((a, b) =>
