@@ -107,18 +107,25 @@ export class DebugLog extends LitElement {
           align-self: flex-start;
           padding-right: 0.25em;
           flex: 2 0;
-          overflow: hidden;
-          text-overflow: ellipsis;
+          min-width: 70px;
+
         }
         .trow > div:nth-child(2) {
-          flex: 1 0;
+          flex: 1 0;          
+          overflow: hidden;
+          text-overflow: ellipsis;
+          max-width: 40px;
         }
         .trow > div:nth-child(3) {
           flex: 3 0;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         .trow > div:last-child {
           flex: 15 0;
           padding-right: 0em;
+          overflow: hidden;
+          text-overflow: ellipsis;
         }
         pre {
           margin: 0;
