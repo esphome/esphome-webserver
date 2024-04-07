@@ -1,17 +1,19 @@
 import { html, css, LitElement } from "lit";
 import { customElement, property } from "lit/decorators.js";
-import { stateOn, stateOff } from "./esp-entity-table";
 import cssReset from "./css/reset";
 
 const inputRangeID: string = "range";
-const inputRangeTooltipID: string = "rangeValue";
+const currentValueID: string = "rangeValue";
+const pressTimeToShowPopup = 500;
 
 @customElement("esp-range-slider")
 export class EspRangeSlider extends LitElement {
   private inputRange: HTMLInputElement | null = null;
-  private inputRangeTooltip: HTMLInputElement | null = null;
+  private currentValue: HTMLInputElement | null = null;
 
   private numDecimalPlaces: number = 0;
+  private longPressTimer: ReturnType<typeof setTimeout> | null = null;
+  private isPopupInputVisible: boolean = false;
 
   @property({ type: Number }) value = 0;
   @property({ type: Number }) min = 0;
@@ -26,38 +28,141 @@ export class EspRangeSlider extends LitElement {
       inputRangeID
     ) as HTMLInputElement;
 
-    this.inputRangeTooltip = this.shadowRoot?.getElementById(
-      inputRangeTooltipID
+    this.currentValue = this.shadowRoot?.getElementById(
+      currentValueID
     ) as HTMLInputElement;
   
-    const val = Number(this.value);
     let stepString = this.step.toString();
     if (stepString.indexOf('.') !== -1) {
       this.numDecimalPlaces = stepString.split('.')[1].length;
     }
   
-    this.updateTooltip();
+    document.addEventListener('mousedown', (event) => {
+      if(!document.querySelector('.popup-number-input')) {
+        return;
+      }
+      const isClickedOutside = !document.querySelector('.popup-number-input')?.contains(event.target as Node);      
+      if (isClickedOutside && this.isPopupInputVisible) {
+        this.deletePopupInput();
+      }
+    });    
   }  
+  
+  protected updated(): void {
+    this.updateCurrentValueOverlay();
+  }
 
-  updateTooltip(): void {
+  onMouseDownCurrentValue(event: MouseEvent): void {
+    this.longPressTimer = setTimeout(() => {
+      this.showPopupInput(event.pageX, event.pageY);
+    }, pressTimeToShowPopup); 
+  }
+  
+  onMouseUpCurrentValue(event: MouseEvent): void {
+    if (this.longPressTimer && !this.isPopupInputVisible) {
+      clearTimeout(this.longPressTimer);
+      this.longPressTimer = null;
+    }
+  }
+  
+  onTouchStartCurrentValue(event: TouchEvent): void {
+    this.longPressTimer = setTimeout(() => {      
+      this.showPopupInput(event.touches[0].pageX,event.touches[0].pageY);
+    }, pressTimeToShowPopup); 
+  }
+  
+  onTouchEndCurrentValue(event: TouchEvent): void {
+    if (this.longPressTimer && !this.isPopupInputVisible) {
+      clearTimeout(this.longPressTimer);
+      this.longPressTimer = null;
+    }
+  }
+  
+  deletePopupInput(): void {
+    const popupInputElement = document.querySelector('.popup-number-input');
+    if (popupInputElement) {
+      popupInputElement.remove();
+    }
+    this.isPopupInputVisible = false;
+  }
+
+  showPopupInput(x: number, y: number): void {
+    const popupInputElement = document.createElement('input');
+    popupInputElement.type = 'number'; 
+    popupInputElement.value = this.inputRange.value;
+    popupInputElement.min = this.inputRange.min;
+    popupInputElement.max = this.inputRange.max;
+    popupInputElement.step = this.inputRange.step;
+    popupInputElement.classList.add('popup-number-input');
+
+    const styles = `
+    position: absolute;
+    left: ${x}px;
+    top: ${y}px;
+    width: 50px;
+    -webkit-appearance: none;
+    margin: 0;
+    `;  
+    popupInputElement.setAttribute('style', styles);
+    document.body.appendChild(popupInputElement);
+
+    popupInputElement.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+    });
+
+    popupInputElement.addEventListener('change', (ev: Event) =>{
+      let input = ev.target as HTMLInputElement;
+      this.inputRange.value = input?.value;
+
+      var event = new Event('input');    
+      this.inputRange?.dispatchEvent(event);
+      var event = new Event('change');    
+      this.inputRange?.dispatchEvent(event);
+    });
+
+    popupInputElement.addEventListener('keydown', (event) => {
+      if (event.key === 'Enter') {
+        this.deletePopupInput();
+      }
+    });
+
+    popupInputElement.focus();
+    this.isPopupInputVisible = true;
+  }
+
+  updateCurrentValueOverlay(): void {
     const newValueAsPercent = Number( (this.inputRange.value - this.inputRange.min) * 100 / (this.inputRange.max - this.inputRange.min) ),
     newPosition = 10 - (newValueAsPercent * 0.2);
-    this.inputRangeTooltip.innerHTML = `<span>${Number(this.inputRange.value).toFixed(this.numDecimalPlaces)}</span>`;
-    this.inputRangeTooltip.style.left = `calc(${newValueAsPercent}% + (${newPosition}px))`;
+    this.currentValue.innerHTML = `<span>${Number(this.inputRange?.value).toFixed(this.numDecimalPlaces)}</span>`;
+    this.currentValue.style.left = `calc(${newValueAsPercent}% + (${newPosition}px))`;
+
+    const spanTooltip = this.currentValue?.querySelector('span');
+    spanTooltip?.addEventListener('mousedown', this.onMouseDownCurrentValue.bind(this));
+    spanTooltip?.addEventListener('mouseup', this.onMouseUpCurrentValue.bind(this));
+    spanTooltip?.addEventListener('touchstart', this.onTouchStartCurrentValue.bind(this));
+    spanTooltip?.addEventListener('touchend', this.onTouchEndCurrentValue.bind(this));
+
+    spanTooltip?.addEventListener('contextmenu', (event) => {
+      event.preventDefault();
+    });
   }
 
   onInputEvent(ev: Event): void {
-    this.updateTooltip();
+    this.updateCurrentValueOverlay();
   }
 
-  sendState(ev: Event): void {
+  onInputChangeEvent(ev: Event): void {
+    this.sendState(this.inputRange?.value);
+  }
+
+  sendState(value: string|undefined): void {
     let event = new CustomEvent("state", {
       detail: {
-        state: Number(this.inputRange.value),
+        state: value,
         id: this.id,
       },
     });
-    this.dispatchEvent(event);
+    this.dispatchEvent(event); 
   }
 
   render() {
@@ -74,8 +179,8 @@ export class EspRangeSlider extends LitElement {
               min="${this.min || Math.min(0, this.value)}"
               max="${this.max || Math.max(10, this.value)}"
               .value="${(this.value.toFixed(this.numDecimalPlaces))}"
-              @input="${this.updateTooltip}"
-              @change="${this.sendState}"
+              @input="${this.onInputEvent}"
+              @change="${this.onInputChangeEvent}"
             />
         </div>
         <label style="text-align: left;">${this.max || 100}</label>
@@ -136,7 +241,6 @@ export class EspRangeSlider extends LitElement {
           top: -50%;
         }
         .range-value span{
-          pointer-events: none;
           padding: 0 3px 0 3px;
           height: 19px;
           line-height: 18px;
@@ -162,6 +266,7 @@ export class EspRangeSlider extends LitElement {
           left: 50%;
           margin-left: -5px;
           margin-top: -1px;
+          pointer-events: none;
         }
       `,
     ];
