@@ -226,7 +226,7 @@ export class EspRangeSlider extends LitElement {
         }
         .range-wrap{
           display: flex;
-          //position: relative;
+          align-items: center;
         }
         .range-wrap label{
           flex: 1;
