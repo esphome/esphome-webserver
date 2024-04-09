@@ -271,6 +271,30 @@ class ActionRenderer {
     </button>`;
   }
 
+  private _date(
+    entity: entityConfig,
+    action: string,
+    opt: string,
+    value: string,
+  ) {
+    return html`
+      <input 
+        type="date" 
+        name="${entity.unique_id}"
+        id="${entity.unique_id}"
+        value="${value}"
+        @change="${(e: Event) => {
+          const val = (<HTMLTextAreaElement>e.target)?.value;
+          this.actioner?.restAction(
+            entity,
+            `${action}?${opt}=${val}`
+          );
+        }}"
+      />
+    `;
+  }
+
+
   private _switch(entity: entityConfig) {
     return html`<esp-switch
       color="var(--primary-color,currentColor)"
@@ -405,6 +429,19 @@ class ActionRenderer {
       icon="mdi:checkbox-${isOn ? "marked-circle" : "blank-circle-outline"}"
       height="24px"
     ></iconify-icon>`;
+  }
+
+  render_date() {
+    if (!this.entity) return;
+    return html`
+      ${this._date(
+        this.entity,
+        "set",
+        "value",
+        this.entity.value,
+      )}
+      ${this.entity.uom}
+    `;
   }
 
   render_switch() {
