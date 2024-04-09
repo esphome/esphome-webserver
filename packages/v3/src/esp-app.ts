@@ -5,6 +5,7 @@ import { getBasePath } from "./esp-entity-table";
 import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
+import "./esp-range-slider";
 import "./esp-logo";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
