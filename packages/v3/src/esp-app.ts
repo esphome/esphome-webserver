@@ -70,7 +70,7 @@ export default class EspApp extends LitElement {
 
   darkQuery: MediaQueryList = window.matchMedia("(prefers-color-scheme: dark)");
 
-  frames = [{}, { color: "red", transform: "scale(1.25)" }, {}];
+  frames = [{}, { color: "rgba(0, 196, 21, 0.75)" }, {}];
 
   constructor() {
     super();
@@ -188,9 +188,9 @@ export default class EspApp extends LitElement {
           <esp-logo></esp-logo>
         </a>
         <iconify-icon
-          .icon="${!!this.connected ? "mdi:heart" : "mdi:heart-off"}"
+          .icon="${!!this.connected ? "mdi:circle" : "mdi:circle-off-outline"}"
           .title="${this.uptime()}"
-          class="top-icon"
+          class="top-icon ${!!this.connected ? "connected" : ""}"
           id="beat"
         ></iconify-icon>
         <a

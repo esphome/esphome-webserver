@@ -60,6 +60,9 @@ export default css`
     float: left;
     color: rgba(127, 127, 127, 0.5);
   }
+  .connected {
+    color: rgba(0, 157, 16, 0.75);
+  }
   esp-logo {
     float: left;
     line-height: 1em;
