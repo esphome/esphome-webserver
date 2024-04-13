@@ -30,7 +30,6 @@ export class EspRangeSlider extends LitElement {
     this.currentValue = this.shadowRoot?.getElementById(
       currentValueID
     ) as HTMLInputElement;
-
     document.addEventListener('mousedown', (event) => {
       if(!document.querySelector('.popup-number-input')) {
         return;
