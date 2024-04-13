@@ -29,8 +29,8 @@ interface entityConfig {
   target_temperature_high?: number;
   min_temp?: number;
   max_temp?: number;
-  min_value?: number;
-  max_value?: number;
+  min_value?: string;
+  max_value?: string;
   step?: number;
   min_length?: number;
   max_length?: number;
@@ -313,18 +313,12 @@ class ActionRenderer {
     entity: entityConfig,
     action: string,
     opt: string,
-    value: number | string,
-    min?: number,
-    max?: number,
+    value: string | number,
+    min?: string | undefined,
+    max?: string | undefined,
     step = 1
   ) {
     if(entity.mode == 1) {
-      const val = Number(value);
-      let stepString = step.toString();
-      let numDecimalPlaces = 0
-      if (stepString.indexOf('.') !== -1) {
-        numDecimalPlaces = stepString.split('.')[1].length;
-      }
       return html`<div class="range">
         <label>${min || 0}</label>
         <input
@@ -332,9 +326,9 @@ class ActionRenderer {
           name="${entity.unique_id}"
           id="${entity.unique_id}"
           step="${step}"
-          min="${min || Math.min(0, val)}"
-          max="${max || Math.max(10, val)}"
-          .value="${(val.toFixed(numDecimalPlaces))}"
+          min="${min || Math.min(0, value as number)}"
+          max="${max || Math.max(10, value as number)}"
+          .value="${value}"
           @change="${(e: Event) => {
             const val = (<HTMLTextAreaElement>e.target)?.value;
             this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
