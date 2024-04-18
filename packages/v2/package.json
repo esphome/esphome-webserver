@@ -7,7 +7,7 @@
     "xbuild": "vite build --emptyOutDir",
     "build": "vite build --emptyOutDir && npm run deploy",
     "serve": "vite preview",
-    "deploy": "bash -c '../../scripts/make_header.sh ../../_static/v2 server_index.h web_server'"
+    "deploy": "bash -c '../../scripts/make_header.sh ../../_static/v2 server_index_v2.h web_server 2'"
   },
   "dependencies": {
     "http-proxy-middleware": "^2.0.1",

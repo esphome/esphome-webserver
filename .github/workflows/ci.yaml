@@ -1,0 +1,32 @@
+name: CI
+
+on:
+  push:
+    branches:
+      - main
+      - dev
+  pull_request:
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: Captive Portal
+            directory: captive-portal
+          - name: Webserver v2
+            directory: v2
+          - name: Webserver v3
+            directory: v3
+    steps:
+      - name: Clone the repo
+        uses: actions/checkout@v4.1.1
+      - name: Set up Node.JS
+        uses: actions/setup-node@v4.0.2
+      - name: Install dependencies
+        run: npm install
+      - name: Build ${{ matrix.name }}
+        run: npm run build
+        working-directory: packages/${{ matrix.directory }}
