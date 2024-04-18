@@ -4,7 +4,6 @@ on:
   push:
     branches:
       - main
-  pull_request:
 
 jobs:
   build:
@@ -60,9 +59,11 @@ jobs:
       - name: List files
         run: ls -R headers
 
-      # - name: Create a release
-      #   id: create_release
-      #   uses: softprops/action-gh-release@v2.0.4
-      #   with:
-      #     tag_name: ${{ steps.create_tag.outputs.tag }}
-      #     name: Release ${{ steps.create_tag.outputs.tag }}
+      - name: Create a release
+        id: create_release
+        uses: softprops/action-gh-release@v2.0.4
+        with:
+          tag_name: ${{ steps.create_tag.outputs.tag }}
+          name: Release ${{ steps.create_tag.outputs.tag }}
+          files: headers/**/*.h
+          generate_release_notes: true
