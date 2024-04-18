@@ -17,9 +17,9 @@ jobs:
           - name: Captive Portal
             directory: captive-portal
           - name: Webserver v2
-            directory: packages/v2
+            directory: v2
           - name: Webserver v3
-            directory: packages/v3
+            directory: v3
     steps:
       - name: Clone the repo
         uses: actions/checkout@v4.1.1
@@ -29,4 +29,4 @@ jobs:
         run: npm install
       - name: Build ${{ matrix.name }}
         run: npm run build
-        working-directory: ${{ matrix.directory }}
+        working-directory: packages/${{ matrix.directory }}
