@@ -99,16 +99,17 @@ export class EntityTable extends LitElement implements RestAction {
           this.has_controls = true;
         }
         this.entities.push(entity);
-        this.entities.sort((a, b) =>          
-          a.entity_category < b.entity_category
-            ? -1
-            : a.entity_category == b.entity_category
-            ? a.sorting_weight < b.sorting_weight
-              ? -1
-              : 1
-            : 1
-        );
-        
+        this.entities.sort((a, b) => {  
+          const sortA = a.sorting_weight ?? a.name;  
+          const sortB = b.sorting_weight ?? b.name;  
+          return a.entity_category < b.entity_category  
+            ? -1  
+            : a.entity_category == b.entity_category  
+            ? sortA < sortB  
+              ? -1  
+              : 1  
+            : 1  
+        });         
         this.requestUpdate();
       } else {
         if (typeof data.value === "number") {
