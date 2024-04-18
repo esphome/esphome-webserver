@@ -1,5 +1,5 @@
 {
-  "name": "esphome-captive_portal",
+  "name": "@esphome-webserver/captive-portal",
   "version": "2.0.0",
   "main": "main.ts",
   "license": "MIT",
@@ -8,7 +8,7 @@
     "dev": "vite",
     "build": "vite build && npm run deploy",
     "serve": "vite preview",
-    "deploy": "bash -c '../scripts/make_header.sh dist captive_index.h captive_portal'"
+    "deploy": "bash -c '../../scripts/make_header.sh ../../_static/captive_portal captive_index.h captive_portal'"
   },
   "dependencies": {
     "rollup-plugin-generate-html-template": "^1.7.0",
