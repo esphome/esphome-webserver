@@ -185,7 +185,10 @@ export class EntityTable extends LitElement implements RestAction {
       <div>
         ${elems.map(
           (group) => html`
-            <div class="tab-header">
+            <div 
+              class="tab-header"
+              @dblclick="${this._handleTabHeaderDblClick}"
+            >
               ${EntityTable.ENTITY_CATEGORIES[parseInt(group.name)] ||
               EntityTable.ENTITY_UNDEFINED}
             </div>
@@ -240,7 +243,15 @@ export class EntityTable extends LitElement implements RestAction {
       );
     }
   }
+  _handleTabHeaderDblClick(e: Event) {
+    const doubleClickEvent = new CustomEvent('entity-tab-header-double-clicked', {
+      bubbles: true,
+      composed: true,
+    });
+    e.target?.dispatchEvent(doubleClickEvent);
+  }
 }
+
 
 type ActionRendererNonCallable = "entity" | "actioner" | "exec";
 type ActionRendererMethodKey = keyof Omit<
