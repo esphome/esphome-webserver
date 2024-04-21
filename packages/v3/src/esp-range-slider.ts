@@ -192,6 +192,7 @@ export class EspRangeSlider extends LitElement {
           -webkit-appearance: none;
           margin: 20px 0;
           width: 100%;
+          touch-action: none;
         }
         input[type=range]:focus {
           outline: none;
