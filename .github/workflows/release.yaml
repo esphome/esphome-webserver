@@ -1,0 +1,69 @@
+name: Release
+
+on:
+  push:
+    branches:
+      - main
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    strategy:
+      matrix:
+        include:
+          - name: Captive Portal
+            directory: captive-portal
+          - name: Webserver v2
+            directory: v2
+          - name: Webserver v3
+            directory: v3
+    steps:
+      - name: Clone the repo
+        uses: actions/checkout@v4.1.1
+
+      - name: Set up Node.JS
+        uses: actions/setup-node@v4.0.2
+
+      - name: Install dependencies
+        run: npm install
+
+      - name: Build ${{ matrix.name }}
+        run: npm run build
+        working-directory: packages/${{ matrix.directory }}
+
+      - uses: actions/upload-artifact@v4.3.1
+        with:
+          name: ${{ matrix.name }}
+          path: _static/**/*.h
+
+  release:
+    name: Tag and Release
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      # Checkout repo, create new git tag, and git release with artifacts
+      - name: Checkout the repo
+        uses: actions/checkout@v4.1.1
+
+      - name: Create a new tag
+        id: create_tag
+        run: echo tag=$(date +'%Y%m%d-%H%M%S') >> $GITHUB_OUTPUT
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4.1.4
+        with:
+          path: headers
+          merge-multiple: true
+
+      - name: List files
+        run: ls -R headers
+
+      - name: Create a release
+        id: create_release
+        uses: softprops/action-gh-release@v2.0.4
+        with:
+          tag_name: ${{ steps.create_tag.outputs.tag }}
+          name: Release ${{ steps.create_tag.outputs.tag }}
+          files: headers/**/*.h
+          generate_release_notes: true

@@ -53,7 +53,7 @@ export default defineConfig({
       ...gzipPlugin({ filter: /\.(js|css|html|svg)$/ }),
       enforce: "post",
       apply: "build",
-    }
+    },
   ],
   build: {
     brotliSize: false,

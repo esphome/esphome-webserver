@@ -7,7 +7,7 @@
     "xbuild": "vite build --emptyOutDir",
     "build": "vite build --emptyOutDir && npm run deploy",
     "serve": "vite preview",
-    "deploy": "bash -c '../../scripts/make_header.sh ../../_static/v3 server_index.h web_server'"
+    "deploy": "bash -c '../../scripts/make_header.sh ../../_static/v3 server_index_v3.h web_server 3'"
   },
   "dependencies": {
     "chart.js": "^4.4.1",
