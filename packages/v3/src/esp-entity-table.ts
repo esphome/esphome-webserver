@@ -271,15 +271,16 @@ class ActionRenderer {
     </button>`;
   }
 
-  private _date(
+  private _datetime(
     entity: entityConfig,
+    type: string,
     action: string,
     opt: string,
     value: string,
   ) {
     return html`
       <input 
-        type="date" 
+        type="${type}" 
         name="${entity.unique_id}"
         id="${entity.unique_id}"
         value="${value}"
@@ -293,7 +294,6 @@ class ActionRenderer {
       />
     `;
   }
-
 
   private _switch(entity: entityConfig) {
     return html`<esp-switch
@@ -444,8 +444,23 @@ class ActionRenderer {
   render_date() {
     if (!this.entity) return;
     return html`
-      ${this._date(
+      ${this._datetime(
         this.entity,
+        "date",
+        "set",
+        "value",
+        this.entity.value,
+      )}
+      ${this.entity.uom}
+    `;
+  }
+
+  render_time() {
+    if (!this.entity) return;
+    return html`
+      ${this._datetime(
+        this.entity,
+        "time",
         "set",
         "value",
         this.entity.value,
