@@ -451,7 +451,6 @@ class ActionRenderer {
         "value",
         this.entity.value,
       )}
-      ${this.entity.uom}
     `;
   }
 
@@ -465,7 +464,6 @@ class ActionRenderer {
         "value",
         this.entity.value,
       )}
-      ${this.entity.uom}
     `;
   }
 
