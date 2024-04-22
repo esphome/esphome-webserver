@@ -486,7 +486,8 @@ class ActionRenderer {
   render_light() {
     if (!this.entity) return;
     return [
-      html`<div class="entity">
+      html`<div class="entity" style="
+      width: 100%;">
         ${this._switch(this.entity)}
         ${this.entity.brightness
           ? this._range(
