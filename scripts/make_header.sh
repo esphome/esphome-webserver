@@ -2,7 +2,10 @@
 cat <<EOT >./$1/$2
 #pragma once
 // Generated from https://github.com/esphome/esphome-webserver
-$(if [ -n "$4" ]; then echo "#if USE_WEBSERVER_VERSION == $4"; fi)
+$(if [ -n "$4" ]; then
+  echo "#ifdef USE_WEBSERVER_LOCAL"
+  echo "#if USE_WEBSERVER_VERSION == $4"
+fi)
 #include "esphome/core/hal.h"
 namespace esphome {
 
@@ -15,5 +18,8 @@ cat <<EOT >>./$1/$2
 
 }  // namespace $3
 }  // namespace esphome
-$(if [ -n "$4" ]; then echo "#endif"; fi)
+$(if [ -n "$4" ]; then
+  echo "#endif"
+  echo "#endif"
+fi)
 EOT
