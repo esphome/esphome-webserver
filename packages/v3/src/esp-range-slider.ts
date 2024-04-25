@@ -11,14 +11,13 @@ export class EspRangeSlider extends LitElement {
   private inputRange: HTMLInputElement | null = null;
   private currentValue: HTMLInputElement | null = null;
 
-  private numDecimalPlaces: number = 0;
   private longPressTimer: ReturnType<typeof setTimeout> | null = null;
   private isPopupInputVisible: boolean = false;
 
-  @property({ type: Number }) value = 0;
-  @property({ type: Number }) min = 0;
-  @property({ type: Number }) max = 0;
-  @property({ type: Number }) step = 0;
+  @property({ type: String }) value = 0;
+  @property({ type: String }) min = 0;
+  @property({ type: String }) max = 0;
+  @property({ type: String }) step = 0;
   @property({ type: String }) name = "";
 
   protected firstUpdated(
@@ -31,12 +30,6 @@ export class EspRangeSlider extends LitElement {
     this.currentValue = this.shadowRoot?.getElementById(
       currentValueID
     ) as HTMLInputElement;
-  
-    let stepString = this.step.toString();
-    if (stepString.indexOf('.') !== -1) {
-      this.numDecimalPlaces = stepString.split('.')[1].length;
-    }
-  
     document.addEventListener('mousedown', (event) => {
       if(!document.querySelector('.popup-number-input')) {
         return;
@@ -133,7 +126,7 @@ export class EspRangeSlider extends LitElement {
   updateCurrentValueOverlay(): void {
     const newValueAsPercent = Number( (this.inputRange.value - this.inputRange.min) * 100 / (this.inputRange.max - this.inputRange.min) ),
     newPosition = 10 - (newValueAsPercent * 0.2);
-    this.currentValue.innerHTML = `<span>${Number(this.inputRange?.value).toFixed(this.numDecimalPlaces)}</span>`;
+    this.currentValue.innerHTML = `<span>${this.inputRange?.value}</span>`;
     this.currentValue.style.left = `calc(${newValueAsPercent}% + (${newPosition}px))`;
 
     const spanTooltip = this.currentValue?.querySelector('span');
@@ -168,7 +161,7 @@ export class EspRangeSlider extends LitElement {
   render() {
     return html`
       <div class="range-wrap">
-        <label style="text-aligne: left;">${this.min || 0}</label>
+        <label>${this.min || 0}</label>
         <div class="slider-wrap">
           <div class="range-value" id="rangeValue"></div>
             <input
@@ -178,7 +171,7 @@ export class EspRangeSlider extends LitElement {
               step="${this.step}"
               min="${this.min || Math.min(0, this.value)}"
               max="${this.max || Math.max(10, this.value)}"
-              .value="${(this.value.toFixed(this.numDecimalPlaces))}"
+              .value="${this.value}"
               @input="${this.onInputEvent}"
               @change="${this.onInputChangeEvent}"
             />
@@ -199,6 +192,7 @@ export class EspRangeSlider extends LitElement {
           -webkit-appearance: none;
           margin: 20px 0;
           width: 100%;
+          touch-action: none;
         }
         input[type=range]:focus {
           outline: none;
@@ -228,11 +222,8 @@ export class EspRangeSlider extends LitElement {
           display: flex;
           align-items: center;
         }
-        .range-wrap label{
-          flex: 1;
-        }
         .slider-wrap{
-          width: 70%; 
+          flex-grow: 1;
           margin: 0px 15px;
           position: relative;
         }

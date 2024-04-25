@@ -46,14 +46,18 @@ export default css`
     text-align: center;
   }
   .entity-row > :nth-child(2) {
-    flex: 1 1 50%;
+    flex: 1 1 40%;
     margin-left: 16px;
     margin-right: 8px;
     text-wrap: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    min-width: 150px;
   }
   .entity-row > :nth-child(3) {
     flex: 1 1 50%;
     margin-right: 8px;
+    margin-left: 20px;
     text-align: right;
     display: flex;
     justify-content: space-between;

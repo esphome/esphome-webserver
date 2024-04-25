@@ -89,6 +89,7 @@ export default defineConfig({
       "/events": proxy_target,
       "/text": proxy_target,
       "/date": proxy_target,
+      "/time": proxy_target,
     },
   },
 });

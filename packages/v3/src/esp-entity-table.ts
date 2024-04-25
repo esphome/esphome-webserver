@@ -29,8 +29,8 @@ interface entityConfig {
   target_temperature_high?: number;
   min_temp?: number;
   max_temp?: number;
-  min_value?: number;
-  max_value?: number;
+  min_value?: string;
+  max_value?: string;
   step?: number;
   min_length?: number;
   max_length?: number;
@@ -185,7 +185,10 @@ export class EntityTable extends LitElement implements RestAction {
       <div>
         ${elems.map(
           (group) => html`
-            <div class="tab-header">
+            <div 
+              class="tab-header"
+              @dblclick="${this._handleTabHeaderDblClick}"
+            >
               ${EntityTable.ENTITY_CATEGORIES[parseInt(group.name)] ||
               EntityTable.ENTITY_UNDEFINED}
             </div>
@@ -240,7 +243,15 @@ export class EntityTable extends LitElement implements RestAction {
       );
     }
   }
+  _handleTabHeaderDblClick(e: Event) {
+    const doubleClickEvent = new CustomEvent('entity-tab-header-double-clicked', {
+      bubbles: true,
+      composed: true,
+    });
+    e.target?.dispatchEvent(doubleClickEvent);
+  }
 }
+
 
 type ActionRendererNonCallable = "entity" | "actioner" | "exec";
 type ActionRendererMethodKey = keyof Omit<
@@ -271,15 +282,16 @@ class ActionRenderer {
     </button>`;
   }
 
-  private _date(
+  private _datetime(
     entity: entityConfig,
+    type: string,
     action: string,
     opt: string,
     value: string,
   ) {
     return html`
       <input 
-        type="date" 
+        type="${type}" 
         name="${entity.unique_id}"
         id="${entity.unique_id}"
         value="${value}"
@@ -293,7 +305,6 @@ class ActionRenderer {
       />
     `;
   }
-
 
   private _switch(entity: entityConfig) {
     return html`<esp-switch
@@ -337,18 +348,12 @@ class ActionRenderer {
     entity: entityConfig,
     action: string,
     opt: string,
-    value: number | string,
-    min?: number,
-    max?: number,
+    value: string | number,
+    min?: string | undefined,
+    max?: string | undefined,
     step = 1
   ) {
     if(entity.mode == 1) {
-      const val = Number(value);
-      let stepString = step.toString();
-      let numDecimalPlaces = 0
-      if (stepString.indexOf('.') !== -1) {
-        numDecimalPlaces = stepString.split('.')[1].length;
-      }
       return html`<div class="range">
         <label>${min || 0}</label>
         <input
@@ -356,9 +361,9 @@ class ActionRenderer {
           name="${entity.unique_id}"
           id="${entity.unique_id}"
           step="${step}"
-          min="${min || Math.min(0, val)}"
-          max="${max || Math.max(10, val)}"
-          .value="${(val.toFixed(numDecimalPlaces))}"
+          min="${min || Math.min(0, value as number)}"
+          max="${max || Math.max(10, value as number)}"
+          .value="${value}"
           @change="${(e: Event) => {
             const val = (<HTMLTextAreaElement>e.target)?.value;
             this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
@@ -450,13 +455,26 @@ class ActionRenderer {
   render_date() {
     if (!this.entity) return;
     return html`
-      ${this._date(
+      ${this._datetime(
         this.entity,
+        "date",
         "set",
         "value",
         this.entity.value,
       )}
-      ${this.entity.uom}
+    `;
+  }
+
+  render_time() {
+    if (!this.entity) return;
+    return html`
+      ${this._datetime(
+        this.entity,
+        "time",
+        "set",
+        "value",
+        this.entity.value,
+      )}
     `;
   }
 
