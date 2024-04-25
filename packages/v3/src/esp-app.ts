@@ -120,6 +120,14 @@ export default class EspApp extends LitElement {
     setInterval(() => {
       this.connected = !!this.ping && Date.now() - this.lastUpdate < 15000;
     }, 5000);
+    document.addEventListener('entity-tab-header-double-clicked', (e) => {
+      const mainElement = this.shadowRoot?.querySelector('main.flex-grid-half');
+      mainElement?.classList.toggle('expanded_entity');
+    });
+    document.addEventListener('log-tab-header-double-clicked', (e) => {
+      const mainElement = this.shadowRoot?.querySelector('main.flex-grid-half');
+      mainElement?.classList.toggle('expanded_logs');
+    });
   }
 
   schemeDefault() {
@@ -162,7 +170,6 @@ export default class EspApp extends LitElement {
       ? html`<section
           id="col_logs"
           class="col"
-          @dblclick="${this._handleDblClick}"
         >
           <esp-log rows="50" .scheme="${this.scheme}"></esp-log>
         </section>`
@@ -210,8 +217,7 @@ export default class EspApp extends LitElement {
       <main class="flex-grid-half" @toggle-layout="${this._handleLayoutToggle}">
         <section
           id="col_entities"
-          class="col"
-          @dblclick="${this._handleDblClick}"
+          class="col"          
         >
           <esp-entity-table .scheme="${this.scheme}"></esp-entity-table>
           ${this.renderOta()}
@@ -219,17 +225,6 @@ export default class EspApp extends LitElement {
         ${this.renderLog()}
       </main>
     `;
-  }
-
-  private _handleDblClick(e: Event) {
-    e.currentTarget?.parentNode?.classList.toggle(
-      "expanded_entity",
-      e.currentTarget?.id === "col_entities" ? undefined : false
-    );
-    e.currentTarget?.parentNode?.classList.toggle(
-      "expanded_logs",
-      e.currentTarget?.id === "col_logs" ? undefined : false
-    );
   }
 
   private _updateUptime(e: MessageEvent) {
