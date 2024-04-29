@@ -73,8 +73,7 @@ jobs:
   esphome-pr:
     name: Make PR into ESPHome repo
     runs-on: ubuntu-latest
-    environment:
-      name: esphome
+    environment: esphome
     needs:
       - build
       - release
