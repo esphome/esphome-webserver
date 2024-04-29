@@ -75,7 +75,6 @@ jobs:
     runs-on: ubuntu-latest
     environment: esphome
     needs:
-      - build
       - release
     steps:
       - name: Checkout esphome repo
