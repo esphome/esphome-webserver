@@ -297,7 +297,7 @@ class ActionRenderer {
         type="${type}" 
         name="${entity.unique_id}"
         id="${entity.unique_id}"
-        value="${value}"
+        .value="${value}"
         @change="${(e: Event) => {
           const val = (<HTMLTextAreaElement>e.target)?.value;
           this.actioner?.restAction(
@@ -326,7 +326,7 @@ class ActionRenderer {
         minlength="${min || Math.min(0, value as number)}"
         maxlength="${max || Math.max(255, value as number)}"
         pattern="${pattern || ''}"
-        value="${value!}"
+        .value="${value!}"
         @change="${(e: Event) => {
           let val = e.target?.value;
           this.actioner?.restAction(entity, `${action}?${opt}=${encodeURIComponent(val)}`);

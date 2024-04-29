@@ -294,7 +294,7 @@ class ActionRenderer {
         type="${type}" 
         name="${entity.unique_id}"
         id="${entity.unique_id}"
-        value="${value}"
+        .value="${value}"
         @change="${(e: Event) => {
           const val = (<HTMLTextAreaElement>e.target)?.value;
           this.actioner?.restAction(
@@ -378,7 +378,7 @@ class ActionRenderer {
         step="${step}"
         min="${min}"
         max="${max}"
-        value="${value}"
+        .value="${value}"
         @state="${(e: CustomEvent) => {
             const val = (<HTMLTextAreaElement>e.target)?.value;
             this.actioner?.restAction(entity, `${action}?${opt}=${e.detail.state}`);
@@ -510,7 +510,8 @@ class ActionRenderer {
   render_light() {
     if (!this.entity) return;
     return [
-      html`<div class="entity">
+      html`<div class="entity" style="
+      width: 100%;">
         ${this._switch(this.entity)}
         ${this.entity.brightness
           ? this._range(
