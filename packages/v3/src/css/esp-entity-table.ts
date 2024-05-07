@@ -76,4 +76,14 @@ export default css`
   input[type="color"]::-webkit-color-swatch-wrapper {
     padding: 0 !important;
   }
+
+  .climate {
+    width: 100%;
+    display: grid;
+    text-align: center;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 6px;
+    padding: 10px;
+    align-items: center;
+  }
 `;
