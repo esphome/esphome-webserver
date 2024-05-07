@@ -161,7 +161,7 @@ export class EspRangeSlider extends LitElement {
   render() {
     return html`
       <div class="range-wrap">
-        <label style="text-aligne: left;">${this.min || 0}</label>
+        <label>${this.min || 0}</label>
         <div class="slider-wrap">
           <div class="range-value" id="rangeValue"></div>
             <input
@@ -192,6 +192,7 @@ export class EspRangeSlider extends LitElement {
           -webkit-appearance: none;
           margin: 20px 0;
           width: 100%;
+          touch-action: none;
         }
         input[type=range]:focus {
           outline: none;
@@ -221,11 +222,8 @@ export class EspRangeSlider extends LitElement {
           display: flex;
           align-items: center;
         }
-        .range-wrap label{
-          flex: 1;
-        }
         .slider-wrap{
-          width: 70%; 
+          flex-grow: 1;
           margin: 0px 15px;
           position: relative;
         }

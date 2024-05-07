@@ -50,7 +50,12 @@ export class DebugLog extends LitElement {
 
   render() {
     return html`
-      <div class="tab-header">Debug Log</div>
+      <div 
+        class="tab-header"
+        @dblclick="${this._handleTabHeaderDblClick}"
+      >
+        Debug Log
+      </div>
       <div class="tab-container">
         <div class="logs" color-scheme="${this.scheme}">
           <div class="thead trow">
@@ -75,6 +80,14 @@ export class DebugLog extends LitElement {
         </div>
       </div>
     `;
+  }
+
+  _handleTabHeaderDblClick(e: Event) {
+    const doubleClickEvent = new CustomEvent('log-tab-header-double-clicked', {
+      bubbles: true,
+      composed: true,
+    });
+    e.target?.dispatchEvent(doubleClickEvent);
   }
 
   static get styles() {

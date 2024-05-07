@@ -285,6 +285,29 @@ class ActionRenderer {
     </div>`;
   }
 
+  private _datetime(
+    entity: entityConfig,
+    type: string,
+    action: string,
+    opt: string,
+    value: string,
+  ) {
+    return html`
+      <input 
+        type="${type}" 
+        name="${entity.unique_id}"
+        id="${entity.unique_id}"
+        .value="${value}"
+        @change="${(e: Event) => {
+          const val = (<HTMLTextAreaElement>e.target)?.value;
+          this.actioner?.restAction(
+            entity,
+            `${action}?${opt}=${val}`
+          );
+        }}"
+      />
+    `;
+  }
 
   private _textinput(
     entity: entityConfig,
@@ -303,7 +326,7 @@ class ActionRenderer {
         minlength="${min || Math.min(0, value as number)}"
         maxlength="${max || Math.max(255, value as number)}"
         pattern="${pattern || ''}"
-        value="${value!}"
+        .value="${value!}"
         @change="${(e: Event) => {
           let val = e.target?.value;
           this.actioner?.restAction(entity, `${action}?${opt}=${encodeURIComponent(val)}`);
@@ -409,6 +432,32 @@ class ActionRenderer {
       this.entity.max_value,
       this.entity.step
     );
+  }
+
+  render_date() {
+    if (!this.entity) return;
+    return html`
+      ${this._datetime(
+        this.entity,
+        "date",
+        "set",
+        "value",
+        this.entity.value,
+      )}
+    `;
+  }
+
+  render_time() {
+    if (!this.entity) return;
+    return html`
+      ${this._datetime(
+        this.entity,
+        "time",
+        "set",
+        "value",
+        this.entity.value,
+      )}
+    `;
   }
 
   render_text() {

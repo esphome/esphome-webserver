@@ -41,6 +41,8 @@ jobs:
     name: Tag and Release
     runs-on: ubuntu-latest
     needs: build
+    outputs:
+      tag: ${{ steps.create_tag.outputs.tag }}
     steps:
       # Checkout repo, create new git tag, and git release with artifacts
       - name: Checkout the repo
@@ -67,3 +69,41 @@ jobs:
           name: Release ${{ steps.create_tag.outputs.tag }}
           files: headers/**/*.h
           generate_release_notes: true
+
+  esphome-pr:
+    name: Make PR into ESPHome repo
+    runs-on: ubuntu-latest
+    environment: esphome
+    needs:
+      - release
+    steps:
+      - name: Checkout esphome repo
+        uses: actions/checkout@v4.1.1
+        with:
+          repository: esphome/esphome
+          ref: dev
+
+      - name: Download Artifacts
+        uses: actions/download-artifact@v4.1.4
+        with:
+          path: /tmp/headers
+          merge-multiple: true
+
+      - name: Move headers into palce
+        run: |-
+          mv /tmp/headers/captive_portal/captive_index.h esphome/components/captive_portal/captive_index.h
+          mv /tmp/headers/v2/server_index_v2.h esphome/components/web_server/server_index_v2.h
+          mv /tmp/headers/v3/server_index_v3.h esphome/components/web_server/server_index_v3.h
+
+      - name: PR Changes
+        uses: peter-evans/create-pull-request@v6.0.4
+        with:
+          commit-message: "Update webserver local assets to ${{ needs.release.outputs.tag }}"
+          committer: esphomebot <esphome@nabucasa.com>
+          author: esphomebot <esphome@nabucasa.com>
+          branch: sync/webserver-assets
+          delete-branch: true
+          title: "Update webserver local assets to ${{ needs.release.outputs.tag }}"
+          body-path: .github/PULL_REQUEST_TEMPLATE.md
+          token: ${{ secrets.ESPHOME_WEBSERVER_SYNC_TOKEN }}
+          assignees: "@esphome/core"
