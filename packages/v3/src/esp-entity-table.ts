@@ -471,7 +471,7 @@ class ActionRenderer {
         minlength="${min || Math.min(0, value as number)}"
         maxlength="${max || Math.max(255, value as number)}"
         pattern="${pattern || ""}"
-        .value="${value!}"
+        value="${value!}"
         @change="${(e: Event) => {
           const val = (<HTMLTextAreaElement>e.target)?.value;
           this.actioner?.restAction(
