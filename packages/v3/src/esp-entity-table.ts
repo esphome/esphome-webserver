@@ -39,8 +39,6 @@ interface entityConfig {
   current_temperature?: number;
   modes?: number[];
   mode?: number;
-  presets?: number[];
-  preset?: number;
   speed_count?: number;
   speed_level?: number;
   speed: string;
@@ -94,12 +92,8 @@ export class EntityTable extends LitElement implements RestAction {
           unique_id: data.id,
           id: parts.slice(1).join("-"),
           entity_category: data.entity_category,
+          value_numeric_history: [data.value],
         } as entityConfig;
-        if (typeof data.value === "number") {
-          entity.value_numeric_history = [data.value];
-        } else if (data.current_temperature) {
-          entity.value_numeric_history = [Number(data.current_temperature)];
-        }
         entity.has_action = this.hasAction(entity);
         if (entity.has_action) {
           this.has_controls = true;
@@ -118,13 +112,11 @@ export class EntityTable extends LitElement implements RestAction {
         });         
         this.requestUpdate();
       } else {
-        let history = [...this.entities[idx].value_numeric_history];
         if (typeof data.value === "number") {
+          let history = [...this.entities[idx].value_numeric_history];
           history.push(data.value);
-        } else if (data.current_temperature) {
-          history.push(Number(data.current_temperature));
+          this.entities[idx].value_numeric_history = history.splice(-50);
         }
-        this.entities[idx].value_numeric_history = history.splice(-50);
 
         delete data.id;
         delete data.domain;
@@ -225,8 +217,7 @@ export class EntityTable extends LitElement implements RestAction {
                         ? this.control(component)
                         : html`<div>${component.state}</div>`}
                     </div>
-                    ${component.domain === "sensor" ||
-                    component.domain === "climate"
+                    ${component.domain === "sensor"
                       ? html`<esp-entity-chart
                           .chartdata="${component.value_numeric_history}"
                         ></esp-entity-chart>`
@@ -247,10 +238,7 @@ export class EntityTable extends LitElement implements RestAction {
   }
 
   _handleEntityRowClick(e: any) {
-    if (
-      e?.currentTarget?.domain === "sensor" ||
-      e?.currentTarget?.domain === "climate"
-    ) {
+    if (e?.currentTarget?.domain === "sensor") {
       if (!e?.ctrlKey) e.stopPropagation();
       e?.currentTarget?.classList.toggle(
         "expanded",
@@ -297,71 +285,25 @@ class ActionRenderer {
     </button>`;
   }
 
-  private _tempSelector(entity: entityConfig, target: string) {
-    if (!entity) return;
-    let targetTemp =
-      target === "high"
-        ? entity.target_temperature_high
-        : entity.target_temperature || entity.target_temperature_low;
-    let upValue =
-      target === "high"
-        ? Number(entity.target_temperature_high) + Number(entity.step)
-        : Number(entity.target_temperature || entity.target_temperature_low) +
-          Number(entity.step);
-    let downValue =
-      target === "high"
-        ? Number(entity.target_temperature_high) - Number(entity.step)
-        : Number(entity.target_temperature || entity.target_temperature_low) -
-          Number(entity.step);
-    upValue =
-      upValue > Number(entity.max_temp) ? Number(entity.max_temp) : upValue;
-    downValue =
-      downValue > Number(entity.max_temp) ? Number(entity.max_temp) : downValue;
-
-    let upAction = target
-      ? `set?target_temperature_${target}=${upValue}`
-      : `set?target_temperature=${upValue}`;
-    let downAction = target
-      ? `set?target_temperature_${target}=${downValue}`
-      : `set?target_temperature=${downValue}`;
-
-    return html`<button
-        class="abutton"
-        @click=${(e: Event) => {
-          e.stopPropagation();
-          this.actioner?.restAction(entity, upAction);
-        }}
-      >
-        🔺</button
-      ><br />
-      <label>${targetTemp}</label><br />
-      <button
-        class="abutton"
-        @click=${(e: Event) => {
-          e.stopPropagation();
-          this.actioner?.restAction(entity, downAction);
-        }}
-      >
-        🔻
-      </button> `;
-  }
-
   private _datetime(
     entity: entityConfig,
     type: string,
     action: string,
     opt: string,
-    value: string
+    value: string,
   ) {
     return html`
-      <input
-        type="${type}"
+      <input 
+        type="${type}" 
         name="${entity.unique_id}"
         id="${entity.unique_id}"
         .value="${value}"
         @change="${(e: Event) => {
           const val = (<HTMLTextAreaElement>e.target)?.value;
-          this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
+          this.actioner?.restAction(
+            entity,
+            `${action}?${opt}=${val}`
+          );
         }}"
       />
     `;
@@ -386,11 +328,7 @@ class ActionRenderer {
     val: string | number | undefined
   ) {
     return html`<select
-      @click=${(e: Event) => {
-        e.stopPropagation();
-      }}
       @change="${(e: Event) => {
-        e.stopPropagation();
         const val = (<HTMLTextAreaElement>e.target)?.value;
         this.actioner?.restAction(
           entity,
@@ -418,7 +356,7 @@ class ActionRenderer {
     max?: string | undefined,
     step = 1
   ) {
-    if (entity.mode == 1) {
+    if(entity.mode == 1) {
       return html`<div class="range">
         <label>${min || 0}</label>
         <input
@@ -435,23 +373,22 @@ class ActionRenderer {
           }}"
         />
         <label>${max || 100}</label>
-      </div>`;
+      </div>`;      
     } else {
-      return html` <esp-range-slider
+      return html`    
+      <esp-range-slider
         name="${entity.unique_id}"
         step="${step}"
         min="${min}"
         max="${max}"
         .value="${value}"
         @state="${(e: CustomEvent) => {
-          const val = (<HTMLTextAreaElement>e.target)?.value;
-          this.actioner?.restAction(
-            entity,
-            `${action}?${opt}=${e.detail.state}`
-          );
-        }}"
+            const val = (<HTMLTextAreaElement>e.target)?.value;
+            this.actioner?.restAction(entity, `${action}?${opt}=${e.detail.state}`);
+          }}"
       ></esp-range-slider>`;
     }
+
   }
 
   private _textinput(
@@ -675,50 +612,57 @@ class ActionRenderer {
       target_temp_label = html`${this.entity
         .target_temperature_low}&nbsp;..&nbsp;${this.entity
         .target_temperature_high}`;
+      target_temp_slider = html`
+        ${this._range(
+          this.entity,
+          "set",
+          "target_temperature_low",
+          this.entity.target_temperature_low,
+          this.entity.min_temp,
+          this.entity.max_temp,
+          this.entity.step
+        )}
+        ${this._range(
+          this.entity,
+          "set",
+          "target_temperature_high",
+          this.entity.target_temperature_high,
+          this.entity.min_temp,
+          this.entity.max_temp,
+          this.entity.step
+        )}
+      `;
     } else {
       target_temp_label = html`${this.entity.target_temperature}`;
+      target_temp_slider = html`
+        ${this._range(
+          this.entity,
+          "set",
+          "target_temperature",
+          this.entity.target_temperature!!,
+          this.entity.min_temp,
+          this.entity.max_temp,
+          this.entity.step
+        )}
+      `;
     }
     let modes = html``;
     if ((this.entity.modes ? this.entity.modes.length : 0) > 0) {
-      modes = html` ${this._select(
-        this.entity,
-        "set",
-        "mode",
-        this.entity.modes || [],
-        this.entity.mode || ""
-      )}`;
+      modes = html`Mode:<br />
+        ${this._select(
+          this.entity,
+          "set",
+          "mode",
+          this.entity.modes || [],
+          this.entity.mode || ""
+        )}`;
     }
-    let presets = html``;
-    if ((this.entity.presets ? this.entity.presets.length : 0) > 0) {
-      presets = html` ${this._select(
-        this.entity,
-        "set",
-        "preset",
-        this.entity.presets || [],
-        this.entity.preset || ""
-      )}`;
-    }
-
     return html`
-      <section class="climate">
-        <div>
-          ${this._tempSelector(
-            this.entity,
-            this.entity.target_temperature_low ? "low" : ""
-          )}
-        </div>
-        <div>
-          <label><strong>${this.entity.current_temperature}</strong></label>
-        </div>
-        <div>
-          ${this.entity.target_temperature_high
-            ? this._tempSelector(this.entity, "high")
-            : ""}
-        </div>
-        <div>${modes}</div>
-        <div>${this.entity.state}</div>
-        <div>${presets}</div>
-      </section>
+      <label
+        >Current:&nbsp;${this.entity.current_temperature},
+        Target:&nbsp;${target_temp_label}</label
+      >
+      ${target_temp_slider} ${modes}
     `;
   }
 }
