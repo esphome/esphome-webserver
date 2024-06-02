@@ -112,7 +112,7 @@ export class EntityTable extends LitElement implements RestAction {
           const sortB = b.sorting_weight ?? b.name;  
           return a.sorting_group < b.sorting_group  
             ? -1  
-            : a.sorting_group == b.sorting_group  
+            : a.sorting_group === b.sorting_group  
             ? sortA < sortB  
               ? -1  
               : 1  
@@ -153,12 +153,12 @@ export class EntityTable extends LitElement implements RestAction {
 
     this.groups = EntityTable.ENTITY_CATEGORIES.map((category, index) => ({
       name: category,
-      sorting_weight: index - 1000
+      sorting_weight: index
     }));
 
     this.groups.push({
       name: EntityTable.ENTITY_UNDEFINED,
-      sorting_weight: -10001 
+      sorting_weight: -1 
     });
   }
 
