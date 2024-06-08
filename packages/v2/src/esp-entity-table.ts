@@ -302,7 +302,7 @@ class ActionRenderer {
           const val = (<HTMLTextAreaElement>e.target)?.value;
           this.actioner?.restAction(
             entity,
-            `${action}?${opt}=${val}`
+            `${action}?${opt}=${val.replace('T', ' ')}`
           );
         }}"
       />
@@ -453,6 +453,19 @@ class ActionRenderer {
       ${this._datetime(
         this.entity,
         "time",
+        "set",
+        "value",
+        this.entity.value,
+      )}
+    `;
+  }
+
+  render_datetime() {
+    if (!this.entity) return;
+    return html`
+      ${this._datetime(
+        this.entity,
+        "datetime-local",
         "set",
         "value",
         this.entity.value,
