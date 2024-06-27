@@ -123,7 +123,7 @@ export default class EspApp extends LitElement {
     return html`
       <h1>
         <a href="https://esphome.io/web-api" class="logo">
-          <esp-logo></esp-logo>
+          <esp-logo style="width: 52px; height: 40px; display: block;"></esp-logo>
         </a>
         ${this.config.title}
         <span id="beat" title="${this.version}">❤</span>
