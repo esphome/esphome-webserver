@@ -3,7 +3,7 @@ import { css } from "lit";
 export default css`
   .flex-grid-half {
     display: grid;
-    grid-template-columns: 600px 2fr;
+    grid-template-columns: 700px 2fr;
   }
   .flex-grid-half.expanded_entity,
   .flex-grid-half.expanded_logs {
