@@ -189,7 +189,9 @@ export class EspRangeSlider extends LitElement {
           width: 100%;
         }
         input[type=range] {
+          background: transparent;
           -webkit-appearance: none;
+          appearance: none;
           margin: 20px 0;
           width: 100%;
           touch-action: none;
@@ -205,6 +207,32 @@ export class EspRangeSlider extends LitElement {
           background: #03a9f4;
           border-radius: 25px;
         }
+        input[type=range]::-moz-range-track {
+          width: 100%;
+          height: 4px;
+          cursor: pointer;
+          animate: 0.2s;
+          background: #03a9f4;
+          border-radius: 25px;
+        }
+        input[type=range]::-ms-track {
+          background: transparent;
+          width: 100%;
+          height: 4px;
+          cursor: pointer;
+          animate: 0.2s;
+          background: transparent;
+          border-color: transparent;
+          color: transparent;
+        }
+        input[type=range]::-ms-fill-lower {
+          background: #03a9f4;
+          border-radius: 25px;
+        }
+        input[type=range]::-ms-fill-upper {
+          background: #03a9f4;
+          border-radius: 25px;
+        }
         input[type=range]::-webkit-slider-thumb {
           height: 20px;
           width: 20px;
@@ -215,23 +243,50 @@ export class EspRangeSlider extends LitElement {
           -webkit-appearance: none;
           margin-top: -8px;
         }
+        input[type=range]::-moz-range-thumb {
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #fff;
+          box-shadow: 0 0 4px 0 rgba(0,0,0, 1);
+          cursor: pointer;
+          border: none;
+        }
+        input[type=range]::-ms-thumb {
+          height: 20px;
+          width: 20px;
+          border-radius: 50%;
+          background: #fff;
+          box-shadow: 0 0 4px 0 rgba(0,0,0, 1);
+          cursor: pointer;
+          border: none;
+        }
         input[type=range]:focus::-webkit-slider-runnable-track {
           background: #03a9f4;
         }
-        .range-wrap{
+        input[type=range]:focus::-moz-range-track {
+          background: #03a9f4;
+        }
+        input[type=range]:focus::-ms-fill-lower {
+          background: #03a9f4;
+        }
+        input[type=range]:focus::-ms-fill-upper {
+          background: #03a9f4;
+        }
+        .range-wrap {
           display: flex;
           align-items: center;
         }
-        .slider-wrap{
+        .slider-wrap {
           flex-grow: 1;
           margin: 0px 15px;
           position: relative;
         }
-        .range-value{
+        .range-value {
           position: absolute;
           top: -50%;
         }
-        .range-value span{
+        .range-value span {
           padding: 0 3px 0 3px;
           height: 19px;
           line-height: 18px;
@@ -245,7 +300,12 @@ export class EspRangeSlider extends LitElement {
           transform: translate(-50%, +80%);
           border-radius: 6px;
         }
-        .range-value span:before{
+        @-moz-document url-prefix() {
+          .range-value span {
+            transform: translate(-50%, +150%);
+          }
+        }
+        .range-value span:before {
           content: "";
           position: absolute;
           width: 0;
