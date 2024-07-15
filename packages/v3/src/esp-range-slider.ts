@@ -186,7 +186,8 @@ export class EspRangeSlider extends LitElement {
       cssReset,
       css`
         :host {
-          width: 100%;
+          min-width: 150px;
+          flex: 1;
         }
         input[type=range] {
           -webkit-appearance: none;

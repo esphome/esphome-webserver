@@ -618,7 +618,9 @@ class ActionRenderer {
   render_climate() {
     if (!this.entity) return;
     let target_temp_slider, target_temp_label, target_temp;
-    let current_temp = html`<div class="climate-row"><label>Current:&nbsp;${this.entity.current_temperature} °C</label></div>`;
+    let current_temp = html`<div class="climate-row" style="padding-bottom: 10px";>
+                              <label>Current:&nbsp;${this.entity.current_temperature} °C</label>
+                            </div>`;
     
     if (
       this.entity.target_temperature_low !== undefined &&

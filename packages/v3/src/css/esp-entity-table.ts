@@ -78,7 +78,8 @@ export default css`
   }
   .climate-row {
     width: 100%;
-    display: flex;
+    display: inline-flex;
+    flex-wrap: wrap;
     text-align: left;
   }
   .climate-row > select{
@@ -88,6 +89,7 @@ export default css`
     align-content: center;
     width: 150px;
   }
+    
   input[type="color"]::-webkit-color-swatch-wrapper {
     padding: 0 !important;
   }
