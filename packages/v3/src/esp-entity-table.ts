@@ -106,7 +106,7 @@ export class EntityTable extends LitElement implements RestAction {
             ? -1  
             : a.entity_category == b.entity_category  
             ? sortA === sortB  
-              ? a.name < b.name
+              ? a.name.toLowerCase() < b.name.toLowerCase()
                 ? -1
                 : 1  
               : sortA < sortB
