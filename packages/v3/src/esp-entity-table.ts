@@ -105,9 +105,13 @@ export class EntityTable extends LitElement implements RestAction {
           return a.entity_category < b.entity_category  
             ? -1  
             : a.entity_category == b.entity_category  
-            ? sortA < sortB  
-              ? -1  
-              : 1  
+            ? sortA === sortB  
+              ? a.name.toLowerCase() < b.name.toLowerCase()
+                ? -1
+                : 1  
+              : sortA < sortB
+                ? -1
+                : 1   
             : 1  
         });         
         this.requestUpdate();
