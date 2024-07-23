@@ -621,65 +621,73 @@ class ActionRenderer {
 
   render_climate() {
     if (!this.entity) return;
-    let target_temp_slider, target_temp_label;
+    let target_temp_slider, target_temp_label, target_temp;
+    let current_temp = html`<div class="climate-row" style="padding-bottom: 10px";>
+                              <label>Current:&nbsp;${this.entity.current_temperature} °C</label>
+                            </div>`;
+    
     if (
       this.entity.target_temperature_low !== undefined &&
       this.entity.target_temperature_high !== undefined
     ) {
-      target_temp_label = html`${this.entity
-        .target_temperature_low}&nbsp;..&nbsp;${this.entity
-        .target_temperature_high}`;
-      target_temp_slider = html`
-        ${this._range(
-          this.entity,
-          "set",
-          "target_temperature_low",
-          this.entity.target_temperature_low,
-          this.entity.min_temp,
-          this.entity.max_temp,
-          this.entity.step
-        )}
-        ${this._range(
-          this.entity,
-          "set",
-          "target_temperature_high",
-          this.entity.target_temperature_high,
-          this.entity.min_temp,
-          this.entity.max_temp,
-          this.entity.step
-        )}
-      `;
+      target_temp = html`
+        <div class="climate-row">
+          <label>Target Low:&nbsp;</label>
+          ${this._range(
+            this.entity,
+            "set",
+            "target_temperature_low",
+            this.entity.target_temperature_low,
+            this.entity.min_temp,
+            this.entity.max_temp,
+            this.entity.step
+          )}
+        </div>
+        <div class="climate-row">
+          <label>Target High:&nbsp;</label>
+          ${this._range(
+            this.entity,
+            "set",
+            "target_temperature_high",
+            this.entity.target_temperature_high,
+            this.entity.min_temp,
+            this.entity.max_temp,
+            this.entity.step
+          )}
+        </div>`;
     } else {
-      target_temp_label = html`${this.entity.target_temperature}`;
-      target_temp_slider = html`
-        ${this._range(
-          this.entity,
-          "set",
-          "target_temperature",
-          this.entity.target_temperature!!,
-          this.entity.min_temp,
-          this.entity.max_temp,
-          this.entity.step
-        )}
-      `;
+      target_temp = html`
+        <div class="climate-row">
+          <label>Target:&nbsp;</label>
+          ${this._range(
+            this.entity,
+            "set",
+            "target_temperature",
+            this.entity.target_temperature!!,
+            this.entity.min_temp,
+            this.entity.max_temp,
+            this.entity.step
+          )}
+        </div>`;
     }
     let modes = html``;
     if ((this.entity.modes ? this.entity.modes.length : 0) > 0) {
-      modes = html`Mode:<br />
-        ${this._select(
-          this.entity,
-          "set",
-          "mode",
-          this.entity.modes || [],
-          this.entity.mode || ""
-        )}`;
+      modes = html`
+        <div class="climate-row">
+          <label>Mode:&nbsp;</label>
+          ${this._select(
+            this.entity,
+            "set",
+            "mode",
+            this.entity.modes || [],
+            this.entity.mode || ""
+          )}
+        </div>`;
     }
     return html`
-      <label
-        >Current:&nbsp;${this.entity.current_temperature},
-        Target:&nbsp;${target_temp_label}</label
-      >
-      ${target_temp_slider} ${modes}
+      <div class="climate-wrap">
+        ${current_temp} ${target_temp} ${modes}
+      </div>
     `;
   }
 }
