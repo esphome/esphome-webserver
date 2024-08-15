@@ -121,6 +121,7 @@ export default class EspLogo extends LitElement {
         }
         if(str.length > this.mtuSize) {
             // there is no direct method to get MTU
+            // another opton would be to send it as part of configuration
             this.mtuSize = str.length
         }
         this.buffer += str;
