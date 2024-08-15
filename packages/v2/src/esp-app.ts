@@ -6,10 +6,14 @@ import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
 import "./esp-logo";
+import "./esp-ble";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
-window.source = new EventSource(getBasePath() + "/events");
+
+// window.source = new EventSource(getBasePath() + "/events");
+window.source = new EventTarget();
+
 
 interface Config {
   ota: boolean;
@@ -22,7 +26,6 @@ interface Config {
 export default class EspApp extends LitElement {
   @state() scheme: string = "";
   @state() ping: string = "";
-  @state() redirectUrl: string = "";
   @query("#beat")
   beat!: HTMLSpanElement;
 
@@ -120,20 +123,9 @@ export default class EspApp extends LitElement {
       : nothing;
   }
 
-  handleRedirect() {
-    window.location.href = "?target=" + this.redirectUrl;
-  }
-
   render() {
     return html`
-    <div class="redirect-container">
-      <input
-        type="text"
-        placeholder="esphome address"
-        @input="${(e: Event) => (this.redirectUrl = (e.target as HTMLInputElement).value)}"
-      />
-      <button class="btn" @click="${this.handleRedirect}">Go</button>
-    </div>
+    <esp-ble></esp-ble>
     <h1>
         <a href="https://esphome.io/web-api" class="logo">
           <esp-logo style="width: 52px; height: 40px; display: block;"></esp-logo>
