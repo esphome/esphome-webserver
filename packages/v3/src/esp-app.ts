@@ -192,7 +192,7 @@ export default class EspApp extends LitElement {
     return html`
       <header>
         <a href="https://esphome.io/web-api" id="logo" title="${this.version}">
-          <esp-logo></esp-logo>
+          <esp-logo style="width: 52px; height: 40px;"></esp-logo>
         </a>
         <iconify-icon
           .icon="${!!this.connected ? "mdi:circle" : "mdi:circle-off-outline"}"
