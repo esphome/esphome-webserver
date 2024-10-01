@@ -110,17 +110,17 @@ export class EntityTable extends LitElement implements RestAction {
         this.entities.sort((a, b) => {  
           const sortA = a.sorting_weight ?? a.name;  
           const sortB = b.sorting_weight ?? b.name;  
-          return a.sorting_group < b.sorting_group  
+          return a.sorting_group < b.sorting_group
             ? -1  
-            : a.sorting_group == b.sorting_group  
-            ? sortA === sortB  
+            : a.sorting_group === b.sorting_group
+            ? sortA === sortB
               ? a.name.toLowerCase() < b.name.toLowerCase()
                 ? -1
-                : 1  
+                : 1
               : sortA < sortB
                 ? -1
-                : 1   
-            : 1  
+                : 1
+            : 1
         });
         this.requestUpdate();
       } else {
