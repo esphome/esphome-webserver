@@ -79,7 +79,8 @@ export class EntityTable extends LitElement implements RestAction {
 
   connectedCallback() {
     super.connectedCallback();
-    window.source?.addEventListener("state", (e: Event) => {
+
+    window.source?.addEventListener("init_entity", (e: Event) => {
       const messageEvent = e as MessageEvent;
       const data = JSON.parse(messageEvent.data);
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
@@ -115,7 +116,14 @@ export class EntityTable extends LitElement implements RestAction {
             : 1  
         });         
         this.requestUpdate();
-      } else {
+      }
+    });
+
+    window.source?.addEventListener("state", (e: Event) => {
+      const messageEvent = e as MessageEvent;
+      const data = JSON.parse(messageEvent.data);
+      let idx = this.entities.findIndex((x) => x.unique_id === data.id);
+      if (idx != -1 && data.id) {
         if (typeof data.value === "number") {
           let history = [...this.entities[idx].value_numeric_history];
           history.push(data.value);
