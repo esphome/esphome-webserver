@@ -132,7 +132,6 @@ export class EntityTable extends LitElement implements RestAction {
               .then((data) => {
                 console.log(data);
                 this.addEntity(data);
-                this._unknown_state_events.delete(data.id);
               })
               .catch((error) => {
                 console.error('Fetch error:', error);
