@@ -11,6 +11,7 @@ import "iconify-icon";
 interface entityConfig {
   unique_id: string;
   sorting_weight: number;
+  sorting_group?: string;
   domain: string;
   id: string;
   state: string;
@@ -50,6 +51,11 @@ interface entityConfig {
   is_disabled_by_default?: boolean;
 }
 
+interface groupConfig {
+  name: string;
+  sorting_weight: number;  
+}
+
 export const stateOn = "ON";
 export const stateOff = "OFF";
 
@@ -70,6 +76,7 @@ export class EntityTable extends LitElement implements RestAction {
 
   private _actionRenderer = new ActionRenderer();
   private _basePath = getBasePath();
+  private groups: groupConfig[] = [] 
   private static ENTITY_UNDEFINED = "States";
   private static ENTITY_CATEGORIES = [
     "Sensor and Control",
@@ -108,7 +115,6 @@ export class EntityTable extends LitElement implements RestAction {
           } else {
             this._unknown_state_events[data.id] = 1;
           }
-
           // ignore the first few events, maybe the esp will send a detail_all
           // event soon
           if (this._unknown_state_events[data.id] < 5) {
@@ -138,6 +144,33 @@ export class EntityTable extends LitElement implements RestAction {
               });
         }
       }
+    });
+
+    window.source?.addEventListener("sorting_group", (e: Event) => {
+      const messageEvent = e as MessageEvent;
+      const data = JSON.parse(messageEvent.data);
+      const groupIndex = this.groups.findIndex((x) => x.name === data.name);
+      if (groupIndex === -1) {
+        let group = {
+           ...data,
+        } as groupConfig;
+        this.groups.push(group);
+        this.groups.sort((a, b) => {
+          return a.sorting_weight < b.sorting_weight  
+            ? -1  
+            : 1  
+        });
+      }
+    });
+
+    this.groups = EntityTable.ENTITY_CATEGORIES.map((category, index) => ({
+      name: category,
+      sorting_weight: index
+    }));
+
+    this.groups.push({
+      name: EntityTable.ENTITY_UNDEFINED,
+      sorting_weight: -1 
     });
   }
 
@@ -213,24 +246,34 @@ export class EntityTable extends LitElement implements RestAction {
   }
 
   render() {
-    function groupBy(xs: Array<any>, key: string): Map<string, Array<any>> {
-      return xs.reduce(function (rv, x) {
+    const groupBy = (xs: Array<any>, key: string): Map<string, Array<any>> => {
+      const groupedMap = xs.reduce(function (rv, x) {
         (
           rv.get(x[key]) ||
           (() => {
-            let tmp: Array<string> = [];
+            let tmp: Array<any> = [];
             rv.set(x[key], tmp);
             return tmp;
           })()
         ).push(x);
         return rv;
       }, new Map<string, Array<any>>());
+      
+      const sortedGroupedMap = new Map<string, Array<any>>();
+      for (const group of this.groups) {
+        const groupName = group.name;
+        if (groupedMap.has(groupName)) {
+          sortedGroupedMap.set(groupName, groupedMap.get(groupName) || []);
+        }
+      }
+
+      return sortedGroupedMap;
     }
 
     const entities = this.show_all
       ? this.entities
       : this.entities.filter((elem) => !elem.is_disabled_by_default);
-    const grouped = groupBy(entities, "entity_category");
+    const grouped = groupBy(entities, "sorting_group");
     const elems = Array.from(grouped, ([name, value]) => ({ name, value }));
     return html`
       <div>
@@ -240,7 +283,7 @@ export class EntityTable extends LitElement implements RestAction {
               class="tab-header"
               @dblclick="${this._handleTabHeaderDblClick}"
             >
-              ${EntityTable.ENTITY_CATEGORIES[parseInt(group.name)] ||
+              ${group.name ||
               EntityTable.ENTITY_UNDEFINED}
             </div>
             <div class="tab-container">
