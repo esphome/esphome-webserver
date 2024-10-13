@@ -109,7 +109,7 @@ export class EntityTable extends LitElement implements RestAction {
             this._unknown_state_events[data.id] = 1;
           }
 
-          // ignore the first few events, maybe the esp will send a init_entity
+          // ignore the first few events, maybe the esp will send a detail_all
           // event soon
           if (this._unknown_state_events[data.id] < 5) {
             return;
