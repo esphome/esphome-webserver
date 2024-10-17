@@ -49,6 +49,7 @@ interface entityConfig {
   value_numeric_history: number[];
   uom?: string;
   is_disabled_by_default?: boolean;
+  position?: number;
 }
 
 interface groupConfig {
@@ -734,5 +735,26 @@ class ActionRenderer {
         ${current_temp} ${target_temp} ${modes}
       </div>
     `;
+  }
+
+  render_valve() {
+    if (!this.entity) return;
+    return [
+      html`<div class="entity" style="
+      width: 100%;">
+        ${this._switch(this.entity)}
+        ${this.entity.position
+          ? this._range(
+              this.entity,
+              "set_valve_position",
+              "position",
+              this.entity.position,
+              0,
+              100,
+              1
+            )
+          : ""}
+      </div> `,
+    ];
   }
 }

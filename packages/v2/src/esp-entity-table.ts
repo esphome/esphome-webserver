@@ -36,6 +36,7 @@ interface entityConfig {
   effects?: string[];
   effect?: string;
   has_action?: boolean;
+  position?: number;
 }
 
 export function getBasePath() {
@@ -548,5 +549,23 @@ class ActionRenderer {
       >
       ${target_temp_slider} ${modes}
     `;
+  }
+
+  render_valve() {
+    if (!this.entity) return;
+    return [
+      this._switch(this.entity),
+      this.entity.position
+        ? this._range(
+            this.entity,
+            "set_valve_position",
+            "position",
+            this.entity.position,
+            0,
+            100,
+            1
+          )
+        : "",
+    ];
   }
 }
