@@ -231,6 +231,25 @@ class ActionRenderer {
     ></esp-switch>`;
   }
 
+  private _valve_switch(entity: entityConfig) {
+    const action_map = {
+      open: "open",
+      closed: "close",
+    };
+    return html`<esp-switch
+      color="var(--primary-color,currentColor)"
+      stateOn="OPEN"
+      stateOff="CLOSED"
+      labelOn="Open"
+      labelOff="Closed"
+      .state=${entity.state}
+      @state="${(e: CustomEvent) => {
+        let act = action_map[e.detail.state.toLowerCase()];
+        this.actioner?.restAction(entity, act);
+      }}"
+    ></esp-switch>`;
+  }
+
   private _select(
     entity: entityConfig,
     action: string,
@@ -554,16 +573,16 @@ class ActionRenderer {
   render_valve() {
     if (!this.entity) return;
     return [
-      this._switch(this.entity),
+      this._valve_switch(this.entity),
       this.entity.position
         ? this._range(
             this.entity,
-            "set_valve_position",
+            "set",
             "position",
             this.entity.position,
-            0,
-            100,
-            1
+            0.0,
+            1.0,
+            0.01
           )
         : "",
     ];
