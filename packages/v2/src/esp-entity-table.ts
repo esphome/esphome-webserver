@@ -549,4 +549,9 @@ class ActionRenderer {
       ${target_temp_slider} ${modes}
     `;
   }
+  render_valve() {
+    if (!this.entity) return;
+    return html`${this._actionButton(this.entity, "| |", "open")}
+    ${this._actionButton(this.entity, "|-|", "close")}`;
+  }
 }
