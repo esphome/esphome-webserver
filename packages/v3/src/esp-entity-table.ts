@@ -117,7 +117,7 @@ export class EntityTable extends LitElement implements RestAction {
           }
           // ignore the first few events, maybe the esp will send a detail_all
           // event soon
-          if (this._unknown_state_events[data.id] < 5) {
+          if (this._unknown_state_events[data.id] < 1) {
             return;
           }
 
@@ -178,13 +178,14 @@ export class EntityTable extends LitElement implements RestAction {
     let idx = this.entities.findIndex((x) => x.unique_id === data.id);
     if (idx === -1 && data.id) {
       // Dynamically add discovered..
-      let parts = data.id.split('-');
+      let parts = data.id.split("-");
       let entity = {
         ...data,
         domain: parts[0],
         unique_id: data.id,
-        id: parts.slice(1).join('-'),
+        id: parts.slice(1).join("-"),
         entity_category: data.entity_category,
+        sorting_group: data.sorting_group ?? (EntityTable.ENTITY_CATEGORIES[parseInt(data.entity_category)] || EntityTable.ENTITY_UNDEFINED),
         value_numeric_history: [data.value],
       } as entityConfig;
       entity.has_action = this.hasAction(entity);
@@ -192,20 +193,24 @@ export class EntityTable extends LitElement implements RestAction {
         this.has_controls = true;
       }
       this.entities.push(entity);
-      this.entities.sort((a, b) => {
-        const sortA = a.sorting_weight ?? a.name;
-        const sortB = b.sorting_weight ?? b.name;
-        return a.entity_category < b.entity_category ?
-            -1 :
-            a.entity_category == b.entity_category ?
-            sortA === sortB ?
-            a.name.toLowerCase() < b.name.toLowerCase() ? -1 : 1 :
-                sortA < sortB ? -1 :
-                                1 :
-            1
+      this.entities.sort((a, b) => {  
+        const sortA = a.sorting_weight ?? a.name;  
+        const sortB = b.sorting_weight ?? b.name;  
+        return a.sorting_group < b.sorting_group
+          ? -1  
+          : a.sorting_group === b.sorting_group
+          ? sortA === sortB
+            ? a.name.toLowerCase() < b.name.toLowerCase()
+              ? -1
+              : 1
+            : sortA < sortB
+              ? -1
+              : 1
+          : 1
       });
       this.requestUpdate();
     }
+    
   }
 
   hasAction(entity: entityConfig): boolean {
