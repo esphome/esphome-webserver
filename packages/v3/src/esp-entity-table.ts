@@ -738,6 +738,7 @@ class ActionRenderer {
   render_valve() {
     if (!this.entity) return;
     return html`${this._actionButton(this.entity, "OPEN", "open")}
+    ${this._actionButton(this.entity, "☐", "stop")}
     ${this._actionButton(this.entity, "CLOSE", "close")}`;
   }
 }
