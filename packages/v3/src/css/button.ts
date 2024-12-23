@@ -27,4 +27,14 @@ export default css`
     background-color: rgba(127, 127, 127, 0.2);
     transition-duration: 1s;
   }
+
+  .abuttonIsState {
+    background-color: #28a745;
+    color: white;
+    border: none;
+    padding: 10px 20px;
+    font-size: 16px;
+    border-radius: 4px;
+    transition: background-color 0.3s ease;
+  }
 `;
