@@ -6,10 +6,14 @@ import "./esp-entity-table";
 import "./esp-log";
 import "./esp-switch";
 import "./esp-logo";
+import "./esp-ble";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 
-window.source = new EventSource(getBasePath() + "/events");
+
+// window.source = new EventSource(getBasePath() + "/events");
+window.source = new EventTarget();
+
 
 interface Config {
   ota: boolean;
@@ -121,7 +125,8 @@ export default class EspApp extends LitElement {
 
   render() {
     return html`
-      <h1>
+    <esp-ble></esp-ble>
+    <h1>
         <a href="https://esphome.io/web-api" class="logo">
           <esp-logo style="width: 52px; height: 40px; display: block;"></esp-logo>
         </a>
