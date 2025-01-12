@@ -228,7 +228,9 @@ export class EntityTable extends LitElement implements RestAction {
   restAction(entity: entityConfig, action: string) {
     fetch(`${this._basePath}/${entity.domain}/${entity.id}/${action}`, {
       method: "POST",
-      body: "true",
+      headers:{
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
     }).then((r) => {
       console.log(r);
     });
