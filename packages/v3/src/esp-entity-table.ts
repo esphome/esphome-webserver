@@ -84,47 +84,17 @@ export class EntityTable extends LitElement implements RestAction {
     "Diagnostic",
   ];
 
+  private _unknown_state_events: {[key: string]: number} = {};
+
   connectedCallback() {
     super.connectedCallback();
-    window.source?.addEventListener("state", (e: Event) => {
+
+    window.source?.addEventListener('state', (e: Event) => {
       const messageEvent = e as MessageEvent;
       const data = JSON.parse(messageEvent.data);
       let idx = this.entities.findIndex((x) => x.unique_id === data.id);
-      if (idx === -1 && data.id) {
-        // Dynamically add discovered..
-        let parts = data.id.split("-");
-        let entity = {
-          ...data,
-          domain: parts[0],
-          unique_id: data.id,
-          id: parts.slice(1).join("-"),
-          entity_category: data.entity_category,
-          sorting_group: data.sorting_group ?? (EntityTable.ENTITY_CATEGORIES[parseInt(data.entity_category)] || EntityTable.ENTITY_UNDEFINED),
-          value_numeric_history: [data.value],
-        } as entityConfig;
-        entity.has_action = this.hasAction(entity);
-        if (entity.has_action) {
-          this.has_controls = true;
-        }
-        this.entities.push(entity);
-        this.entities.sort((a, b) => {  
-          const sortA = a.sorting_weight ?? a.name;  
-          const sortB = b.sorting_weight ?? b.name;  
-          return a.sorting_group < b.sorting_group
-            ? -1  
-            : a.sorting_group === b.sorting_group
-            ? sortA === sortB
-              ? a.name.toLowerCase() < b.name.toLowerCase()
-                ? -1
-                : 1
-              : sortA < sortB
-                ? -1
-                : 1
-            : 1
-        });
-        this.requestUpdate();
-      } else {
-        if (typeof data.value === "number") {
+      if (idx != -1 && data.id) {
+        if (typeof data.value === 'number') {
           let history = [...this.entities[idx].value_numeric_history];
           history.push(data.value);
           this.entities[idx].value_numeric_history = history.splice(-50);
@@ -135,6 +105,44 @@ export class EntityTable extends LitElement implements RestAction {
         delete data.unique_id;
         Object.assign(this.entities[idx], data);
         this.requestUpdate();
+      } else {
+        // is it a `detail_all` event already?
+        if (data?.name) {
+          this.addEntity(data);
+        } else {
+          if (this._unknown_state_events[data.id]) {
+            this._unknown_state_events[data.id]++;
+          } else {
+            this._unknown_state_events[data.id] = 1;
+          }
+          // ignore the first few events, maybe the esp will send a detail_all
+          // event soon
+          if (this._unknown_state_events[data.id] < 1) {
+            return;
+          }
+
+          let parts = data.id.split('-');
+          let domain = parts[0];
+          let id = parts.slice(1).join('-');
+
+          fetch(`${this._basePath}/${domain}/${id}?detail=all`, {
+            method: 'GET',
+          })
+              .then((r) => {
+                console.log(r);
+                if (!r.ok) {
+                  throw new Error(`HTTP error! Status: ${r.status}`);
+                }
+                return r.json();
+              })
+              .then((data) => {
+                console.log(data);
+                this.addEntity(data);
+              })
+              .catch((error) => {
+                console.error('Fetch error:', error);
+              });
+        }
       }
     });
 
@@ -166,6 +174,45 @@ export class EntityTable extends LitElement implements RestAction {
     });
   }
 
+  addEntity(data: any) {
+    let idx = this.entities.findIndex((x) => x.unique_id === data.id);
+    if (idx === -1 && data.id) {
+      // Dynamically add discovered..
+      let parts = data.id.split("-");
+      let entity = {
+        ...data,
+        domain: parts[0],
+        unique_id: data.id,
+        id: parts.slice(1).join("-"),
+        entity_category: data.entity_category,
+        sorting_group: data.sorting_group ?? (EntityTable.ENTITY_CATEGORIES[parseInt(data.entity_category)] || EntityTable.ENTITY_UNDEFINED),
+        value_numeric_history: [data.value],
+      } as entityConfig;
+      entity.has_action = this.hasAction(entity);
+      if (entity.has_action) {
+        this.has_controls = true;
+      }
+      this.entities.push(entity);
+      this.entities.sort((a, b) => {  
+        const sortA = a.sorting_weight ?? a.name;  
+        const sortB = b.sorting_weight ?? b.name;  
+        return a.sorting_group < b.sorting_group
+          ? -1  
+          : a.sorting_group === b.sorting_group
+          ? sortA === sortB
+            ? a.name.toLowerCase() < b.name.toLowerCase()
+              ? -1
+              : 1
+            : sortA < sortB
+              ? -1
+              : 1
+          : 1
+      });
+      this.requestUpdate();
+    }
+    
+  }
+
   hasAction(entity: entityConfig): boolean {
     return `render_${entity.domain}` in this._actionRenderer;
   }
@@ -181,7 +228,9 @@ export class EntityTable extends LitElement implements RestAction {
   restAction(entity: entityConfig, action: string) {
     fetch(`${this._basePath}/${entity.domain}/${entity.id}/${action}`, {
       method: "POST",
-      body: "true",
+      headers:{
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
     }).then((r) => {
       console.log(r);
     });
@@ -738,7 +787,6 @@ class ActionRenderer {
   }
   render_valve() {
     if (!this.entity) return;
-    console.log(this.entity.state)
     return html`${this._actionButton(this.entity, "OPEN", "open", this.entity.state === "OPEN")}
     ${this._actionButton(this.entity, "☐", "stop")}
     ${this._actionButton(this.entity, "CLOSE", "close", this.entity.state === "CLOSED")}`;
