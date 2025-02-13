@@ -52,6 +52,7 @@ export class ChartElement extends LitElement {
         ],
       },
       options: {
+        animation: { duration: 0 },
         plugins: { legend: { display: false } },
         scales: { x: { display: false }, y: { position: "right" } },
         responsive: true,
