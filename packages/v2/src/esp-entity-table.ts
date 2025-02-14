@@ -103,7 +103,9 @@ export class EntityTable extends LitElement implements RestAction {
   restAction(entity: entityConfig, action: string) {
     fetch(`${basePath}/${entity.domain}/${entity.id}/${action}`, {
       method: "POST",
-      body: "true",
+      headers:{
+        'Content-Type': 'application/x-www-form-urlencoded'
+      },
     }).then((r) => {
       console.log(r);
     });
@@ -548,5 +550,11 @@ class ActionRenderer {
       >
       ${target_temp_slider} ${modes}
     `;
+  }
+  render_valve() {
+    if (!this.entity) return;
+    return html`${this._actionButton(this.entity, "| |", "open")}
+    ${this._actionButton(this.entity, "☐", "stop")}
+    ${this._actionButton(this.entity, "|-|", "close")}`;
   }
 }
