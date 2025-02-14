@@ -665,7 +665,7 @@ class ActionRenderer {
   render_cover() {
     if (!this.entity) return;
     return html`${this._actionButton(this.entity, "↑", "open", this.entity.state === "OPEN")}
-    ${this._actionButton(this.entity, "☐", "stop", )}
+    ${this._actionButton(this.entity, "☐", "stop")}
     ${this._actionButton(this.entity, "↓", "close", this.entity.state === "CLOSED")}`;
   }
 
