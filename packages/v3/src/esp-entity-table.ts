@@ -372,11 +372,12 @@ class ActionRenderer {
     return this[method]();
   }
 
-  private _actionButton(entity: entityConfig, label: string, action: string) {
+  private _actionButton(entity: entityConfig, label: string, action: string, isCurrentState: boolean = false) {
     if (!entity) return;
     let a = action || label.toLowerCase();
     return html`<button
-      class="abutton"
+      class="${isCurrentState ? 'abuttonIsState' : 'abutton'}"
+      ?disabled=${isCurrentState}
       @click=${() => this.actioner?.restAction(entity, a)}
     >
       ${label}
@@ -786,8 +787,8 @@ class ActionRenderer {
   }
   render_valve() {
     if (!this.entity) return;
-    return html`${this._actionButton(this.entity, "OPEN", "open")}
+    return html`${this._actionButton(this.entity, "OPEN", "open", this.entity.state === "OPEN")}
     ${this._actionButton(this.entity, "☐", "stop")}
-    ${this._actionButton(this.entity, "CLOSE", "close")}`;
+    ${this._actionButton(this.entity, "CLOSE", "close", this.entity.state === "CLOSED")}`;
   }
 }
