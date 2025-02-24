@@ -59,6 +59,33 @@ export class ChartElement extends LitElement {
         maintainAspectRatio: false,
       },
     });
+    this.updateStylesIfExpanded();
+  }
+  // since the :host-context(.expanded) selector is not supported in Safari and Firefox we need to use JS to apply styles
+  // whether the parent element is expanded or not
+  updateStylesIfExpanded() {
+    const parentElement = this.parentElement;
+    const expandedClass = "expanded";
+
+    const applyStyles = () => {
+      if (parentElement && parentElement.classList.contains(expandedClass)) {
+        this.style.height = "240px";
+        this.style.opacity = "0.5";
+      } else {
+        this.style.height = "42px";
+        this.style.opacity = "0.1";
+      }
+    };
+
+    applyStyles();
+
+    // Observe class changes
+    const observer = new MutationObserver(applyStyles);
+    if (parentElement)
+      observer.observe(parentElement, {
+        attributes: true,
+        attributeFilter: ["class"],
+      });
   }
 
   static get styles() {
@@ -66,14 +93,9 @@ export class ChartElement extends LitElement {
       :host {
         position: absolute;
         left: 24px;
-        height: 42px !important;
+        height: 42px;
         width: calc(100% - 42px);
         z-index: -100;
-        opacity: 0.1;
-      }
-      :host-context(.expanded) {
-        height: 240px !important;
-        opacity: 0.5;
       }
     `;
   }
