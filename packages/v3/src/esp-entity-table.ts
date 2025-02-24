@@ -657,16 +657,16 @@ class ActionRenderer {
 
   render_lock() {
     if (!this.entity) return;
-    return html`${this._actionButton(this.entity, "🔐", "lock")}
-    ${this._actionButton(this.entity, "🔓", "unlock")}
+    return html`${this._actionButton(this.entity, "🔐", "lock", this.entity.state === "LOCKED")}
+    ${this._actionButton(this.entity, "🔓", "unlock", this.entity.state === "UNLOCKED")}
     ${this._actionButton(this.entity, "↑", "open")} `;
   }
 
   render_cover() {
     if (!this.entity) return;
-    return html`${this._actionButton(this.entity, "↑", "open")}
+    return html`${this._actionButton(this.entity, "↑", "open", this.entity.state === "OPEN")}
     ${this._actionButton(this.entity, "☐", "stop")}
-    ${this._actionButton(this.entity, "↓", "close")}`;
+    ${this._actionButton(this.entity, "↓", "close", this.entity.state === "CLOSED")}`;
   }
 
   render_button() {
