@@ -12,9 +12,11 @@ source.addEventListener('log', function (e) {
         ];
     
     let klass = '';
+    let colorPrefix = '';
     for (const log_pref of log_prefs){
         if (e.data.startsWith(log_pref[0])) {
             klass = log_pref[1];
+            colorPrefix = log_pref[0];
         }
     }
     
@@ -29,10 +31,23 @@ source.addEventListener('log', function (e) {
     // Split by newlines to handle multi-line messages
     const lines = content.split('\n');
     
+    // Extract header from first line (everything up to and including ']:')
+    let header = '';
+    const headerMatch = lines[0].match(/^(.*?\]:)/);
+    if (headerMatch) {
+        header = headerMatch[1];
+    }
+    
     // Process each line
-    lines.forEach((line) => {
+    lines.forEach((line, index) => {
         if (line) {
-            log.innerHTML += '<span class="' + klass + '">' + line + "</span>\n";
+            if (index === 0) {
+                // First line - display as-is
+                log.innerHTML += '<span class="' + klass + '">' + line + "</span>\n";
+            } else {
+                // Continuation lines - prepend with header
+                log.innerHTML += '<span class="' + klass + '">' + header + line + "</span>\n";
+            }
         }
     });
 });
