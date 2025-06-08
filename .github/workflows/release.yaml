@@ -99,8 +99,8 @@ jobs:
         uses: peter-evans/create-pull-request@v6.0.4
         with:
           commit-message: "Update webserver local assets to ${{ needs.release.outputs.tag }}"
-          committer: esphomebot <esphome@nabucasa.com>
-          author: esphomebot <esphome@nabucasa.com>
+          committer: esphomebot <68923041+esphomebot@users.noreply.github.com>
+          author: esphomebot <68923041+esphomebot@users.noreply.github.com>
           branch: sync/webserver-assets
           delete-branch: true
           title: "Update webserver local assets to ${{ needs.release.outputs.tag }}"

@@ -10,17 +10,46 @@ source.addEventListener('log', function (e) {
         ["\u001b[0;36m", 'd'],
         ["\u001b[0;37m", 'v'],
         ];
-    
+
     let klass = '';
+    let colorPrefix = '';
     for (const log_pref of log_prefs){
         if (e.data.startsWith(log_pref[0])) {
             klass = log_pref[1];
+            colorPrefix = log_pref[0];
         }
     }
+
     if (klass == ''){
         log.innerHTML += e.data + '\n';
+        return;
     }
-    log.innerHTML += '<span class="' + klass + '">' + e.data.substr(7, e.data.length - 11) + "</span>\n";
+
+    // Extract content without color codes and ANSI termination
+    const content = e.data.substr(7, e.data.length - 11);
+
+    // Split by newlines to handle multi-line messages
+    const lines = content.split('\n');
+
+    // Extract header from first line (everything up to and including ']:')
+    let header = '';
+    const headerMatch = lines[0].match(/^(.*?\]:)/);
+    if (headerMatch) {
+        header = headerMatch[1];
+    }
+
+    // Process each line
+    lines.forEach((line, index) => {
+        if (line) {
+            if (index === 0) {
+                // First line - display as-is
+                log.innerHTML += '<span class="' + klass + '">' + line + "</span>\n";
+            } else {
+                // Continuation lines - prepend with header
+                log.innerHTML += '<span class="' + klass + '">' + header + line + "</span>\n";
+            }
+        }
+    });
 });
 
 actions = [
@@ -47,7 +76,7 @@ for (; row = states.rows[i]; i++) {
     if (!row.children[2].children.length) {
         continue;
     }
-    
+
     for (const domain of actions){
         if (row.classList.contains(domain[0])) {
             let id = row.id.substr(domain[0].length+1);
