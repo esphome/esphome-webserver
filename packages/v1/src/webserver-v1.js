@@ -17,10 +17,24 @@ source.addEventListener('log', function (e) {
             klass = log_pref[1];
         }
     }
+    
     if (klass == ''){
         log.innerHTML += e.data + '\n';
+        return;
     }
-    log.innerHTML += '<span class="' + klass + '">' + e.data.substr(7, e.data.length - 11) + "</span>\n";
+    
+    // Extract content without color codes and ANSI termination
+    const content = e.data.substr(7, e.data.length - 11);
+    
+    // Split by newlines to handle multi-line messages
+    const lines = content.split('\n');
+    
+    // Process each line
+    lines.forEach((line) => {
+        if (line) {
+            log.innerHTML += '<span class="' + klass + '">' + line + "</span>\n";
+        }
+    });
 });
 
 actions = [
