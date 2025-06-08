@@ -25,7 +25,7 @@ export class DebugLog extends LitElement {
     window.source?.addEventListener("log", (e: Event) => {
       const messageEvent = e as MessageEvent;
       const d: String = messageEvent.data;
-      
+
       const types: Record<string, string> = {
         "[1;31m": "e",
         "[0;33m": "w",
@@ -34,20 +34,20 @@ export class DebugLog extends LitElement {
         "[0;36m": "d",
         "[0;37m": "v",
       };
-      
+
       // Extract the type from the color code
       const type = types[d.slice(0, 7)];
       if (!type) {
         // No color code, skip
         return;
       }
-      
+
       // Extract content without color codes and ANSI termination
       const content = d.slice(7, d.length - 4);
-      
+
       // Split by newlines to handle multi-line messages
       const lines = content.split('\n');
-      
+
       // Process the first line to extract metadata
       const firstLine = lines[0];
       const parts = firstLine.slice(3).split(":");
@@ -55,7 +55,7 @@ export class DebugLog extends LitElement {
       const firstDetail = firstLine.slice(5 + tag.length);
       const level = firstLine.slice(0, 3);
       const when = new Date().toTimeString().split(" ")[0];
-      
+
       // Create a log record for each line
       lines.forEach((line, index) => {
         const record = {
@@ -67,7 +67,7 @@ export class DebugLog extends LitElement {
         } as recordConfig;
         this.logs.push(record);
       });
-      
+
       this.logs = this.logs.slice(-this.rows);
     });
   }

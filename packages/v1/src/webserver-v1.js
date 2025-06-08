@@ -10,7 +10,7 @@ source.addEventListener('log', function (e) {
         ["\u001b[0;36m", 'd'],
         ["\u001b[0;37m", 'v'],
         ];
-    
+
     let klass = '';
     let colorPrefix = '';
     for (const log_pref of log_prefs){
@@ -19,25 +19,25 @@ source.addEventListener('log', function (e) {
             colorPrefix = log_pref[0];
         }
     }
-    
+
     if (klass == ''){
         log.innerHTML += e.data + '\n';
         return;
     }
-    
+
     // Extract content without color codes and ANSI termination
     const content = e.data.substr(7, e.data.length - 11);
-    
+
     // Split by newlines to handle multi-line messages
     const lines = content.split('\n');
-    
+
     // Extract header from first line (everything up to and including ']:')
     let header = '';
     const headerMatch = lines[0].match(/^(.*?\]:)/);
     if (headerMatch) {
         header = headerMatch[1];
     }
-    
+
     // Process each line
     lines.forEach((line, index) => {
         if (line) {
@@ -76,7 +76,7 @@ for (; row = states.rows[i]; i++) {
     if (!row.children[2].children.length) {
         continue;
     }
-    
+
     for (const domain of actions){
         if (row.classList.contains(domain[0])) {
             let id = row.id.substr(domain[0].length+1);
