@@ -10,18 +10,18 @@ source.addEventListener('log', function (e) {
         ["\u001b[0;36m", 'd'],
         ["\u001b[0;37m", 'v'],
         ];
-    
+
     // Split the message into lines
     const message = e.data;
     const lines = message.split('\n');
-    
+
     // Process each line
     lines.forEach((line, index) => {
         if (!line.trim()) return; // Skip empty lines
-        
+
         let klass = '';
         let content = line;
-        
+
         // Check if this line starts with a color code
         for (const log_pref of log_prefs){
             if (line.startsWith(log_pref[0])) {
@@ -31,7 +31,7 @@ source.addEventListener('log', function (e) {
                 break;
             }
         }
-        
+
         // If no color code found, use the whole line
         if (klass === '') {
             log.innerHTML += line + '\n';
@@ -65,7 +65,7 @@ for (; row = states.rows[i]; i++) {
     if (!row.children[2].children.length) {
         continue;
     }
-    
+
     for (const domain of actions){
         if (row.classList.contains(domain[0])) {
             let id = row.id.substr(domain[0].length+1);
