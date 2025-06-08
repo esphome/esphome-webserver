@@ -11,16 +11,34 @@ source.addEventListener('log', function (e) {
         ["\u001b[0;37m", 'v'],
         ];
     
-    let klass = '';
-    for (const log_pref of log_prefs){
-        if (e.data.startsWith(log_pref[0])) {
-            klass = log_pref[1];
+    // Split the message into lines
+    const message = e.data;
+    const lines = message.split('\n');
+    
+    // Process each line
+    lines.forEach((line, index) => {
+        if (!line.trim()) return; // Skip empty lines
+        
+        let klass = '';
+        let content = line;
+        
+        // Check if this line starts with a color code
+        for (const log_pref of log_prefs){
+            if (line.startsWith(log_pref[0])) {
+                klass = log_pref[1];
+                // Extract content after color code and before reset code
+                content = line.substr(7, line.length - 11);
+                break;
+            }
         }
-    }
-    if (klass == ''){
-        log.innerHTML += e.data + '\n';
-    }
-    log.innerHTML += '<span class="' + klass + '">' + e.data.substr(7, e.data.length - 11) + "</span>\n";
+        
+        // If no color code found, use the whole line
+        if (klass === '') {
+            log.innerHTML += line + '\n';
+        } else {
+            log.innerHTML += '<span class="' + klass + '">' + content + "</span>\n";
+        }
+    });
 });
 
 actions = [

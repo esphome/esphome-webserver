@@ -24,10 +24,7 @@ export class DebugLog extends LitElement {
     super.connectedCallback();
     window.source?.addEventListener("log", (e: Event) => {
       const messageEvent = e as MessageEvent;
-      const d: String = messageEvent.data;
-      let parts = d.slice(10, d.length - 4).split(":");
-      let tag = parts.slice(0, 2).join(":");
-      let detail = d.slice(12 + tag.length, d.length - 4);
+      const message: String = messageEvent.data;
       const types: Record<string, string> = {
         "[1;31m": "e",
         "[0;33m": "w",
@@ -36,14 +33,29 @@ export class DebugLog extends LitElement {
         "[0;36m": "d",
         "[0;37m": "v",
       };
-      const record = {
-        type: types[d.slice(0, 7)],
-        level: d.slice(7, 10),
-        tag: tag,
-        detail: detail,
-        when: new Date().toTimeString().split(" ")[0],
-      } as recordConfig;
-      this.logs.push(record);
+      
+      // Split the message into lines
+      const lines = message.split('\n');
+      
+      // Process each line
+      lines.forEach((line) => {
+        if (!line.trim()) return; // Skip empty lines
+        
+        let parts = line.slice(10, line.length - 4).split(":");
+        let tag = parts.slice(0, 2).join(":");
+        let detail = line.slice(12 + tag.length, line.length - 4);
+        
+        const record = {
+          type: types[line.slice(0, 7)],
+          level: line.slice(7, 10),
+          tag: tag,
+          detail: detail,
+          when: new Date().toTimeString().split(" ")[0],
+        } as recordConfig;
+        
+        this.logs.push(record);
+      });
+      
       this.logs = this.logs.slice(-this.rows);
     });
   }
