@@ -10,35 +10,17 @@ source.addEventListener('log', function (e) {
         ["\u001b[0;36m", 'd'],
         ["\u001b[0;37m", 'v'],
         ];
-
-    // Split the message into lines
-    const message = e.data;
-    const lines = message.split('\n');
-
-    // Process each line
-    lines.forEach((line, index) => {
-        if (!line.trim()) return; // Skip empty lines
-
-        let klass = '';
-        let content = line;
-
-        // Check if this line starts with a color code
-        for (const log_pref of log_prefs){
-            if (line.startsWith(log_pref[0])) {
-                klass = log_pref[1];
-                // Extract content after color code and before reset code
-                content = line.substr(7, line.length - 11);
-                break;
-            }
+    
+    let klass = '';
+    for (const log_pref of log_prefs){
+        if (e.data.startsWith(log_pref[0])) {
+            klass = log_pref[1];
         }
-
-        // If no color code found, use the whole line
-        if (klass === '') {
-            log.innerHTML += line + '\n';
-        } else {
-            log.innerHTML += '<span class="' + klass + '">' + content + "</span>\n";
-        }
-    });
+    }
+    if (klass == ''){
+        log.innerHTML += e.data + '\n';
+    }
+    log.innerHTML += '<span class="' + klass + '">' + e.data.substr(7, e.data.length - 11) + "</span>\n";
 });
 
 actions = [
@@ -65,7 +47,7 @@ for (; row = states.rows[i]; i++) {
     if (!row.children[2].children.length) {
         continue;
     }
-
+    
     for (const domain of actions){
         if (row.classList.contains(domain[0])) {
             let id = row.id.substr(domain[0].length+1);
