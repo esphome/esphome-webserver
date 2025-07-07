@@ -77,7 +77,7 @@ export class DebugLog extends LitElement {
           <thead>
             <tr>
               <th>Time</th>
-              <th>level</th>
+              <th>Level</th>
               <th>Tag</th>
               <th>Message</th>
             </tr>
