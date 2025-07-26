@@ -11,6 +11,7 @@ import replace from "@rollup/plugin-replace";
 import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: '/v2/',
   clearScreen: false,
   plugins: [
     {
