@@ -8,10 +8,10 @@ import { viteSingleFile } from "vite-plugin-singlefile";
 import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
-
-const proxy_target = process.env.PROXY_TARGET || "http://nodemcu.local";
+import { VitePWA } from 'vite-plugin-pwa'
 
 export default defineConfig({
+  base: '/v2/',
   clearScreen: false,
   plugins: [
     {
@@ -53,6 +53,15 @@ export default defineConfig({
       enforce: "post",
       apply: "build",
     },
+    VitePWA({
+      registerType: 'autoUpdate',
+      manifest: {
+        icons: [{
+          "src": "logo.svg",
+          "sizes": "any"
+        }],
+      }
+    }),
   ],
   build: {
     brotliSize: false,
@@ -71,25 +80,8 @@ export default defineConfig({
     },
   },
   server: {
-    open: "/", // auto open browser in dev mode
-    host: true, // dev on local and network
+    host: true,
     port: 5001,
     strictPort: true,
-    proxy: {
-      "/light": proxy_target,
-      "/select": proxy_target,
-      "/cover": proxy_target,
-      "/switch": proxy_target,
-      "/button": proxy_target,
-      "/fan": proxy_target,
-      "/lock": proxy_target,
-      "/number": proxy_target,
-      "/climate": proxy_target,
-      "/events": proxy_target,
-      "/text": proxy_target,
-      "/date": proxy_target,
-      "/time": proxy_target,
-      "/valve": proxy_target,
-    },
   },
 });
