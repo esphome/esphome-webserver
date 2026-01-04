@@ -834,4 +834,73 @@ class ActionRenderer {
     ${this._actionButton(this.entity, "☐", "stop")}
     ${this._actionButton(this.entity, "CLOSE", "close", this.entity.state === "CLOSED")}`;
   }
+
+  render_water_heater() {
+    if (!this.entity) return;
+    let target_temp_slider, target_temp_label, target_temp;
+    
+    if (
+      this.entity.target_temperature_low !== undefined &&
+      this.entity.target_temperature_high !== undefined
+    ) {
+      target_temp = html`
+        <div class="climate-row">
+          <label>Target Low:&nbsp;</label>
+          ${this._range(
+            this.entity,
+            "set",
+            "target_temperature_low",
+            this.entity.target_temperature_low,
+            this.entity.min_temp,
+            this.entity.max_temp,
+            this.entity.step
+          )}
+        </div>
+        <div class="climate-row">
+          <label>Target High:&nbsp;</label>
+          ${this._range(
+            this.entity,
+            "set",
+            "target_temperature_high",
+            this.entity.target_temperature_high,
+            this.entity.min_temp,
+            this.entity.max_temp,
+            this.entity.step
+          )}
+        </div>`;
+    } else {
+      target_temp = html`
+        <div class="climate-row">
+          <label>Target:&nbsp;</label>
+          ${this._range(
+            this.entity,
+            "set",
+            "target_temperature",
+            this.entity.target_temperature!!,
+            this.entity.min_temp,
+            this.entity.max_temp,
+            this.entity.step
+          )}
+        </div>`;
+    }
+    let modes = html``;
+    if ((this.entity.modes ? this.entity.modes.length : 0) > 0) {
+      modes = html`
+        <div class="climate-row">
+          <label>Mode:&nbsp;</label>
+          ${this._select(
+            this.entity,
+            "set",
+            "mode",
+            this.entity.modes || [],
+            this.entity.mode || ""
+          )}
+        </div>`;
+    }
+    return html`
+      <div class="climate-wrap">
+        ${target_temp} ${modes}
+      </div>
+    `;
+  }
 }

@@ -91,6 +91,7 @@ export default defineConfig({
       "/date": proxy_target,
       "/time": proxy_target,
       "/valve": proxy_target,
+      "/water_heater": proxy_target,
     },
   },
 });

@@ -588,4 +588,66 @@ class ActionRenderer {
     ${this._actionButton(this.entity, "☐", "stop")}
     ${this._actionButton(this.entity, "|-|", "close")}`;
   }
+  render_water_heater() {
+    if (!this.entity) return;
+    let target_temp_slider, target_temp_label;
+    if (
+      this.entity.target_temperature_low !== undefined &&
+      this.entity.target_temperature_high !== undefined
+    ) {
+      target_temp_label = html`${this.entity
+        .target_temperature_low}&nbsp;..&nbsp;${this.entity
+        .target_temperature_high}`;
+      target_temp_slider = html`
+        ${this._range(
+          this.entity,
+          "set",
+          "target_temperature_low",
+          this.entity.target_temperature_low,
+          this.entity.min_temp,
+          this.entity.max_temp,
+          this.entity.step
+        )}
+        ${this._range(
+          this.entity,
+          "set",
+          "target_temperature_high",
+          this.entity.target_temperature_high,
+          this.entity.min_temp,
+          this.entity.max_temp,
+          this.entity.step
+        )}
+      `;
+    } else {
+      target_temp_label = html`${this.entity.target_temperature}`;
+      target_temp_slider = html`
+        ${this._range(
+          this.entity,
+          "set",
+          "target_temperature",
+          this.entity.target_temperature!!,
+          this.entity.min_temp,
+          this.entity.max_temp,
+          this.entity.step
+        )}
+      `;
+    }
+    let modes = html``;
+    if ((this.entity.modes ? this.entity.modes.length : 0) > 0) {
+      modes = html`Mode:<br />
+        ${this._select(
+          this.entity,
+          "set",
+          "mode",
+          this.entity.modes || [],
+          this.entity.mode || ""
+        )}`;
+    }
+    return html`
+      <label
+        >Target:&nbsp;${target_temp_label}</label
+      >
+      ${target_temp_slider} ${modes}
+    `;
+  }
 }
