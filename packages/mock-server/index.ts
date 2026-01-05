@@ -1,6 +1,6 @@
 /**
- * ESPHome Web Server Mock - Comprehensive Entity Coverage
- * Tests ALL entity types and their variations for UI development.
+ * ESPHome Web Server Mock
+ * Comprehensive mock server covering all entity types and variations for UI development and testing.
  * Run with: npx tsx index.ts
  */
 
@@ -60,16 +60,15 @@ interface LightEntity extends BaseEntity {
   brightness?: number;
   color_mode?: string;
   supported_color_modes?: string[];
-  r?: number;
-  g?: number;
-  b?: number;
-  w?: number;
-  c?: number;
+  color?: { r?: number; g?: number; b?: number; w?: number; c?: number };
+  white_value?: number; // legacy API, same as color.w
   color_temp?: number;
   min_mireds?: number;
   max_mireds?: number;
   effects?: string[];
   effect?: string;
+  effect_index?: number;
+  effect_count?: number;
 }
 
 interface FanEntity extends BaseEntity {
@@ -184,13 +183,7 @@ interface UpdateEntity extends BaseEntity {
   progress?: number;
 }
 
-interface MediaPlayerEntity extends BaseEntity {
-  domain: "media_player";
-  is_muted?: boolean;
-  volume?: number;
-  tts_url?: string;
-  media_url?: string;
-}
+// Note: MediaPlayer is NOT supported by web_server component
 
 type Entity =
   | SensorEntity
@@ -212,8 +205,7 @@ type Entity =
   | ValveEntity
   | AlarmControlPanelEntity
   | EventEntity
-  | UpdateEntity
-  | MediaPlayerEntity;
+  | UpdateEntity;
 
 // ============================================================================
 // State
@@ -306,9 +298,7 @@ function initEntities() {
     brightness: 255,
     color_mode: "rgb",
     supported_color_modes: ["rgb"],
-    r: 255,
-    g: 100,
-    b: 50,
+    color: { r: 255, g: 100, b: 50 },
     effects: [
       "None",
       "Rainbow",
@@ -319,6 +309,8 @@ function initEntities() {
       "Fireworks",
     ],
     effect: "None",
+    effect_index: 0,
+    effect_count: 7,
     sorting_weight: weight++,
     sorting_group: "Lights",
   });
@@ -334,10 +326,8 @@ function initEntities() {
     brightness: 200,
     color_mode: "rgbw",
     supported_color_modes: ["rgbw"],
-    r: 128,
-    g: 64,
-    b: 255,
-    w: 128,
+    color: { r: 128, g: 64, b: 255, w: 128 },
+    white_value: 128,
     sorting_weight: weight++,
     sorting_group: "Lights",
   });
@@ -353,11 +343,8 @@ function initEntities() {
     brightness: 220,
     color_mode: "rgbww",
     supported_color_modes: ["rgbww", "color_temp"],
-    r: 0,
-    g: 200,
-    b: 150,
-    c: 100,
-    w: 80,
+    color: { r: 0, g: 200, b: 150, c: 100, w: 80 },
+    white_value: 80,
     color_temp: 300,
     min_mireds: 153,
     max_mireds: 500,
@@ -1294,10 +1281,12 @@ function initEntities() {
   // ALARM CONTROL PANEL
   // =========================================================================
 
+  // Note: ESPHome sends the id field as "alarm-control-panel-{id}" (hyphenated prefix)
+  // but the domain is still "alarm_control_panel" for routing
   entities.set("alarm_control_panel-home", {
     unique_id: "alarm_control_panel-home",
     domain: "alarm_control_panel",
-    id: "home",
+    id: "alarm-control-panel-home", // ESPHome uses hyphenated prefix in id field
     name: "Home Alarm",
     state: "DISARMED",
     value: 0,
@@ -1358,23 +1347,6 @@ function initEntities() {
     entity_category: 1,
     sorting_weight: weight++,
     sorting_group: "Configuration",
-  });
-
-  // =========================================================================
-  // MEDIA PLAYER (if supported)
-  // =========================================================================
-
-  entities.set("media_player-speaker", {
-    unique_id: "media_player-speaker",
-    domain: "media_player",
-    id: "speaker",
-    name: "Smart Speaker",
-    state: "IDLE",
-    icon: "mdi:speaker",
-    is_muted: false,
-    volume: 0.5,
-    sorting_weight: weight++,
-    sorting_group: "Controls",
   });
 
   // =========================================================================
@@ -1610,18 +1582,31 @@ function handleAction(entity: Entity, action: string, params: URLSearchParams) {
         light.value = true;
         const brightness = params.get("brightness");
         if (brightness) light.brightness = parseInt(brightness);
+        // Initialize color object if needed
+        if (!light.color) light.color = {};
         const r = params.get("r"),
           g = params.get("g"),
           b = params.get("b");
-        if (r) light.r = parseInt(r);
-        if (g) light.g = parseInt(g);
-        if (b) light.b = parseInt(b);
-        const w = params.get("w");
-        if (w) light.w = parseInt(w);
+        if (r) light.color.r = parseInt(r);
+        if (g) light.color.g = parseInt(g);
+        if (b) light.color.b = parseInt(b);
+        const w = params.get("white_value") || params.get("w");
+        if (w) {
+          light.color.w = parseInt(w);
+          light.white_value = parseInt(w);
+        }
+        const c = params.get("c");
+        if (c) light.color.c = parseInt(c);
         const colorTemp = params.get("color_temp");
         if (colorTemp) light.color_temp = parseInt(colorTemp);
         const effect = params.get("effect");
-        if (effect) light.effect = effect;
+        if (effect) {
+          light.effect = effect;
+          // Update effect_index if effects list exists
+          if (light.effects) {
+            light.effect_index = light.effects.indexOf(effect);
+          }
+        }
         logMessage("I", "light", 145, `'${light.name}' - Turning ON`);
       } else if (action === "turn_off") {
         light.state = "OFF";
@@ -1899,24 +1884,7 @@ function handleAction(entity: Entity, action: string, params: URLSearchParams) {
       }
       break;
     }
-
-    case "media_player": {
-      const mp = entity as MediaPlayerEntity;
-      if (action === "play") {
-        mp.state = "PLAYING";
-      } else if (action === "pause") {
-        mp.state = "PAUSED";
-      } else if (action === "stop") {
-        mp.state = "IDLE";
-      } else if (action === "mute") {
-        mp.is_muted = !mp.is_muted;
-      } else if (action === "set") {
-        const volume = params.get("volume");
-        if (volume) mp.volume = parseFloat(volume);
-      }
-      logMessage("I", "media", 67, `'${mp.name}' - ${mp.state}`);
-      break;
-    }
+    // Note: media_player is NOT supported by ESPHome web_server component
   }
 
   broadcast("state", JSON.stringify(entity));
@@ -2097,8 +2065,8 @@ const server = http.createServer(
 
       const uptime = Date.now() - startTime;
       const config = JSON.stringify({
-        title: "ESPHome Mock Device",
-        comment: "Comprehensive Entity Test Server",
+        title: "ESPHome Test Device",
+        comment: "Mock server for UI development",
         ota: true,
         log: true,
         lang: "en",
