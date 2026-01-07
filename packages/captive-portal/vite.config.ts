@@ -1,8 +1,8 @@
 import { defineConfig } from "vite";
 import gzipPlugin from "rollup-plugin-gzip";
-import { viteSingleFile } from "vite-plugin-singlefile";
-
 import minifyHTML from "rollup-plugin-minify-html-template-literals";
+import { brotliCompressSync } from "zlib";
+import { viteSingleFile } from "vite-plugin-singlefile";
 import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 
 export default defineConfig({
@@ -11,6 +11,17 @@ export default defineConfig({
     viteSingleFile(),
     { ...minifyHTML(), enforce: "pre", apply: "build" },
     ViteMinifyHtml(),
+    {
+      ...gzipPlugin({
+        filter: /\.(html)$/,
+        additionalFiles: [],
+        customCompression: (content) =>
+          brotliCompressSync(Buffer.from(content)),
+        fileName: ".br",
+      }),
+      enforce: "post",
+      apply: "build",
+    },
     {
       ...gzipPlugin({ filter: /\.(html)$/ }),
       enforce: "post",
