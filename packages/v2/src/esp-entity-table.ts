@@ -201,14 +201,8 @@ export class EntityTable extends LitElement implements RestAction {
           background-color: rgba(127, 127, 127, 0.3);
         }
         select {
-          background-color: inherit;
-          color: inherit;
           width: 100%;
           border-radius: 4px;
-        }
-        option {
-          color: currentColor;
-          background-color: var(--primary-color, currentColor);
         }
         input[type="range"], input[type="text"] {
           width: calc(100% - 8rem);
