@@ -34,7 +34,7 @@ fetch("/config.json").then(function (response) {
     document.querySelector("link[rel~='icon']").href = `data:image/svg+xml,${wifi(-65)}`;
     if (config.web_server) {
       let webServerLink = document.createElement("div");
-      webServerLink.innerHTML = `<h3>Device Control</h3><a href="/?web_server=1" target="_blank">Open Web Server</a><br><br><hr><br>`;
+      webServerLink.innerHTML = `<h3>Device Control</h3><a href="/?web_server=1" target="_blank" onclick="window.open('/?web_server=1','_blank');return false;">Open Web Server</a><p style="font-size:12px;color:#666;">If this doesn't open, manually browse to ${window.location.origin}/?web_server=1</p><hr><br>`;
       // Insert before OTA Update section (third h1)
       document.body.getElementsByTagName("h1")[2].before(webServerLink);
     }
