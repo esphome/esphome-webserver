@@ -32,5 +32,10 @@ fetch("/config.json").then(function (response) {
     })
     document.querySelector("#net").innerHTML = html(result)
     document.querySelector("link[rel~='icon']").href = `data:image/svg+xml,${wifi(-65)}`;
+    if (config.web_server) {
+      let webServerLink = document.createElement("div");
+      webServerLink.innerHTML = `<br><hr><br><h3>Device Control</h3><a href="/?web_server">Open Web Server</a>`;
+      document.querySelector("#net").after(webServerLink);
+    }
   })
 })
