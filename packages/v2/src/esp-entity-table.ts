@@ -37,6 +37,9 @@ interface entityConfig {
   effects?: string[];
   effect?: string;
   has_action?: boolean;
+  // Water heater specific
+  away?: boolean;
+  is_on?: boolean;
 }
 
 export function getBasePath() {
@@ -647,13 +650,29 @@ class ActionRenderer {
           this.entity.mode || ""
         )}`;
     }
+    // Away mode toggle (if supported)
+    let away = this.entity.away !== undefined
+      ? html`Away:&nbsp;${this._actionButton(
+          this.entity,
+          this.entity.away ? "ON" : "OFF",
+          `set?away=${!this.entity.away}`
+        )}<br />`
+      : html``;
+    // On/Off toggle (if supported)
+    let on_off = this.entity.is_on !== undefined
+      ? html`Power:&nbsp;${this._actionButton(
+          this.entity,
+          this.entity.is_on ? "ON" : "OFF",
+          `set?is_on=${!this.entity.is_on}`
+        )}<br />`
+      : html``;
     const has_current = this.entity.current_temperature !== undefined;
     let current_temp = has_current
       ? html`Current:&nbsp;${this.entity.current_temperature}`
       : html``;
     return html`
       <label>${current_temp}${has_current && has_target ? ', ' : ''}${target_temp_label}</label>
-      ${target_temp_slider} ${modes}
+      ${target_temp_slider} ${modes} ${away} ${on_off}
     `;
   }
 }
