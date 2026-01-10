@@ -647,7 +647,7 @@ class ActionRenderer {
           "set",
           "mode",
           this.entity.modes || [],
-          this.entity.mode || ""
+          this.entity.state || ""
         )}`;
     }
     // Away mode toggle (if supported)
