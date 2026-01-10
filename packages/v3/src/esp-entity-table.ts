@@ -50,6 +50,9 @@ interface entityConfig {
   value_numeric_history: number[];
   uom?: string;
   is_disabled_by_default?: boolean;
+  // Water heater specific
+  away?: boolean;
+  is_on?: boolean;
 }
 
 interface groupConfig {
@@ -837,8 +840,16 @@ class ActionRenderer {
 
   render_water_heater() {
     if (!this.entity) return;
-    let target_temp_slider, target_temp_label, target_temp;
-    
+
+    // Current temperature display (if available)
+    let current_temp = this.entity.current_temperature !== undefined
+      ? html`<div class="climate-row" style="padding-bottom: 10px">
+               <label>Current:&nbsp;${this.entity.current_temperature} °C</label>
+             </div>`
+      : nothing;
+
+    // Target temperature control(s)
+    let target_temp;
     if (
       this.entity.target_temperature_low !== undefined &&
       this.entity.target_temperature_high !== undefined
@@ -868,7 +879,7 @@ class ActionRenderer {
             this.entity.step
           )}
         </div>`;
-    } else {
+    } else if (this.entity.target_temperature !== undefined) {
       target_temp = html`
         <div class="climate-row">
           <label>Target:&nbsp;</label>
@@ -876,30 +887,62 @@ class ActionRenderer {
             this.entity,
             "set",
             "target_temperature",
-            this.entity.target_temperature!!,
+            this.entity.target_temperature,
             this.entity.min_temp,
             this.entity.max_temp,
             this.entity.step
           )}
         </div>`;
+    } else {
+      target_temp = nothing;
     }
-    let modes = html``;
-    if ((this.entity.modes ? this.entity.modes.length : 0) > 0) {
-      modes = html`
-        <div class="climate-row">
-          <label>Mode:&nbsp;</label>
-          ${this._select(
-            this.entity,
-            "set",
-            "mode",
-            this.entity.modes || [],
-            this.entity.mode || ""
-          )}
-        </div>`;
-    }
+
+    // Mode selector (if modes available)
+    let modes = (this.entity.modes?.length ?? 0) > 0
+      ? html`
+          <div class="climate-row">
+            <label>Mode:&nbsp;</label>
+            ${this._select(
+              this.entity,
+              "set",
+              "mode",
+              this.entity.modes || [],
+              this.entity.mode || ""
+            )}
+          </div>`
+      : nothing;
+
+    // Away mode toggle (if supported)
+    let away = this.entity.away !== undefined
+      ? html`
+          <div class="climate-row">
+            <label>Away:&nbsp;</label>
+            ${this._actionButton(
+              this.entity,
+              this.entity.away ? "ON" : "OFF",
+              `set?away=${!this.entity.away}`,
+              false
+            )}
+          </div>`
+      : nothing;
+
+    // On/Off toggle (if supported)
+    let on_off = this.entity.is_on !== undefined
+      ? html`
+          <div class="climate-row">
+            <label>Power:&nbsp;</label>
+            ${this._actionButton(
+              this.entity,
+              this.entity.is_on ? "ON" : "OFF",
+              `set?is_on=${!this.entity.is_on}`,
+              false
+            )}
+          </div>`
+      : nothing;
+
     return html`
       <div class="climate-wrap">
-        ${target_temp} ${modes}
+        ${current_temp} ${target_temp} ${modes} ${away} ${on_off}
       </div>
     `;
   }
