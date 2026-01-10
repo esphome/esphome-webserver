@@ -590,12 +590,15 @@ class ActionRenderer {
   }
   render_water_heater() {
     if (!this.entity) return;
-    let target_temp_slider, target_temp_label;
+    let target_temp_slider = html``;
+    let target_temp_label = html``;
+    let has_target = false;
     if (
       this.entity.target_temperature_low !== undefined &&
       this.entity.target_temperature_high !== undefined
     ) {
-      target_temp_label = html`${this.entity
+      has_target = true;
+      target_temp_label = html`Target:&nbsp;${this.entity
         .target_temperature_low}&nbsp;..&nbsp;${this.entity
         .target_temperature_high}`;
       target_temp_slider = html`
@@ -618,14 +621,15 @@ class ActionRenderer {
           this.entity.step
         )}
       `;
-    } else {
-      target_temp_label = html`${this.entity.target_temperature}`;
+    } else if (this.entity.target_temperature !== undefined) {
+      has_target = true;
+      target_temp_label = html`Target:&nbsp;${this.entity.target_temperature}`;
       target_temp_slider = html`
         ${this._range(
           this.entity,
           "set",
           "target_temperature",
-          this.entity.target_temperature!!,
+          this.entity.target_temperature,
           this.entity.min_temp,
           this.entity.max_temp,
           this.entity.step
@@ -643,10 +647,12 @@ class ActionRenderer {
           this.entity.mode || ""
         )}`;
     }
+    const has_current = this.entity.current_temperature !== undefined;
+    let current_temp = has_current
+      ? html`Current:&nbsp;${this.entity.current_temperature}`
+      : html``;
     return html`
-      <label
-        >Target:&nbsp;${target_temp_label}</label
-      >
+      <label>${current_temp}${has_current && has_target ? ', ' : ''}${target_temp_label}</label>
       ${target_temp_slider} ${modes}
     `;
   }
