@@ -907,7 +907,7 @@ class ActionRenderer {
               "set",
               "mode",
               this.entity.modes || [],
-              this.entity.mode || ""
+              this.entity.state || ""
             )}
           </div>`
       : nothing;
