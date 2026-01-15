@@ -40,6 +40,9 @@ interface entityConfig {
   // Water heater specific
   away?: boolean;
   is_on?: boolean;
+  // Infrared specific
+  supports_transmitter?: boolean;
+  supports_receiver?: boolean;
 }
 
 export function getBasePath() {
@@ -673,6 +676,111 @@ class ActionRenderer {
     return html`
       <label>${current_temp}${has_current && has_target ? ', ' : ''}${target_temp_label}</label>
       ${target_temp_slider} ${modes} ${away} ${on_off}
+    `;
+  }
+
+  render_infrared() {
+    if (!this.entity) return;
+
+    // Only show transmit UI if entity supports transmitter
+    if (this.entity.supports_transmitter !== true) {
+      return html``;
+    }
+
+    const entity = this.entity;
+
+    // Helper to encode timings array to base64
+    const encodeTimings = (timingsStr: string): string => {
+      const timings = timingsStr.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
+      const buffer = new ArrayBuffer(timings.length * 4);
+      const view = new DataView(buffer);
+      timings.forEach((val, i) => view.setInt32(i * 4, val, true)); // little-endian
+      const bytes = new Uint8Array(buffer);
+      let binary = '';
+      bytes.forEach(b => binary += String.fromCharCode(b));
+      return btoa(binary);
+    };
+
+    const handleTransmit = (e: Event) => {
+      const button = e.currentTarget as HTMLElement;
+      const container = button.parentElement;
+      if (!container) {
+        console.error('Infrared: Could not find container');
+        return;
+      }
+
+      const carrierInput = container.querySelector('input[data-field="carrier"]') as HTMLInputElement;
+      const repeatInput = container.querySelector('input[data-field="repeat"]') as HTMLInputElement;
+      const timingsInput = container.querySelector('input[data-field="timings"]') as HTMLInputElement;
+
+      if (!carrierInput || !repeatInput || !timingsInput) {
+        console.error('Infrared: Could not find input elements', { carrierInput, repeatInput, timingsInput });
+        return;
+      }
+
+      const carrier = carrierInput.value || '38000';
+      const repeat = repeatInput.value || '1';
+      const timingsRaw = timingsInput.value || '';
+
+      if (!timingsRaw.trim()) {
+        console.warn('Infrared: No timings provided');
+        return;
+      }
+
+      const timingsEncoded = encodeTimings(timingsRaw);
+      console.log('Infrared: Transmitting', { carrier, repeat, timingsRaw, timingsEncoded });
+
+      // Build URL for transmit action (without query params - data goes in body)
+      const url = buildEntityActionUrl(entity, 'transmit');
+
+      // Send data in POST body to avoid URI Too Long error
+      const body = new URLSearchParams();
+      body.append('carrier_frequency', carrier);
+      body.append('repeat_count', repeat);
+      body.append('data', timingsEncoded);
+
+      fetch(url, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/x-www-form-urlencoded'
+        },
+        body: body.toString()
+      }).then(r => {
+        console.log('Infrared: Transmit response', r);
+      }).catch(err => {
+        console.error('Infrared: Transmit error', err);
+      });
+    };
+
+    return html`
+      <div class="infrared-wrap">
+        <label>Carrier (Hz):&nbsp;</label>
+        <input
+          type="number"
+          data-field="carrier"
+          value="38000"
+          min="1000"
+          max="100000"
+          style="width: 80px"
+        /><br />
+        <label>Repeat:&nbsp;</label>
+        <input
+          type="number"
+          data-field="repeat"
+          value="1"
+          min="1"
+          max="100"
+          style="width: 50px"
+        /><br />
+        <label>Timings:&nbsp;</label>
+        <input
+          type="text"
+          data-field="timings"
+          placeholder="e.g. 9000,-4500,560,-560,..."
+          style="width: calc(100% - 8rem); min-width: 10rem"
+        /><br />
+        <button class="rnd" @click=${handleTransmit}>TX</button>
+      </div>
     `;
   }
 }
