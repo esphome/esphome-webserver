@@ -684,7 +684,7 @@ class ActionRenderer {
 
     // Only show transmit UI if entity supports transmitter
     if (this.entity.supports_transmitter !== true) {
-      return html``;
+      return nothing;
     }
 
     const entity = this.entity;
