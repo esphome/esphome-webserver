@@ -689,7 +689,7 @@ class ActionRenderer {
 
     const entity = this.entity;
 
-    // Helper to encode timings array to base64
+    // Helper to encode timings array to base64url
     const encodeTimings = (timingsStr: string): string => {
       const timings = timingsStr.split(',').map(s => parseInt(s.trim(), 10)).filter(n => !isNaN(n));
       const buffer = new ArrayBuffer(timings.length * 4);
@@ -698,7 +698,8 @@ class ActionRenderer {
       const bytes = new Uint8Array(buffer);
       let binary = '';
       bytes.forEach(b => binary += String.fromCharCode(b));
-      return btoa(binary);
+      // Convert to base64url: replace + with -, / with _, remove padding =
+      return btoa(binary).replace(/\+/g, '-').replace(/\//g, '_').replace(/=+$/, '');
     };
 
     const handleTransmit = (e: Event) => {
