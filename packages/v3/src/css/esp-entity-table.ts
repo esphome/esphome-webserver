@@ -93,4 +93,22 @@ export default css`
   input[type="color"]::-webkit-color-swatch-wrapper {
     padding: 0 !important;
   }
+  .serial-channel-row {
+    flex-direction: column;
+    align-items: stretch;
+    padding: 8px 0;
+  }
+  .serial-channel-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 8px 16px;
+    font-weight: 600;
+    color: #44739e;
+  }
+  .serial-channel-content {
+    width: 100%;
+    margin: 0 !important;
+    text-align: left !important;
+  }
 `;

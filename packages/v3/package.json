@@ -13,7 +13,8 @@
     "chart.js": "^4.4.1",
     "http-proxy-middleware": "^2.0.1",
     "iconify-icon": "^1.0.8",
-    "lit": "^2.0.2"
+    "lit": "^2.0.2",
+    "@xterm/xterm": "^5.5.0"
   },
   "devDependencies": {
     "rollup-plugin-copy": "^3.4.0",
