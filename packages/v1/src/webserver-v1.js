@@ -67,13 +67,15 @@ multi_actions = [
 
 source.addEventListener('state', function (e) {
     const data = JSON.parse(e.data);
-    // New firmware sends id as "domain/name" or "domain/device/name"
-    // Old firmware sends id as "domain-object_id"
+    // Prefer name_id (new format) over id (legacy format) for entity identification
+    // New firmware sends name_id as "domain/name" or "domain/device/name"
+    // Legacy format in id is "domain-object_id"
+    const entityId = data.name_id || data.id;
     // Try getElementById first (works for old format), then query by data attributes
-    let row = document.getElementById(data.id);
-    if (!row && data.id.includes('/')) {
+    let row = document.getElementById(entityId);
+    if (!row && entityId.includes('/')) {
         // New format: parse and find by data attributes
-        const parts = data.id.split('/');
+        const parts = entityId.split('/');
         const domain = parts[0];
         if (parts.length === 3) {
             // domain/device/name

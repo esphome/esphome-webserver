@@ -98,15 +98,17 @@ export class EntityTable extends LitElement implements RestAction {
     window.source?.addEventListener("state", (e: Event) => {
       const messageEvent = e as MessageEvent;
       const data = JSON.parse(messageEvent.data);
-      let idx = this.entities.findIndex((x) => x.unique_id === data.id);
-      if (idx === -1 && data.id) {
+      // Prefer name_id (new format) over id (legacy format) for entity identification
+      const entityId = data.name_id || data.id;
+      let idx = this.entities.findIndex((x) => x.unique_id === entityId);
+      if (idx === -1 && entityId) {
         // Dynamically add discovered entity
         // domain comes from JSON (new format) or parsed from id (old format)
-        const domain = data.domain || parseDomainFromId(data.id);
+        const domain = data.domain || parseDomainFromId(entityId);
         let entity = {
           ...data,
           domain: domain,
-          unique_id: data.id,
+          unique_id: entityId,
         } as entityConfig;
         entity.has_action = this.hasAction(entity);
         if (entity.has_action) {

@@ -145,8 +145,10 @@ export class EntityTable extends LitElement implements RestAction {
     window.source?.addEventListener('state', (e: Event) => {
       const messageEvent = e as MessageEvent;
       const data = JSON.parse(messageEvent.data);
-      let idx = this.entities.findIndex((x) => x.unique_id === data.id);
-      if (idx != -1 && data.id) {
+      // Prefer name_id (new format) over id (legacy format) for entity identification
+      const entityId = data.name_id || data.id;
+      let idx = this.entities.findIndex((x) => x.unique_id === entityId);
+      if (idx != -1 && entityId) {
         if (typeof data.value === 'number') {
           let history = [...this.entities[idx].value_numeric_history];
           history.push(data.value);
@@ -163,18 +165,18 @@ export class EntityTable extends LitElement implements RestAction {
         if (data?.name && data?.domain) {
           this.addEntity(data);
         } else {
-          if (this._unknown_state_events[data.id]) {
-            this._unknown_state_events[data.id]++;
+          if (this._unknown_state_events[entityId]) {
+            this._unknown_state_events[entityId]++;
           } else {
-            this._unknown_state_events[data.id] = 1;
+            this._unknown_state_events[entityId] = 1;
           }
           // ignore the first few events, maybe the esp will send a detail_all
           // event soon
-          if (this._unknown_state_events[data.id] < 1) {
+          if (this._unknown_state_events[entityId] < 1) {
             return;
           }
 
-          fetch(buildIdFetchUrl(this._basePath, data.id), {
+          fetch(buildIdFetchUrl(this._basePath, entityId), {
             method: 'GET',
           })
               .then((r) => {
@@ -224,15 +226,17 @@ export class EntityTable extends LitElement implements RestAction {
   }
 
   addEntity(data: any) {
-    let idx = this.entities.findIndex((x) => x.unique_id === data.id);
-    if (idx === -1 && data.id) {
+    // Prefer name_id (new format) over id (legacy format) for entity identification
+    const entityId = data.name_id || data.id;
+    let idx = this.entities.findIndex((x) => x.unique_id === entityId);
+    if (idx === -1 && entityId) {
       // Dynamically add discovered entity
       // domain comes from JSON (new format) or parsed from id (old format)
-      const domain = data.domain || parseDomainFromId(data.id);
+      const domain = data.domain || parseDomainFromId(entityId);
       let entity = {
         ...data,
         domain: domain,
-        unique_id: data.id,
+        unique_id: entityId,
         entity_category: data.entity_category,
         sorting_group: data.sorting_group ?? (EntityTable.ENTITY_CATEGORIES[parseInt(data.entity_category)] || EntityTable.ENTITY_UNDEFINED),
         value_numeric_history: [data.value],
