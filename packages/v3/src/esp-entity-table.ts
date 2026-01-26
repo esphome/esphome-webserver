@@ -156,6 +156,7 @@ export class EntityTable extends LitElement implements RestAction {
         }
 
         delete data.id;
+        delete data.name_id;
         delete data.domain;
         delete data.unique_id;
         Object.assign(this.entities[idx], data);
