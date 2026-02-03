@@ -98,13 +98,29 @@ export default class EspApp extends LitElement {
     this.scheme = this.schemeDefault();
     window.source.addEventListener("ping", (e: MessageEvent) => {
       if (e.data?.length) {
-        this.setConfig(JSON.parse(e.data));
-        this.requestUpdate();
+        const data = JSON.parse(e.data);
+        if (data.title !== undefined) {
+          // Full config: {"title":"...","comment":"...","ota":true,"log":true,"lang":"en","uptime":123456}
+          this.setConfig(data);
+          this.requestUpdate();
+        }
+        if (data.uptime !== undefined) {
+          // New firmware sends uptime in JSON data (64-bit safe)
+          // Full config (on connect): {"title":"...","uptime":123456}
+          // Interval ping: {"uptime":123456}
+          this._setUptime(data.uptime);
+        } else {
+          // Old firmware sends uptime in lastEventId (32-bit, may overflow after ~49 days)
+          this._updateUptime(e);
+        }
+      } else {
+        // Old firmware interval ping: empty data, uptime in lastEventId
+        this._updateUptime(e);
       }
-      this._updateUptime(e);
       this.lastUpdate = Date.now();
     });
     window.source.addEventListener("log", (e: MessageEvent) => {
+      // Old firmware sends uptime in lastEventId for log events
       this._updateUptime(e);
       this.lastUpdate = Date.now();
     });
@@ -146,7 +162,7 @@ export default class EspApp extends LitElement {
   }
 
   uptime() {
-    return `${getRelativeTime(-this.ping | 0)}`;
+    return `${getRelativeTime(-this.ping || 0)}`;
   }
 
   renderOta() {
@@ -227,11 +243,15 @@ export default class EspApp extends LitElement {
     `;
   }
 
+  private _setUptime(uptime: number) {
+    this.ping = uptime;
+    this.connected = true;
+    this.requestUpdate();
+  }
+
   private _updateUptime(e: MessageEvent) {
     if (e.lastEventId) {
-      this.ping = parseInt(e.lastEventId);
-      this.connected = true;
-      this.requestUpdate();
+      this._setUptime(parseInt(e.lastEventId));
     }
   }
 
