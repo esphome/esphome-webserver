@@ -75,25 +75,26 @@ interface groupConfig {
 export const stateOn = "ON";
 export const stateOff = "OFF";
 
-// Clear mutually exclusive fields for domain-specific SSE state merging.
-// Climate has pairs (fan_mode/custom_fan_mode, preset/custom_preset) where
-// the backend only sends the active one; stale values from the other must be cleared.
-function mergeEntityState(entity: entityConfig, data: Record<string, any>): void {
-  if (entity.domain === "climate") {
-    if ("fan_mode" in data) delete entity.custom_fan_mode;
-    if ("custom_fan_mode" in data) delete entity.fan_mode;
-    if ("preset" in data) delete entity.custom_preset;
-    if ("custom_preset" in data) delete entity.preset;
-    if (!("fan_mode" in data) && !("custom_fan_mode" in data)) {
-      delete entity.fan_mode;
-      delete entity.custom_fan_mode;
-    }
-    if (!("preset" in data) && !("custom_preset" in data)) {
-      delete entity.preset;
-      delete entity.custom_preset;
-    }
+// Per-domain SSE state merge functions (like render_climate, render_light, etc.)
+// Clear mutually exclusive fields before Object.assign to prevent stale values.
+function merge_climate(entity: entityConfig, data: Record<string, any>): void {
+  if ("fan_mode" in data) delete entity.custom_fan_mode;
+  if ("custom_fan_mode" in data) delete entity.fan_mode;
+  if ("preset" in data) delete entity.custom_preset;
+  if ("custom_preset" in data) delete entity.preset;
+  if (!("fan_mode" in data) && !("custom_fan_mode" in data)) {
+    delete entity.fan_mode;
+    delete entity.custom_fan_mode;
+  }
+  if (!("preset" in data) && !("custom_preset" in data)) {
+    delete entity.preset;
+    delete entity.custom_preset;
   }
 }
+
+const merge_state: Record<string, (entity: entityConfig, data: Record<string, any>) => void> = {
+  climate: merge_climate,
+};
 
 export function getBasePath() {
   let str = window.location.pathname;
@@ -188,7 +189,7 @@ export class EntityTable extends LitElement implements RestAction {
         delete data.name_id;
         delete data.domain;
         delete data.unique_id;
-        mergeEntityState(this.entities[idx], data);
+        merge_state[this.entities[idx].domain]?.(this.entities[idx], data);
         Object.assign(this.entities[idx], data);
         this.requestUpdate();
       } else {
