@@ -29,8 +29,17 @@ interface entityConfig {
   max_length?: number;
   pattern?: string;
   current_temperature?: number;
+  current_humidity?: number;
   modes?: number[];
   mode?: number;
+  presets?: string[];
+  preset?: string;
+  custom_presets?: string[];
+  custom_preset?: string;
+  fan_modes?: string[];
+  fan_mode?: string;
+  custom_fan_modes?: string[];
+  custom_fan_mode?: string;
   speed_count?: number;
   speed_level?: number;
   speed: string;
@@ -122,6 +131,22 @@ export class EntityTable extends LitElement implements RestAction {
         delete data.name_id;
         delete data.domain;
         delete data.unique_id;
+        // Climate: clear mutually exclusive fields when their counterpart arrives
+        if (this.entities[idx].domain === "climate") {
+          if ("fan_mode" in data) delete this.entities[idx].custom_fan_mode;
+          if ("custom_fan_mode" in data) delete this.entities[idx].fan_mode;
+          if ("preset" in data) delete this.entities[idx].custom_preset;
+          if ("custom_preset" in data) delete this.entities[idx].preset;
+          // If neither in a pair is sent, both should be cleared
+          if (!("fan_mode" in data) && !("custom_fan_mode" in data)) {
+            delete this.entities[idx].fan_mode;
+            delete this.entities[idx].custom_fan_mode;
+          }
+          if (!("preset" in data) && !("custom_preset" in data)) {
+            delete this.entities[idx].preset;
+            delete this.entities[idx].custom_preset;
+          }
+        }
         Object.assign(this.entities[idx], data);
         this.requestUpdate();
       }
@@ -577,12 +602,44 @@ class ActionRenderer {
           this.entity.mode || ""
         )}`;
     }
+    let allPresets = [
+      "",
+      ...(this.entity.presets || []),
+      ...(this.entity.custom_presets || []),
+    ];
+    let presets = allPresets.length > 1
+      ? html`Preset:<br />
+          ${this._select(
+            this.entity,
+            "set",
+            "preset",
+            allPresets,
+            this.entity.preset || this.entity.custom_preset || ""
+          )}`
+      : html``;
+    let allFanModes = [
+      ...(this.entity.fan_modes || []),
+      ...(this.entity.custom_fan_modes || []),
+    ];
+    let fan_modes = allFanModes.length > 0
+      ? html`Fan:<br />
+          ${this._select(
+            this.entity,
+            "set",
+            "fan_mode",
+            allFanModes,
+            this.entity.fan_mode || this.entity.custom_fan_mode || ""
+          )}`
+      : html``;
+    let humidity = this.entity.current_humidity !== undefined
+      ? html`, ${this.entity.current_humidity} %`
+      : html``;
     return html`
       <label
-        >Current:&nbsp;${this.entity.current_temperature},
+        >Current:&nbsp;${this.entity.current_temperature}${humidity},
         Target:&nbsp;${target_temp_label}</label
       >
-      ${target_temp_slider} ${modes}
+      ${target_temp_slider} ${modes} ${presets} ${fan_modes}
     `;
   }
   render_valve() {
