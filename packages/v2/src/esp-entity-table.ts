@@ -54,6 +54,26 @@ interface entityConfig {
   supports_receiver?: boolean;
 }
 
+// Clear mutually exclusive fields for domain-specific SSE state merging.
+// Climate has pairs (fan_mode/custom_fan_mode, preset/custom_preset) where
+// the backend only sends the active one; stale values from the other must be cleared.
+function mergeEntityState(entity: entityConfig, data: Record<string, any>): void {
+  if (entity.domain === "climate") {
+    if ("fan_mode" in data) delete entity.custom_fan_mode;
+    if ("custom_fan_mode" in data) delete entity.fan_mode;
+    if ("preset" in data) delete entity.custom_preset;
+    if ("custom_preset" in data) delete entity.preset;
+    if (!("fan_mode" in data) && !("custom_fan_mode" in data)) {
+      delete entity.fan_mode;
+      delete entity.custom_fan_mode;
+    }
+    if (!("preset" in data) && !("custom_preset" in data)) {
+      delete entity.preset;
+      delete entity.custom_preset;
+    }
+  }
+}
+
 export function getBasePath() {
   let str = window.location.pathname;
   return str.endsWith("/") ? str.slice(0, -1) : str;
@@ -131,22 +151,7 @@ export class EntityTable extends LitElement implements RestAction {
         delete data.name_id;
         delete data.domain;
         delete data.unique_id;
-        // Climate: clear mutually exclusive fields when their counterpart arrives
-        if (this.entities[idx].domain === "climate") {
-          if ("fan_mode" in data) delete this.entities[idx].custom_fan_mode;
-          if ("custom_fan_mode" in data) delete this.entities[idx].fan_mode;
-          if ("preset" in data) delete this.entities[idx].custom_preset;
-          if ("custom_preset" in data) delete this.entities[idx].preset;
-          // If neither in a pair is sent, both should be cleared
-          if (!("fan_mode" in data) && !("custom_fan_mode" in data)) {
-            delete this.entities[idx].fan_mode;
-            delete this.entities[idx].custom_fan_mode;
-          }
-          if (!("preset" in data) && !("custom_preset" in data)) {
-            delete this.entities[idx].preset;
-            delete this.entities[idx].custom_preset;
-          }
-        }
+        mergeEntityState(this.entities[idx], data);
         Object.assign(this.entities[idx], data);
         this.requestUpdate();
       }
@@ -632,7 +637,7 @@ class ActionRenderer {
           )}`
       : html``;
     let humidity = this.entity.current_humidity !== undefined
-      ? html`, ${this.entity.current_humidity} %`
+      ? html`&nbsp;|&nbsp;${this.entity.current_humidity} %`
       : html``;
     return html`
       <label
