@@ -75,7 +75,6 @@ interface groupConfig {
 export const stateOn = "ON";
 export const stateOff = "OFF";
 
-// Per-domain SSE state merge functions (like render_climate, render_light, etc.)
 // Clear mutually exclusive fields before Object.assign to prevent stale values.
 function merge_climate(entity: entityConfig, data: Record<string, any>): void {
   if ("fan_mode" in data) delete entity.custom_fan_mode;
