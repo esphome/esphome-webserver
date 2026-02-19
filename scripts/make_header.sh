@@ -28,7 +28,7 @@ fi
 embed_compressed_file() {
   local input_file="$1"
   local array_name="$2"
-  echo "const uint8_t ${array_name}[] PROGMEM = {" >>"$OUTPUT_FILE"
+  echo "constexpr uint8_t ${array_name}[] PROGMEM = {" >>"$OUTPUT_FILE"
   xxd -cols 19 -i "$input_file" | sed -e '2,$!d' -e 's/^/    /' -e '$d' | sed -e '$d' | sed -e '$s/$/};/' >>"$OUTPUT_FILE"
 }
 
