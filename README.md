@@ -38,6 +38,60 @@ web_server:
   version: 2
 ```
 
+## SSE Event Protocol
+
+The web server backend sends [Server-Sent Events](https://developer.mozilla.org/en-US/docs/Web/API/Server-Sent_Events) on the `/events` endpoint. The frontend listens for the following event types:
+
+### `ping`
+
+Sent on initial client connection (with full config) and every 10 seconds (interval keepalive).
+
+**Initial connection (full config):**
+```
+event: ping
+id: <millis()>
+data: {"title":"My Device","comment":"Living Room","ota":true,"log":true,"lang":"en","uptime":12345}
+```
+
+**Interval ping:**
+```
+event: ping
+id: <millis()>
+data: {"uptime":12345}
+```
+
+| Field | Type | Description |
+|-------|------|-------------|
+| `title` | string | Device friendly name (or name if no friendly name set) |
+| `comment` | string | Device comment |
+| `ota` | boolean | Whether OTA updates are enabled |
+| `log` | boolean | Whether log output is exposed |
+| `lang` | string | Language code (currently always `"en"`) |
+| `uptime` | uint32 | Device uptime in **seconds** (good for ~136 years) |
+
+The SSE `id` field contains `millis()` (32-bit milliseconds) for SSE protocol reconnection compliance. This is **not** used for uptime display.
+
+**Old firmware (pre-2026.3):** Interval pings send empty `data`. Uptime is derived from `e.lastEventId` (millis, 32-bit, overflows after ~49.7 days). The `uptime` JSON field is absent from the config ping.
+
+### `log`
+
+Sent for each log message.
+
+```
+event: log
+id: <millis()>
+data: <log message with ANSI color codes>
+```
+
+### `state`
+
+Sent when an entity's state changes and on initial connection for all entities.
+
+```
+event: state
+data: {"id":"sensor-temperature","state":"23.5","value":"23.50"}
+```
+
 development
 ===========
 
