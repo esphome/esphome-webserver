@@ -62,6 +62,7 @@ export default class EspApp extends LitElement {
   @state() ping: number = 0;
   @state() connected: boolean = true;
   @state() lastUpdate: number = 0;
+  private _hasJsonUptime: boolean = false;
   @query("#beat")
   beat!: HTMLSpanElement;
 
@@ -105,10 +106,11 @@ export default class EspApp extends LitElement {
           this.requestUpdate();
         }
         if (data.uptime !== undefined) {
-          // New firmware sends uptime in JSON data (64-bit safe)
+          // New firmware sends uptime in seconds in JSON data (overflow-safe)
           // Full config (on connect): {"title":"...","uptime":123456}
           // Interval ping: {"uptime":123456}
-          this._setUptime(data.uptime);
+          this._hasJsonUptime = true;
+          this._setUptime(data.uptime * 1000);
         } else {
           // Old firmware sends uptime in lastEventId (32-bit, may overflow after ~49 days)
           this._updateUptime(e);
@@ -121,7 +123,11 @@ export default class EspApp extends LitElement {
     });
     window.source.addEventListener("log", (e: MessageEvent) => {
       // Old firmware sends uptime in lastEventId for log events
-      this._updateUptime(e);
+      // Skip when new firmware provides uptime via JSON ping to avoid
+      // millis() overwriting the overflow-safe seconds-based value
+      if (!this._hasJsonUptime) {
+        this._updateUptime(e);
+      }
       this.lastUpdate = Date.now();
     });
     window.source.addEventListener("state", (e: MessageEvent) => {
