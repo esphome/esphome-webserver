@@ -67,7 +67,13 @@ export default class EspApp extends LitElement {
       const messageEvent = e as MessageEvent;
       const d: String = messageEvent.data;
       if (d.length) {
-        this.setConfig(JSON.parse(messageEvent.data));
+        const data = JSON.parse(messageEvent.data);
+        // Only apply config when full config is present (has title).
+        // New firmware sends interval pings with only {"uptime":...}
+        // which would wipe the existing config if passed to setConfig.
+        if (data.title !== undefined) {
+          this.setConfig(data);
+        }
       }
       this.ping = messageEvent.lastEventId;
     });
