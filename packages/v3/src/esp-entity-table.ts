@@ -25,6 +25,7 @@ interface entityConfig {
   option?: string[];
   assumed_state?: boolean;
   brightness?: number;
+  color_temp?: number;
   color_mode?: string;
   color: object;
   target_temperature?: number;
@@ -688,9 +689,20 @@ class ActionRenderer {
               "turn_on",
               "brightness",
               this.entity.brightness,
-              0,
-              255,
-              1
+              "0",
+              "255",
+              1,
+            )
+          : ""}
+        ${this.entity.color_temp
+          ? this._range(
+              this.entity,
+              "turn_on",
+              "color_temp",
+              this.entity.color_temp,
+              "154",
+              "370",
+              1,
             )
           : ""}
         ${this.entity.color_mode === "rgb" || this.entity.color_mode === "rgbw"
