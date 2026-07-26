@@ -1,9 +1,27 @@
-{"name":"My ESPhome",
-    "aps":[
-        {}
-        ,{"ssid":"Hermione","rssi":-50,"lock":0}
-        ,{"ssid":"Neville","rssi":-65,"lock":1}
-        ,{"ssid":"Gandalf the Grey","rssi":-85,"lock":1}
-        ,{"ssid":"Hagrid","rssi":-95,"lock":0}
+{
+    "mac": "AA:BB:CC:DD:EE:FF",
+    "name": "My ESPhome",
+    "aps": [
+        {},
+        {
+            "ssid": "Hermione",
+            "rssi": -50,
+            "lock": 0
+        },
+        {
+            "ssid": "Neville",
+            "rssi": -65,
+            "lock": 1
+        },
+        {
+            "ssid": "Gandalf the Grey",
+            "rssi": -85,
+            "lock": 1
+        },
+        {
+            "ssid": "Hagrid",
+            "rssi": -95,
+            "lock": 0
+        }
     ]
 }
