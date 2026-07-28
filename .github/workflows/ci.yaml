@@ -7,26 +7,15 @@ on:
       - dev
   pull_request:
 
+permissions: {}
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: true
+
 jobs:
   build:
-    name: Build ${{ matrix.name }}
-    runs-on: ubuntu-latest
-    strategy:
-      matrix:
-        include:
-          - name: Captive Portal
-            directory: captive-portal
-          - name: Webserver v2
-            directory: v2
-          - name: Webserver v3
-            directory: v3
-    steps:
-      - name: Clone the repo
-        uses: actions/checkout@b4ffde65f46336ab88eb53be808477a3936bae11  # v4.1.1
-      - name: Set up Node.JS
-        uses: actions/setup-node@60edb5dd545a775178f52524783378180af0d1f8  # v4.0.2
-      - name: Install dependencies
-        run: npm install
-      - name: Build ${{ matrix.name }}
-        run: npm run build
-        working-directory: packages/${{ matrix.directory }}
+    name: Build
+    permissions:
+      contents: read
+    uses: ./.github/workflows/build.yaml

@@ -1,0 +1,85 @@
+name: Build
+
+# Reusable build shared by CI and Release so the package list lives in exactly
+# one place. Artifacts named ``component-*`` are laid out as
+# ``<component>/<file>`` so the merged tree can be copied straight into
+# ``esphome/components/`` without knowing which package produced what.
+
+on:
+  workflow_call:
+
+jobs:
+  build:
+    name: Build ${{ matrix.name }}
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - name: Captive Portal
+            package: captive-portal
+            artifact: component-captive-portal
+            source: _static/captive_portal/*.h
+            dest: captive_portal
+          # v1 assets are not embedded into a component - users download them
+          # from the release and point ``css_include``/``js_include`` at them.
+          - name: Webserver v1
+            package: v1
+            artifact: webserver-v1
+            source: _static/v1/*
+            dest: ""
+          - name: Webserver v2
+            package: v2
+            artifact: component-web-server-v2
+            source: _static/v2/*.h
+            dest: web_server
+          - name: Webserver v3
+            package: v3
+            artifact: component-web-server-v3
+            source: _static/v3/*.h
+            dest: web_server
+    steps:
+      - name: Clone the repo
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1  # v7.0.1
+
+      - name: Set up Node.JS
+        uses: actions/setup-node@820762786026740c76f36085b0efc47a31fe5020  # v7.0.0
+        with:
+          node-version-file: .nvmrc
+          cache: npm
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Type check ${{ matrix.name }}
+        # No package defines a ``typecheck`` script yet - the sources currently
+        # fail ``tsc --noEmit``, so this is a no-op until those are fixed. Add
+        # the script per package to turn it on. v1 is plain JS and never will.
+        run: npm run typecheck --if-present
+        working-directory: packages/${{ matrix.package }}
+
+      - name: Build ${{ matrix.name }}
+        run: npm run build
+        working-directory: packages/${{ matrix.package }}
+
+      - name: Stage artifact
+        env:
+          SOURCE: ${{ matrix.source }}
+          DEST: ${{ matrix.dest }}
+        run: |
+          set -euo pipefail
+          dest="dist/${DEST}"
+          mkdir -p "$dest"
+          # SOURCE is deliberately unquoted so the glob expands; an unmatched
+          # glob makes cp fail rather than silently producing an empty artifact.
+          cp -a ${SOURCE} "$dest/"
+          find dist -type f | sort
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@043fb46d1a93c77aae656e7c1c64a875d1fc6a0a  # v7.0.1
+        with:
+          name: ${{ matrix.artifact }}
+          path: dist
+          if-no-files-found: error
