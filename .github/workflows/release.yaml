@@ -33,6 +33,10 @@ jobs:
   release:
     name: Tag and Release
     runs-on: ubuntu-latest
+    # The paths filter only constrains the push trigger; workflow_dispatch can
+    # be run from any ref. Without this, dispatching from a feature branch cuts
+    # a real tag and release from unreviewed code.
+    if: github.ref == 'refs/heads/main'
     needs: build
     outputs:
       tag: ${{ steps.create_tag.outputs.tag }}
@@ -79,6 +83,9 @@ jobs:
     # No GITHUB_TOKEN scopes needed: everything that touches esphome/esphome
     # uses the App token minted below, and same-run artifact downloads
     # authenticate with ACTIONS_RUNTIME_TOKEN.
+    # Redundant with the guard on release (this job needs it), but this is the
+    # job with the outward-facing side effect, so state its precondition here.
+    if: github.ref == 'refs/heads/main'
     needs:
       - release
     steps:
@@ -119,17 +126,26 @@ jobs:
           wholesale on every build, so read the release notes rather than the diff.
           EOF
 
-          # /anchor/r reads the description in after the placeholder line, and
-          # /anchor/d removes the placeholder itself. Written outside the
-          # workspace: create-pull-request commits every untracked file.
-          sed -e '/<!-- Quick description and explanation of changes -->/r /tmp/description.md' \
-              -e '/<!-- Quick description and explanation of changes -->/d' \
-              -e 's|^- \[ \] Other$|- [x] Other|' \
-              -e 's|^- fixes <link to issue>$|- N/A - automated asset sync.|' \
-              -e 's|^- esphome/esphome.io#.*$|- N/A - no user-facing configuration changes.|' \
-              -e 's|^- esphome/developers.esphome.io#.*$|- N/A|' \
-              -e 's|^  - \[ \] The code change is tested|  - [x] The code change is tested|' \
-              .github/PULL_REQUEST_TEMPLATE.md >/tmp/pr-body.md
+          # A reworded line just no-ops the matching expression, but a renamed
+          # or relocated template would make sed exit non-zero under set -e and
+          # kill the job after the release is already published. Fall back to
+          # the bare description instead.
+          if [ ! -f .github/PULL_REQUEST_TEMPLATE.md ]; then
+            echo "::warning::esphome PR template not found; using the bare description."
+            cp /tmp/description.md /tmp/pr-body.md
+          else
+            # /anchor/r reads the description in after the placeholder line, and
+            # /anchor/d removes the placeholder itself. Written outside the
+            # workspace: create-pull-request commits every untracked file.
+            sed -e '/<!-- Quick description and explanation of changes -->/r /tmp/description.md' \
+                -e '/<!-- Quick description and explanation of changes -->/d' \
+                -e 's|^- \[ \] Other$|- [x] Other|' \
+                -e 's|^- fixes <link to issue>$|- N/A - automated asset sync.|' \
+                -e 's|^- esphome/esphome.io#.*$|- N/A - no user-facing configuration changes.|' \
+                -e 's|^- esphome/developers.esphome.io#.*$|- N/A|' \
+                -e 's|^  - \[ \] The code change is tested|  - [x] The code change is tested|' \
+                .github/PULL_REQUEST_TEMPLATE.md >/tmp/pr-body.md
+          fi
 
           cat /tmp/pr-body.md
 
