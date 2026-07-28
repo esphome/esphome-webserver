@@ -79,7 +79,11 @@ jobs:
   esphome-pr:
     name: Make PR into ESPHome repo
     runs-on: ubuntu-latest
-    environment: esphome
+    environment:
+      name: esphome
+      # Empty when the action finds no asset changes and skips the PR; the
+      # deployment then just renders without a link.
+      url: ${{ steps.pr.outputs.pull-request-url }}
     # No GITHUB_TOKEN scopes needed: everything that touches esphome/esphome
     # uses the App token minted below, and same-run artifact downloads
     # authenticate with ACTIONS_RUNTIME_TOKEN.
@@ -161,6 +165,7 @@ jobs:
         run: cp -a /tmp/components/. esphome/components/
 
       - name: PR Changes
+        id: pr
         uses: peter-evans/create-pull-request@5f6978faf089d4d20b00c7766989d076bb2fc7f1  # v8.1.1
         with:
           token: ${{ steps.app-token.outputs.token }}
