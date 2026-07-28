@@ -1,6 +1,7 @@
 {
   "name": "@esphome-webserver/v3",
   "version": "3.0.0",
+  "type": "module",
   "scripts": {
     "start": "npm run dev",
     "dev": "vite",
@@ -10,23 +11,17 @@
     "deploy": "bash -c '../../scripts/make_header.sh ../../_static/v3 server_index_v3.h web_server 3'"
   },
   "dependencies": {
-    "chart.js": "^4.4.1",
-    "http-proxy-middleware": "^2.0.1",
-    "iconify-icon": "^1.0.8",
-    "lit": "^2.0.2"
+    "chart.js": "^4.5.1",
+    "iconify-icon": "^3.0.2",
+    "lit": "^3.3.3"
   },
   "devDependencies": {
-    "rollup-plugin-copy": "^3.4.0",
-    "rollup-plugin-gzip": "^2.5.0",
-    "rollup-plugin-minify-html-template-literals": "^1.2.0",
-    "@rollup/plugin-node-resolve": "^13.0.6",
-    "@rollup/plugin-replace": "^3.0.0",
-    "@types/node": "^15.12.1",
-    "rollup-plugin-strip-banner": "^2.0.0",
-    "typescript": "^4.1.3",
-    "vite": "^2.3.6",
-    "vite-plugin-html": "^2.1.1",
-    "vite-plugin-package-version": "^1.0.2",
-    "vite-plugin-singlefile": "^0.5.1"
+    "@rollup/plugin-replace": "^6.0.3",
+    "@types/node": "^26.1.2",
+    "rollup-plugin-strip-banner": "^3.1.0",
+    "typescript": "^7.0.2",
+    "vite": "^8.1.5",
+    "vite-plugin-package-version": "^1.1.0",
+    "vite-plugin-singlefile": "^2.3.3"
   }
 }
