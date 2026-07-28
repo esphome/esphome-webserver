@@ -6,6 +6,7 @@ import cssInput from "./css/input";
 import cssEntityTable from "./css/esp-entity-table";
 import cssTab from "./css/tab";
 import "./esp-entity-chart";
+import "./esp-serial-terminal";
 import "iconify-icon";
 
 interface entityConfig {
@@ -57,6 +58,11 @@ interface entityConfig {
   // Infrared specific
   supports_transmitter?: boolean;
   supports_receiver?: boolean;
+  // Serial channel specific
+  baud_rate?: number;
+  data_bits?: number;
+  stop_bits?: number;
+  parity?: string;
 }
 
 interface groupConfig {
@@ -88,7 +94,7 @@ function parseDomainFromId(id: string): string {
   return id.split('-')[0];
 }
 
-function buildEntityActionUrl(basePath: string, entity: entityConfig, action: string): string {
+export function buildEntityActionUrl(basePath: string, entity: entityConfig, action: string): string {
   if (isNewIdFormat(entity.unique_id)) {
     // New format: /{domain}/{device?}/{name}/{action}
     const entityName = encodeURIComponent(entity.name);
@@ -350,33 +356,55 @@ export class EntityTable extends LitElement implements RestAction {
             </div>
             <div class="tab-container">
               ${group.value.map(
-                (component, idx) => html`
-                  <div
-                    class="entity-row"
-                    .domain="${component.domain}"
-                    @click="${this._handleEntityRowClick}"
-                  >
-                    <div>
-                      ${component.icon
-                        ? html`<iconify-icon
-                            icon="${component.icon}"
-                            height="24px"
-                          ></iconify-icon>`
+(component, idx) => {
+                  if (component.domain === "serial_channel") {
+                    return html`
+                      <div class="entity-row serial-channel-row">
+                        <div class="serial-channel-header">
+                          ${component.icon
+                            ? html`<iconify-icon
+                                icon="${component.icon}"
+                                height="24px"
+                              ></iconify-icon>`
+                            : nothing}
+                          <span>${component.device ? `[${component.device}] ` : ''}${component.name}</span>
+                        </div>
+                        <div class="serial-channel-content">
+                          ${this.has_controls && component.has_action
+                            ? this.control(component)
+                            : html`<div>${component.state}</div>`}
+                        </div>
+                      </div>
+                    `;
+                  }
+                  return html`
+                    <div
+                      class="entity-row"
+                      .domain="${component.domain}"
+                      @click="${this._handleEntityRowClick}"
+                    >
+                      <div>
+                        ${component.icon
+                          ? html`<iconify-icon
+                              icon="${component.icon}"
+                              height="24px"
+                            ></iconify-icon>`
+                          : nothing}
+                      </div>
+                      <div>${component.device ? `[${component.device}] ` : ''}${component.name}</div>
+                      <div>
+                        ${this.has_controls && component.has_action
+                          ? this.control(component)
+                          : html`<div>${component.state}</div>`}
+                      </div>
+                      ${component.domain === "sensor"
+                        ? html`<esp-entity-chart
+                            .chartdata="${component.value_numeric_history}"
+                          ></esp-entity-chart>`
                         : nothing}
                     </div>
-                    <div>${component.device ? `[${component.device}] ` : ''}${component.name}</div>
-                    <div>
-                      ${this.has_controls && component.has_action
-                        ? this.control(component)
-                        : html`<div>${component.state}</div>`}
-                    </div>
-                    ${component.domain === "sensor"
-                      ? html`<esp-entity-chart
-                          .chartdata="${component.value_numeric_history}"
-                        ></esp-entity-chart>`
-                      : nothing}
-                  </div>
-                `
+                  `;
+                }
               )}
             </div>
           `
@@ -1080,5 +1108,10 @@ class ActionRenderer {
         </div>
       </div>
     `;
+  }
+
+  render_serial_channel() {
+    if (!this.entity) return;
+    return html`<esp-serial-terminal .entity="${this.entity}"></esp-serial-terminal>`;
   }
 }
