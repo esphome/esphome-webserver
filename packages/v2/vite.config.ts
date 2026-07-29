@@ -24,9 +24,12 @@ export default defineConfig({
       delimiters: ["", ""],
       preventAssignment: true,
     }),
-    viteSingleFile(),
+    // deleteInlinedFiles: false keeps the standalone www.js on disk after it
+    // has been inlined into index.html. It is published to the CDN and users
+    // point `js_url` at it instead of embedding the page in the firmware.
+    viteSingleFile({ deleteInlinedFiles: false }),
     minifyHtml(),
-    compress(/\.html$/),
+    compress(/\.(js|css|html|svg)$/),
   ],
   build: {
     reportCompressedSize: false,
