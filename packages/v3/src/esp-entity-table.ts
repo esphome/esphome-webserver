@@ -48,7 +48,7 @@ interface entityConfig {
   effects?: string[];
   effect?: string;
   has_action?: boolean;
-  value_numeric_history: number[];
+  value_numeric_history: { value: number; timestamp: string }[];
   uom?: string;
   is_disabled_by_default?: boolean;
   // Water heater specific
@@ -152,7 +152,8 @@ export class EntityTable extends LitElement implements RestAction {
       if (idx != -1 && entityId) {
         if (typeof data.value === 'number') {
           let history = [...this.entities[idx].value_numeric_history];
-          history.push(data.value);
+          const timestamp = data.when || new Date().toTimeString().split(" ")[0];
+          history.push({ value: data.value, timestamp: timestamp });
           this.entities[idx].value_numeric_history = history.splice(-50);
         }
 
@@ -235,13 +236,14 @@ export class EntityTable extends LitElement implements RestAction {
       // Dynamically add discovered entity
       // domain comes from JSON (new format) or parsed from id (old format)
       const domain = data.domain || parseDomainFromId(entityId);
+      const timestamp = data.when || new Date().toTimeString().split(" ")[0];
       let entity = {
         ...data,
         domain: domain,
         unique_id: entityId,
         entity_category: data.entity_category,
         sorting_group: data.sorting_group ?? (EntityTable.ENTITY_CATEGORIES[parseInt(data.entity_category)] || EntityTable.ENTITY_UNDEFINED),
-        value_numeric_history: [data.value],
+        value_numeric_history: typeof data.value === 'number' ? [{ value: data.value, timestamp: timestamp }] : [],
       } as entityConfig;
       entity.has_action = this.hasAction(entity);
       if (entity.has_action) {

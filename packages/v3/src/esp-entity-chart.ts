@@ -8,6 +8,7 @@ import {
   LinearScale,
   PointElement,
   LineElement,
+  Tooltip,
 } from "chart.js";
 
 Chart.register(
@@ -16,7 +17,8 @@ Chart.register(
   CategoryScale,
   LinearScale,
   PointElement,
-  LineElement
+  LineElement,
+  Tooltip
 );
 
 @customElement("esp-entity-chart")
@@ -30,10 +32,10 @@ export class ChartElement extends LitElement {
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
-    if (changedProperties.has("chartdata")) {
-      this.chartSubComponent.data.datasets[0].data = this.chartdata;
-      this.chartSubComponent.data.labels = this.chartdata;
-      this.chartSubComponent?.update();
+    if (changedProperties.has("chartdata") && this.chartSubComponent) {
+      this.chartSubComponent.data.datasets[0].data = this.chartdata.map((d: any) => typeof d === 'object' ? d.value : d);
+      this.chartSubComponent.data.labels = this.chartdata.map((d: any) => typeof d === 'object' ? d.timestamp : '');
+      this.chartSubComponent.update();
     }
   }
 
@@ -42,10 +44,10 @@ export class ChartElement extends LitElement {
     this.chartSubComponent = new Chart(ctx, {
       type: "line",
       data: {
-        labels: this.chartdata,
+        labels: this.chartdata.map((d: any) => typeof d === 'object' ? d.timestamp : ''),
         datasets: [
           {
-            data: this.chartdata,
+            data: this.chartdata.map((d: any) => typeof d === 'object' ? d.value : d),
             borderWidth: 1,
             tension: 0.3,
           },
@@ -53,10 +55,25 @@ export class ChartElement extends LitElement {
       },
       options: {
         animation: { duration: 0 },
-        plugins: { legend: { display: false } },
+        plugins: {
+          legend: { display: false },
+          tooltip: {
+            enabled: true,
+            usePointStyle: true,
+            callbacks: {
+              label: function(context: any) {
+                return `Value: ${context.parsed.y}`;
+              }
+            }
+          }
+        },
         scales: { x: { display: false }, y: { position: "right" } },
         responsive: true,
         maintainAspectRatio: false,
+        interaction: {
+          intersect: false,
+          mode: 'index',
+        },
       },
     });
     this.updateStylesIfExpanded();
@@ -95,7 +112,7 @@ export class ChartElement extends LitElement {
         left: 24px;
         height: 42px;
         width: calc(100% - 42px);
-        z-index: -100;
+        z-index: -1;
       }
     `;
   }

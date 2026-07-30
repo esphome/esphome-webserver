@@ -87,4 +87,11 @@ export default css`
   input[type="color"]::-webkit-color-swatch-wrapper {
     padding: 0 !important;
   }
+  .entity-row.expanded {
+    z-index: 1;
+    pointer-events: none;
+  }
+  .entity-row.expanded esp-entity-chart {
+    pointer-events: auto;
+  }
 `;
