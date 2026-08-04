@@ -20,7 +20,7 @@
     "@types/node": "^26.1.2",
     "rollup-plugin-strip-banner": "^3.1.0",
     "typescript": "^7.0.2",
-    "vite": "^8.1.5",
+    "vite": "^8.2.0",
     "vite-plugin-package-version": "^1.1.0",
     "vite-plugin-singlefile": "^2.3.3"
   }
