@@ -12,9 +12,9 @@
     "deploy": "bash -c '../../scripts/make_header.sh ../../_static/captive_portal captive_index.h captive_portal'"
   },
   "devDependencies": {
-    "@types/node": "^26.1.2",
+    "@types/node": "^26.2.0",
     "typescript": "^7.0.2",
-    "vite": "^8.1.5",
+    "vite": "^8.2.1",
     "vite-plugin-singlefile": "^2.3.3"
   }
 }
