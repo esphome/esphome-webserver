@@ -10,66 +10,70 @@ interface recordConfig {
   when: string;
 }
 
+const LOG_TYPES: Record<string, string> = {
+  "[1;31m": "e",
+  "[0;33m": "w",
+  "[0;32m": "i",
+  "[0;35m": "c",
+  "[0;36m": "d",
+  "[0;37m": "v",
+};
+
 @customElement("esp-log")
 export class DebugLog extends LitElement {
   @property({ type: Number }) rows = 10;
   @property({ type: String }) scheme = "";
   @state() logs: recordConfig[] = [];
 
-  constructor() {
-    super();
-  }
+  private _handleLog = (e: Event) => {
+    const messageEvent = e as MessageEvent;
+    const d: String = messageEvent.data;
+
+    // Extract the type from the color code
+    const type = LOG_TYPES[d.slice(0, 7)];
+    if (!type) {
+      // No color code, skip
+      return;
+    }
+
+    // Extract content without color codes and ANSI termination
+    const content = d.slice(7, d.length - 4);
+
+    // Split by newlines to handle multi-line messages
+    const lines = content.split('\n');
+
+    // Process the first line to extract metadata
+    const firstLine = lines[0];
+    const parts = firstLine.slice(3).split(":");
+    const tag = parts.slice(0, 2).join(":");
+    const firstDetail = firstLine.slice(5 + tag.length);
+    const level = firstLine.slice(0, 3);
+    const when = new Date().toTimeString().split(" ")[0];
+
+    // Create a log record for each line
+    const newRecords: recordConfig[] = [];
+    lines.forEach((line, index) => {
+      const record = {
+        type: type,
+        level: level,
+        tag: tag,
+        detail: index === 0 ? firstDetail : line,
+        when: when,
+      } as recordConfig;
+      newRecords.push(record);
+    });
+
+    this.logs = [...this.logs, ...newRecords].slice(-this.rows);
+  };
 
   connectedCallback() {
     super.connectedCallback();
-    window.source?.addEventListener("log", (e: Event) => {
-      const messageEvent = e as MessageEvent;
-      const d: String = messageEvent.data;
+    window.source?.addEventListener("log", this._handleLog);
+  }
 
-      const types: Record<string, string> = {
-        "[1;31m": "e",
-        "[0;33m": "w",
-        "[0;32m": "i",
-        "[0;35m": "c",
-        "[0;36m": "d",
-        "[0;37m": "v",
-      };
-
-      // Extract the type from the color code
-      const type = types[d.slice(0, 7)];
-      if (!type) {
-        // No color code, skip
-        return;
-      }
-
-      // Extract content without color codes and ANSI termination
-      const content = d.slice(7, d.length - 4);
-
-      // Split by newlines to handle multi-line messages
-      const lines = content.split('\n');
-
-      // Process the first line to extract metadata
-      const firstLine = lines[0];
-      const parts = firstLine.slice(3).split(":");
-      const tag = parts.slice(0, 2).join(":");
-      const firstDetail = firstLine.slice(5 + tag.length);
-      const level = firstLine.slice(0, 3);
-      const when = new Date().toTimeString().split(" ")[0];
-
-      // Create a log record for each line
-      lines.forEach((line, index) => {
-        const record = {
-          type: type,
-          level: level,
-          tag: tag,
-          detail: index === 0 ? firstDetail : line,
-          when: when,
-        } as recordConfig;
-        this.logs.push(record);
-      });
-
-      this.logs = this.logs.slice(-this.rows);
-    });
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    window.source?.removeEventListener("log", this._handleLog);
   }
 
   render() {
@@ -97,7 +101,7 @@ export class DebugLog extends LitElement {
                 <div>${log.level}</div>
                 <div>${log.tag}</div>
                 <div>${log.detail}</div>
-              </td>
+              </div>
             `
             )}
           </div>
@@ -136,9 +140,6 @@ export class DebugLog extends LitElement {
         .thead .trow {
           text-align: left;
           padding: 0.25rem 0.5rem;
-        }
-        .trow {
-          display: flex;
         }
         .trow > div {
           align-self: flex-start;

@@ -22,7 +22,7 @@ Chart.register(
 @customElement("esp-entity-chart")
 export class ChartElement extends LitElement {
   @property({ type: Array }) chartdata = [];
-  private chartSubComponent: Chart;
+  private chartSubComponent?: Chart;
 
   constructor() {
     super();
@@ -30,15 +30,16 @@ export class ChartElement extends LitElement {
 
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
-    if (changedProperties.has("chartdata")) {
+    if (changedProperties.has("chartdata") && this.chartSubComponent) {
       this.chartSubComponent.data.datasets[0].data = this.chartdata;
       this.chartSubComponent.data.labels = this.chartdata;
-      this.chartSubComponent?.update();
+      this.chartSubComponent.update();
     }
   }
 
   firstUpdated() {
-    const ctx = this.renderRoot.querySelector("canvas").getContext("2d");
+    const ctx = this.renderRoot.querySelector("canvas")?.getContext("2d");
+    if (!ctx) return;
     this.chartSubComponent = new Chart(ctx, {
       type: "line",
       data: {

@@ -1,5 +1,5 @@
-import { html, css, LitElement } from "lit";
-import { customElement, property } from "lit/decorators.js";
+import { html, css, LitElement, PropertyValues } from "lit";
+import { customElement, property, state } from "lit/decorators.js";
 import cssReset from "./css/reset";
 
 const inputRangeID: string = "range";
@@ -14,11 +14,23 @@ export class EspRangeSlider extends LitElement {
   private longPressTimer: ReturnType<typeof setTimeout> | null = null;
   private isPopupInputVisible: boolean = false;
 
-  @property({ type: String }) value = 0;
-  @property({ type: String }) min = 0;
-  @property({ type: String }) max = 0;
-  @property({ type: String }) step = 0;
+  @property({ type: Number }) value = 0;
+  @property({ type: Number }) min = 0;
+  @property({ type: Number }) max = 0;
+  @property({ type: Number }) step = 0;
   @property({ type: String }) name = "";
+
+  @state() private displayValue = "";
+
+  private _handleDocumentMouseDown = (event: MouseEvent) => {
+    if(!document.querySelector('.popup-number-input')) {
+      return;
+    }
+    const isClickedOutside = !document.querySelector('.popup-number-input')?.contains(event.target as Node);
+    if (isClickedOutside && this.isPopupInputVisible) {
+      this.deletePopupInput();
+    }
+  };
 
   protected firstUpdated(
     _changedProperties: Map<string | number | symbol, unknown>
@@ -30,17 +42,27 @@ export class EspRangeSlider extends LitElement {
     this.currentValue = this.shadowRoot?.getElementById(
       currentValueID
     ) as HTMLInputElement;
-    document.addEventListener('mousedown', (event) => {
-      if(!document.querySelector('.popup-number-input')) {
-        return;
-      }
-      const isClickedOutside = !document.querySelector('.popup-number-input')?.contains(event.target as Node);      
-      if (isClickedOutside && this.isPopupInputVisible) {
-        this.deletePopupInput();
-      }
-    });    
-  }  
-  
+    document.addEventListener('mousedown', this._handleDocumentMouseDown);
+  }
+
+  disconnectedCallback(): void {
+    super.disconnectedCallback();
+    document.removeEventListener('mousedown', this._handleDocumentMouseDown);
+    if (this.longPressTimer) {
+      clearTimeout(this.longPressTimer);
+      this.longPressTimer = null;
+    }
+    this.deletePopupInput();
+  }
+
+  // Keep the tooltip in step with an externally pushed value. Setting it here
+  // rather than in updated() avoids scheduling a second render every cycle.
+  protected willUpdate(_changedProperties: PropertyValues): void {
+    if (_changedProperties.has("value")) {
+      this.displayValue = String(this.value);
+    }
+  }
+
   protected updated(): void {
     this.updateCurrentValueOverlay();
   }
@@ -80,12 +102,16 @@ export class EspRangeSlider extends LitElement {
   }
 
   showPopupInput(x: number, y: number): void {
+    if (!this.inputRange) return;
+
+    const rangeElement = this.inputRange;
+
     const popupInputElement = document.createElement('input');
-    popupInputElement.type = 'number'; 
-    popupInputElement.value = this.inputRange.value;
-    popupInputElement.min = this.inputRange.min;
-    popupInputElement.max = this.inputRange.max;
-    popupInputElement.step = this.inputRange.step;
+    popupInputElement.type = 'number';
+    popupInputElement.value = rangeElement.value;
+    popupInputElement.min = rangeElement.min;
+    popupInputElement.max = rangeElement.max;
+    popupInputElement.step = rangeElement.step;
     popupInputElement.classList.add('popup-number-input');
 
     const styles = `
@@ -105,12 +131,12 @@ export class EspRangeSlider extends LitElement {
 
     popupInputElement.addEventListener('change', (ev: Event) =>{
       let input = ev.target as HTMLInputElement;
-      this.inputRange.value = input?.value;
+      rangeElement.value = input?.value;
 
-      var event = new Event('input');    
-      this.inputRange?.dispatchEvent(event);
-      var event = new Event('change');    
-      this.inputRange?.dispatchEvent(event);
+      const inputEvent = new Event('input');
+      rangeElement.dispatchEvent(inputEvent);
+      const changeEvent = new Event('change');
+      rangeElement.dispatchEvent(changeEvent);
     });
 
     popupInputElement.addEventListener('keydown', (event) => {
@@ -124,23 +150,21 @@ export class EspRangeSlider extends LitElement {
   }
 
   updateCurrentValueOverlay(): void {
-    const newValueAsPercent = Number( (this.inputRange.value - this.inputRange.min) * 100 / (this.inputRange.max - this.inputRange.min) ),
-    newPosition = 10 - (newValueAsPercent * 0.2);
-    this.currentValue.innerHTML = `<span>${this.inputRange?.value}</span>`;
-    this.currentValue.style.left = `calc(${newValueAsPercent}% + (${newPosition}px))`;
+    if (!this.inputRange || !this.currentValue) return;
 
-    const spanTooltip = this.currentValue?.querySelector('span');
-    spanTooltip?.addEventListener('mousedown', this.onMouseDownCurrentValue.bind(this));
-    spanTooltip?.addEventListener('mouseup', this.onMouseUpCurrentValue.bind(this));
-    spanTooltip?.addEventListener('touchstart', this.onTouchStartCurrentValue.bind(this));
-    spanTooltip?.addEventListener('touchend', this.onTouchEndCurrentValue.bind(this));
+    const value = Number(this.inputRange.value);
+    const min = Number(this.inputRange.min);
+    const max = Number(this.inputRange.max);
 
-    spanTooltip?.addEventListener('contextmenu', (event) => {
-      event.preventDefault();
-    });
+    const span = max - min;
+    const percent = span > 0 ? ((value - min) * 100) / span : 0;
+    const offset = 10 - percent * 0.2;
+    this.currentValue.style.left = `calc(${percent}% + (${offset}px))`;
   }
 
   onInputEvent(ev: Event): void {
+    // live value while dragging, before any state round-trip
+    this.displayValue = (ev.target as HTMLInputElement).value;
     this.updateCurrentValueOverlay();
   }
 
@@ -163,7 +187,16 @@ export class EspRangeSlider extends LitElement {
       <div class="range-wrap">
         <label>${this.min || 0}</label>
         <div class="slider-wrap">
-          <div class="range-value" id="rangeValue"></div>
+          <div class="range-value" id="rangeValue">
+            <span
+              @mousedown="${this.onMouseDownCurrentValue}"
+              @mouseup="${this.onMouseUpCurrentValue}"
+              @touchstart="${this.onTouchStartCurrentValue}"
+              @touchend="${this.onTouchEndCurrentValue}"
+              @contextmenu="${(e: Event) => e.preventDefault()}"
+              >${this.displayValue}</span
+            >
+          </div>
             <input
               id="${inputRangeID}"
               type="range"

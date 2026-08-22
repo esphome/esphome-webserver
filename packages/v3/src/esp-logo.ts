@@ -1,11 +1,12 @@
-import { LitElement, svg } from "lit";
+import { LitElement, html } from "lit";
 import { customElement } from "lit/decorators.js";
+import { unsafeHTML } from "lit/directives/unsafe-html.js";
 
 import logo from "/logo.svg?raw";
 
 @customElement("esp-logo")
 export default class EspLogo extends LitElement {
   render() {
-    return svg([logo]);
+    return html`${unsafeHTML(logo)}`;
   }
 }

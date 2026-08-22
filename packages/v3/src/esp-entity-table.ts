@@ -1,5 +1,7 @@
-import { html, css, LitElement, TemplateResult, nothing } from "lit";
-import { customElement, state, property } from "lit/decorators.js";
+import { html, LitElement, nothing } from "lit";
+import { customElement, state } from "lit/decorators.js";
+import { repeat } from "lit/directives/repeat.js";
+import { ifDefined } from "lit/directives/if-defined.js";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssInput from "./css/input";
@@ -33,8 +35,8 @@ interface entityConfig {
   target_temperature_high?: number;
   min_temp?: number;
   max_temp?: number;
-  min_value?: string;
-  max_value?: string;
+  min_value?: number;
+  max_value?: number;
   step?: number;
   min_length?: number;
   max_length?: number;
@@ -122,6 +124,19 @@ interface RestAction {
   restAction(entity?: entityConfig, action?: string): void;
 }
 
+const MAX_HISTORY = 50;
+// Number of state events for an unrecognised entity to tolerate before asking
+// the device for its details - the esp may still send a detail_all event.
+const UNKNOWN_EVENT_THRESHOLD = 3;
+// Cap on detail requests per unrecognised entity. Without it a device that
+// never describes an entity is refetched on every state event, forever.
+const MAX_DETAIL_FETCH_ATTEMPTS = 3;
+
+interface unknownEntityState {
+  events: number;
+  attempts: number;
+}
+
 @customElement("esp-entity-table")
 export class EntityTable extends LitElement implements RestAction {
   @state() entities: entityConfig[] = [];
@@ -130,7 +145,6 @@ export class EntityTable extends LitElement implements RestAction {
 
   private _actionRenderer = new ActionRenderer();
   private _basePath = getBasePath();
-  private groups: groupConfig[] = [] 
   private static ENTITY_UNDEFINED = "States";
   private static ENTITY_CATEGORIES = [
     "Sensor and Control",
@@ -138,93 +152,106 @@ export class EntityTable extends LitElement implements RestAction {
     "Diagnostic",
   ];
 
-  private _unknown_state_events: {[key: string]: number} = {};
+  private groups: groupConfig[] = EntityTable._defaultGroups();
+
+  private _unknown_entities: { [key: string]: unknownEntityState } = {};
+  private _pending_detail_fetches = new Set<string>();
+
+  private static _defaultGroups(): groupConfig[] {
+    const groups = EntityTable.ENTITY_CATEGORIES.map((category, index) => ({
+      name: category,
+      sorting_weight: index,
+    }));
+    groups.push({ name: EntityTable.ENTITY_UNDEFINED, sorting_weight: -1 });
+    groups.sort((a, b) => a.sorting_weight - b.sorting_weight);
+    return groups;
+  }
+
+  private _handleState = (e: Event) => {
+    const messageEvent = e as MessageEvent;
+    const data = JSON.parse(messageEvent.data);
+    // Prefer name_id (new format) over id (legacy format) for entity identification
+    const entityId = data.name_id || data.id;
+    if (!entityId) return;
+
+    const idx = this.entities.findIndex((x) => x.unique_id === entityId);
+    if (idx !== -1) {
+      if (typeof data.value === "number") {
+        const history = this.entities[idx].value_numeric_history;
+        history.push(data.value);
+        if (history.length > MAX_HISTORY) history.shift();
+        // new array identity so the chart's property binding sees the change
+        this.entities[idx].value_numeric_history = history.slice();
+      }
+
+      delete data.id;
+      delete data.name_id;
+      delete data.domain;
+      delete data.unique_id;
+      Object.assign(this.entities[idx], data);
+      this.requestUpdate();
+      return;
+    }
+
+    // is it a `detail_all` event already? (has name and domain)
+    if (data.name && data.domain) {
+      this.addEntity(data);
+      return;
+    }
+
+    let unknown = this._unknown_entities[entityId];
+    if (!unknown) {
+      unknown = this._unknown_entities[entityId] = { events: 0, attempts: 0 };
+    }
+    unknown.events++;
+    if (unknown.events < UNKNOWN_EVENT_THRESHOLD) return;
+    if (unknown.attempts >= MAX_DETAIL_FETCH_ATTEMPTS) return;
+    // only one detail request per entity may be in flight
+    if (this._pending_detail_fetches.has(entityId)) return;
+    unknown.attempts++;
+    this._pending_detail_fetches.add(entityId);
+
+    fetch(buildIdFetchUrl(this._basePath, entityId), { method: "GET" })
+      .then((r) => {
+        if (!r.ok) {
+          throw new Error(`HTTP error! Status: ${r.status}`);
+        }
+        return r.json();
+      })
+      .then((detail) => {
+        delete this._unknown_entities[entityId];
+        this.addEntity(detail);
+      })
+      .catch((error) => {
+        console.error("Fetch error:", error);
+      })
+      .finally(() => {
+        this._pending_detail_fetches.delete(entityId);
+      });
+  };
+
+  private _handleSortingGroup = (e: Event) => {
+    const messageEvent = e as MessageEvent;
+    const data = JSON.parse(messageEvent.data);
+    if (this.groups.some((x) => x.name === data.name)) return;
+    this.groups.push({ ...data } as groupConfig);
+    this.groups.sort((a, b) => a.sorting_weight - b.sorting_weight);
+    this.requestUpdate();
+  };
 
   connectedCallback() {
     super.connectedCallback();
+    window.source?.addEventListener("state", this._handleState);
+    window.source?.addEventListener("sorting_group", this._handleSortingGroup);
+  }
 
-    window.source?.addEventListener('state', (e: Event) => {
-      const messageEvent = e as MessageEvent;
-      const data = JSON.parse(messageEvent.data);
-      // Prefer name_id (new format) over id (legacy format) for entity identification
-      const entityId = data.name_id || data.id;
-      let idx = this.entities.findIndex((x) => x.unique_id === entityId);
-      if (idx != -1 && entityId) {
-        if (typeof data.value === 'number') {
-          let history = [...this.entities[idx].value_numeric_history];
-          history.push(data.value);
-          this.entities[idx].value_numeric_history = history.splice(-50);
-        }
-
-        delete data.id;
-        delete data.name_id;
-        delete data.domain;
-        delete data.unique_id;
-        Object.assign(this.entities[idx], data);
-        this.requestUpdate();
-      } else {
-        // is it a `detail_all` event already? (has name and domain)
-        if (data?.name && data?.domain) {
-          this.addEntity(data);
-        } else {
-          if (this._unknown_state_events[entityId]) {
-            this._unknown_state_events[entityId]++;
-          } else {
-            this._unknown_state_events[entityId] = 1;
-          }
-          // ignore the first few events, maybe the esp will send a detail_all
-          // event soon
-          if (this._unknown_state_events[entityId] < 1) {
-            return;
-          }
-
-          fetch(buildIdFetchUrl(this._basePath, entityId), {
-            method: 'GET',
-          })
-              .then((r) => {
-                console.log(r);
-                if (!r.ok) {
-                  throw new Error(`HTTP error! Status: ${r.status}`);
-                }
-                return r.json();
-              })
-              .then((data) => {
-                console.log(data);
-                this.addEntity(data);
-              })
-              .catch((error) => {
-                console.error('Fetch error:', error);
-              });
-        }
-      }
-    });
-
-    window.source?.addEventListener("sorting_group", (e: Event) => {
-      const messageEvent = e as MessageEvent;
-      const data = JSON.parse(messageEvent.data);
-      const groupIndex = this.groups.findIndex((x) => x.name === data.name);
-      if (groupIndex === -1) {
-        let group = {
-           ...data,
-        } as groupConfig;
-        this.groups.push(group);
-        this.groups.sort((a, b) => {
-          return a.sorting_weight < b.sorting_weight  
-            ? -1  
-            : 1  
-        });
-      }
-    });
-
-    this.groups = EntityTable.ENTITY_CATEGORIES.map((category, index) => ({
-      name: category,
-      sorting_weight: index
-    }));
-
-    this.groups.push({
-      name: EntityTable.ENTITY_UNDEFINED,
-      sorting_weight: -1 
-    });
+  disconnectedCallback() {
+    window.source?.removeEventListener("state", this._handleState);
+    window.source?.removeEventListener(
+      "sorting_group",
+      this._handleSortingGroup
+    );
+    super.disconnectedCallback();
   }
 
   addEntity(data: any) {
@@ -239,33 +266,30 @@ export class EntityTable extends LitElement implements RestAction {
         ...data,
         domain: domain,
         unique_id: entityId,
-        entity_category: data.entity_category,
-        sorting_group: data.sorting_group ?? (EntityTable.ENTITY_CATEGORIES[parseInt(data.entity_category)] || EntityTable.ENTITY_UNDEFINED),
-        value_numeric_history: [data.value],
+        sorting_group:
+          data.sorting_group ??
+          (EntityTable.ENTITY_CATEGORIES[Number(data.entity_category)] ||
+            EntityTable.ENTITY_UNDEFINED),
+        value_numeric_history:
+          typeof data.value === "number" ? [data.value] : [],
       } as entityConfig;
       entity.has_action = this.hasAction(entity);
       if (entity.has_action) {
         this.has_controls = true;
       }
       this.entities.push(entity);
+      // Groups are ordered by `this.groups` at render time, so entities only
+      // need ordering within their group: by weight, then by name.
       this.entities.sort((a, b) => {
-        const sortA = a.sorting_weight ?? a.name;
-        const sortB = b.sorting_weight ?? b.name;
-        return a.sorting_group < b.sorting_group
-          ? -1
-          : a.sorting_group === b.sorting_group
-          ? sortA === sortB
-            ? a.name.toLowerCase() < b.name.toLowerCase()
-              ? -1
-              : 1
-            : sortA < sortB
-              ? -1
-              : 1
-          : 1
+        const wa = a.sorting_weight ?? Number.MAX_SAFE_INTEGER;
+        const wb = b.sorting_weight ?? Number.MAX_SAFE_INTEGER;
+        if (wa !== wb) return wa - wb;
+        const na = a.name.toLowerCase();
+        const nb = b.name.toLowerCase();
+        return na < nb ? -1 : na > nb ? 1 : 0;
       });
       this.requestUpdate();
     }
-
   }
 
   hasAction(entity: entityConfig): boolean {
@@ -275,6 +299,7 @@ export class EntityTable extends LitElement implements RestAction {
   control(entity: entityConfig) {
     this._actionRenderer.entity = entity;
     this._actionRenderer.actioner = this;
+    this._actionRenderer.basePath = this._basePath;
     return this._actionRenderer.exec(
       `render_${entity.domain}` as ActionRendererMethodKey
     );
@@ -283,11 +308,11 @@ export class EntityTable extends LitElement implements RestAction {
   restAction(entity: entityConfig, action: string) {
     fetch(buildEntityActionUrl(this._basePath, entity, action), {
       method: "POST",
-      headers:{
-        'Content-Type': 'application/x-www-form-urlencoded'
+      headers: {
+        "Content-Type": "application/x-www-form-urlencoded",
       },
-    }).then((r) => {
-      console.log(r);
+    }).catch((error) => {
+      console.error("Action error:", error);
     });
   }
 
@@ -305,52 +330,59 @@ export class EntityTable extends LitElement implements RestAction {
         </button>
       </div>`;
     }
+    return nothing;
+  }
+
+  // Buckets entities by sorting_group, ordered by `this.groups`. Groups that
+  // were never announced still render, after the known ones, so an entity can
+  // never be silently dropped.
+  private _groupEntities(entities: entityConfig[]): Map<string, entityConfig[]> {
+    const buckets = new Map<string, entityConfig[]>();
+    for (const entity of entities) {
+      const name = entity.sorting_group || EntityTable.ENTITY_UNDEFINED;
+      const bucket = buckets.get(name);
+      if (bucket) {
+        bucket.push(entity);
+      } else {
+        buckets.set(name, [entity]);
+      }
+    }
+
+    const ordered = new Map<string, entityConfig[]>();
+    for (const group of this.groups) {
+      const bucket = buckets.get(group.name);
+      if (bucket) {
+        ordered.set(group.name, bucket);
+        buckets.delete(group.name);
+      }
+    }
+    for (const [name, bucket] of buckets) {
+      ordered.set(name, bucket);
+    }
+    return ordered;
   }
 
   render() {
-    const groupBy = (xs: Array<any>, key: string): Map<string, Array<any>> => {
-      const groupedMap = xs.reduce(function (rv, x) {
-        (
-          rv.get(x[key]) ||
-          (() => {
-            let tmp: Array<any> = [];
-            rv.set(x[key], tmp);
-            return tmp;
-          })()
-        ).push(x);
-        return rv;
-      }, new Map<string, Array<any>>());
-      
-      const sortedGroupedMap = new Map<string, Array<any>>();
-      for (const group of this.groups) {
-        const groupName = group.name;
-        if (groupedMap.has(groupName)) {
-          sortedGroupedMap.set(groupName, groupedMap.get(groupName) || []);
-        }
-      }
-
-      return sortedGroupedMap;
-    }
-
     const entities = this.show_all
       ? this.entities
       : this.entities.filter((elem) => !elem.is_disabled_by_default);
-    const grouped = groupBy(entities, "sorting_group");
-    const elems = Array.from(grouped, ([name, value]) => ({ name, value }));
     return html`
       <div>
-        ${elems.map(
-          (group) => html`
-            <div 
+        ${repeat(
+          this._groupEntities(entities),
+          ([name]) => name,
+          ([name, members]) => html`
+            <div
               class="tab-header"
               @dblclick="${this._handleTabHeaderDblClick}"
             >
-              ${group.name ||
-              EntityTable.ENTITY_UNDEFINED}
+              ${name}
             </div>
             <div class="tab-container">
-              ${group.value.map(
-                (component, idx) => html`
+              ${repeat(
+                members,
+                (component) => component.unique_id,
+                (component) => html`
                   <div
                     class="entity-row"
                     .domain="${component.domain}"
@@ -364,7 +396,9 @@ export class EntityTable extends LitElement implements RestAction {
                           ></iconify-icon>`
                         : nothing}
                     </div>
-                    <div>${component.device ? `[${component.device}] ` : ''}${component.name}</div>
+                    <div>
+                      ${component.device ? `[${component.device}] ` : ""}${component.name}
+                    </div>
                     <div>
                       ${this.has_controls && component.has_action
                         ? this.control(component)
@@ -409,7 +443,7 @@ export class EntityTable extends LitElement implements RestAction {
 }
 
 
-type ActionRendererNonCallable = "entity" | "actioner" | "exec";
+type ActionRendererNonCallable = "entity" | "actioner" | "basePath" | "exec";
 type ActionRendererMethodKey = keyof Omit<
   ActionRenderer,
   ActionRendererNonCallable
@@ -418,10 +452,10 @@ type ActionRendererMethodKey = keyof Omit<
 class ActionRenderer {
   public entity?: entityConfig;
   public actioner?: RestAction;
+  public basePath: string = "";
 
   exec(method: ActionRendererMethodKey) {
-    if (!this[method] || typeof this[method] !== "function") {
-      console.log(`ActionRenderer.${method} is not callable`);
+    if (typeof this[method] !== "function") {
       return;
     }
     return this[method]();
@@ -506,43 +540,43 @@ class ActionRenderer {
     action: string,
     opt: string,
     value: string | number,
-    min?: string | undefined,
-    max?: string | undefined,
+    min?: number,
+    max?: number,
     step = 1
   ) {
-    if(entity.mode == 1) {
+    if (entity.mode == 1) {
       return html`<div class="range">
-        <label>${min || 0}</label>
+        <label>${min ?? 0}</label>
         <input
-          type="${entity.mode == 1 ? "number" : "range"}"
+          type="number"
           name="${entity.unique_id}"
           id="${entity.unique_id}"
           step="${step}"
-          min="${min || Math.min(0, value as number)}"
-          max="${max || Math.max(10, value as number)}"
+          min="${min ?? Math.min(0, Number(value))}"
+          max="${max ?? Math.max(10, Number(value))}"
           .value="${value}"
           @change="${(e: Event) => {
-            const val = (<HTMLTextAreaElement>e.target)?.value;
+            const val = (<HTMLInputElement>e.target)?.value;
             this.actioner?.restAction(entity, `${action}?${opt}=${val}`);
           }}"
         />
-        <label>${max || 100}</label>
-      </div>`;      
-    } else {
-      return html`    
+        <label>${max ?? 100}</label>
+      </div>`;
+    }
+    return html`
       <esp-range-slider
         name="${entity.unique_id}"
         step="${step}"
-        min="${min}"
-        max="${max}"
+        min="${ifDefined(min)}"
+        max="${ifDefined(max)}"
         .value="${value}"
         @state="${(e: CustomEvent) => {
-            const val = (<HTMLTextAreaElement>e.target)?.value;
-            this.actioner?.restAction(entity, `${action}?${opt}=${e.detail.state}`);
-          }}"
+          this.actioner?.restAction(
+            entity,
+            `${action}?${opt}=${e.detail.state}`
+          );
+        }}"
       ></esp-range-slider>`;
-    }
-
   }
 
   private _textinput(
@@ -559,8 +593,8 @@ class ActionRenderer {
         type="${entity.mode == 1 ? "password" : "text"}"
         name="${entity.unique_id}"
         id="${entity.unique_id}"
-        minlength="${min || Math.min(0, value as number)}"
-        maxlength="${max || Math.max(255, value as number)}"
+        minlength="${min ?? 0}"
+        maxlength="${max ?? 255}"
         pattern="${pattern || ""}"
         .value="${value!}"
         @change="${(e: Event) => {
@@ -576,7 +610,7 @@ class ActionRenderer {
 
   private _colorpicker(entity: entityConfig, action: string, value: any) {
     function u16tohex(d: number) {
-      return Number(d).toString(16).padStart(2, "0");
+      return (Number(d) || 0).toString(16).padStart(2, "0");
     }
     function rgb_to_str(rgbhex: string) {
       const rgb = rgbhex
@@ -597,6 +631,86 @@ class ActionRenderer {
         }}"
       />
     </div>`;
+  }
+
+  // Shared by climate and water_heater: either a low/high pair or a single
+  // target, depending on what the entity reports.
+  private _targetTemperature(entity: entityConfig) {
+    if (
+      entity.target_temperature_low !== undefined &&
+      entity.target_temperature_high !== undefined
+    ) {
+      return html`
+        <div class="climate-row">
+          <label>Target Low:&nbsp;</label>
+          ${this._range(
+            entity,
+            "set",
+            "target_temperature_low",
+            entity.target_temperature_low,
+            entity.min_temp,
+            entity.max_temp,
+            entity.step
+          )}
+        </div>
+        <div class="climate-row">
+          <label>Target High:&nbsp;</label>
+          ${this._range(
+            entity,
+            "set",
+            "target_temperature_high",
+            entity.target_temperature_high,
+            entity.min_temp,
+            entity.max_temp,
+            entity.step
+          )}
+        </div>`;
+    }
+    if (entity.target_temperature !== undefined) {
+      return html`
+        <div class="climate-row">
+          <label>Target:&nbsp;</label>
+          ${this._range(
+            entity,
+            "set",
+            "target_temperature",
+            entity.target_temperature,
+            entity.min_temp,
+            entity.max_temp,
+            entity.step
+          )}
+        </div>`;
+    }
+    return nothing;
+  }
+
+  private _currentTemperature(entity: entityConfig) {
+    if (entity.current_temperature === undefined) return nothing;
+    return html`<div class="climate-row" style="padding-bottom: 10px">
+      <label>Current:&nbsp;${entity.current_temperature} °C</label>
+    </div>`;
+  }
+
+  // climate selects on `mode`, water_heater on `state`, so the current value
+  // is passed in rather than derived here.
+  private _modeSelect(entity: entityConfig, value: string | number) {
+    if (!entity.modes?.length) return nothing;
+    return html`
+      <div class="climate-row">
+        <label>Mode:&nbsp;</label>
+        ${this._select(entity, "set", "mode", entity.modes, value)}
+      </div>`;
+  }
+
+  // Shared by cover, valve and lock: a fixed set of buttons, each disabled
+  // while the entity is already in the state it would move to.
+  private _stateButtons(
+    entity: entityConfig,
+    buttons: [label: string, action: string, activeState?: string][]
+  ) {
+    return html`${buttons.map(([label, action, activeState]) =>
+      this._actionButton(entity, label, action, entity.state === activeState)
+    )}`;
   }
 
   render_binary_sensor() {
@@ -683,25 +797,25 @@ class ActionRenderer {
       html`<div class="entity" style="
       width: 100%;">
         ${this._switch(this.entity)}
-        ${this.entity.brightness
+        ${this.entity.brightness !== undefined
           ? this._range(
               this.entity,
               "turn_on",
               "brightness",
               this.entity.brightness,
-              "0",
-              "255",
+              0,
+              255,
               1,
             )
           : ""}
-        ${this.entity.color_temp
+        ${this.entity.color_temp !== undefined
           ? this._range(
               this.entity,
               "turn_on",
               "color_temp",
               this.entity.color_temp,
-              "154",
-              "370",
+              154,
+              370,
               1,
             )
           : ""}
@@ -723,16 +837,20 @@ class ActionRenderer {
 
   render_lock() {
     if (!this.entity) return;
-    return html`${this._actionButton(this.entity, "🔐", "lock", this.entity.state === "LOCKED")}
-    ${this._actionButton(this.entity, "🔓", "unlock", this.entity.state === "UNLOCKED")}
-    ${this._actionButton(this.entity, "↑", "open")} `;
+    return this._stateButtons(this.entity, [
+      ["🔐", "lock", "LOCKED"],
+      ["🔓", "unlock", "UNLOCKED"],
+      ["↑", "open"],
+    ]);
   }
 
   render_cover() {
     if (!this.entity) return;
-    return html`${this._actionButton(this.entity, "↑", "open", this.entity.state === "OPEN")}
-    ${this._actionButton(this.entity, "☐", "stop")}
-    ${this._actionButton(this.entity, "↓", "close", this.entity.state === "CLOSED")}`;
+    return this._stateButtons(this.entity, [
+      ["↑", "open", "OPEN"],
+      ["☐", "stop"],
+      ["↓", "close", "CLOSED"],
+    ]);
   }
 
   render_button() {
@@ -782,187 +900,60 @@ class ActionRenderer {
 
   render_climate() {
     if (!this.entity) return;
-    let target_temp_slider, target_temp_label, target_temp;
-    let current_temp = html`<div class="climate-row" style="padding-bottom: 10px";>
-                              <label>Current:&nbsp;${this.entity.current_temperature} °C</label>
-                            </div>`;
-    
-    if (
-      this.entity.target_temperature_low !== undefined &&
-      this.entity.target_temperature_high !== undefined
-    ) {
-      target_temp = html`
-        <div class="climate-row">
-          <label>Target Low:&nbsp;</label>
-          ${this._range(
-            this.entity,
-            "set",
-            "target_temperature_low",
-            this.entity.target_temperature_low,
-            this.entity.min_temp,
-            this.entity.max_temp,
-            this.entity.step
-          )}
-        </div>
-        <div class="climate-row">
-          <label>Target High:&nbsp;</label>
-          ${this._range(
-            this.entity,
-            "set",
-            "target_temperature_high",
-            this.entity.target_temperature_high,
-            this.entity.min_temp,
-            this.entity.max_temp,
-            this.entity.step
-          )}
-        </div>`;
-    } else {
-      target_temp = html`
-        <div class="climate-row">
-          <label>Target:&nbsp;</label>
-          ${this._range(
-            this.entity,
-            "set",
-            "target_temperature",
-            this.entity.target_temperature!!,
-            this.entity.min_temp,
-            this.entity.max_temp,
-            this.entity.step
-          )}
-        </div>`;
-    }
-    let modes = html``;
-    if ((this.entity.modes ? this.entity.modes.length : 0) > 0) {
-      modes = html`
-        <div class="climate-row">
-          <label>Mode:&nbsp;</label>
-          ${this._select(
-            this.entity,
-            "set",
-            "mode",
-            this.entity.modes || [],
-            this.entity.mode || ""
-          )}
-        </div>`;
-    }
     return html`
       <div class="climate-wrap">
-        ${current_temp} ${target_temp} ${modes}
+        ${this._currentTemperature(this.entity)}
+        ${this._targetTemperature(this.entity)}
+        ${this._modeSelect(this.entity, this.entity.mode ?? "")}
       </div>
     `;
   }
+
   render_valve() {
     if (!this.entity) return;
-    return html`${this._actionButton(this.entity, "OPEN", "open", this.entity.state === "OPEN")}
-    ${this._actionButton(this.entity, "☐", "stop")}
-    ${this._actionButton(this.entity, "CLOSE", "close", this.entity.state === "CLOSED")}`;
+    return this._stateButtons(this.entity, [
+      ["OPEN", "open", "OPEN"],
+      ["☐", "stop"],
+      ["CLOSE", "close", "CLOSED"],
+    ]);
   }
 
   render_water_heater() {
     if (!this.entity) return;
-
-    // Current temperature display (if available)
-    let current_temp = this.entity.current_temperature !== undefined
-      ? html`<div class="climate-row" style="padding-bottom: 10px">
-               <label>Current:&nbsp;${this.entity.current_temperature} °C</label>
-             </div>`
-      : nothing;
-
-    // Target temperature control(s)
-    let target_temp;
-    if (
-      this.entity.target_temperature_low !== undefined &&
-      this.entity.target_temperature_high !== undefined
-    ) {
-      target_temp = html`
-        <div class="climate-row">
-          <label>Target Low:&nbsp;</label>
-          ${this._range(
-            this.entity,
-            "set",
-            "target_temperature_low",
-            this.entity.target_temperature_low,
-            this.entity.min_temp,
-            this.entity.max_temp,
-            this.entity.step
-          )}
-        </div>
-        <div class="climate-row">
-          <label>Target High:&nbsp;</label>
-          ${this._range(
-            this.entity,
-            "set",
-            "target_temperature_high",
-            this.entity.target_temperature_high,
-            this.entity.min_temp,
-            this.entity.max_temp,
-            this.entity.step
-          )}
-        </div>`;
-    } else if (this.entity.target_temperature !== undefined) {
-      target_temp = html`
-        <div class="climate-row">
-          <label>Target:&nbsp;</label>
-          ${this._range(
-            this.entity,
-            "set",
-            "target_temperature",
-            this.entity.target_temperature,
-            this.entity.min_temp,
-            this.entity.max_temp,
-            this.entity.step
-          )}
-        </div>`;
-    } else {
-      target_temp = nothing;
-    }
-
-    // Mode selector (if modes available)
-    let modes = (this.entity.modes?.length ?? 0) > 0
-      ? html`
-          <div class="climate-row">
-            <label>Mode:&nbsp;</label>
-            ${this._select(
-              this.entity,
-              "set",
-              "mode",
-              this.entity.modes || [],
-              this.entity.state || ""
-            )}
-          </div>`
-      : nothing;
+    const entity = this.entity;
 
     // Away mode toggle (if supported)
-    let away = this.entity.away !== undefined
-      ? html`
-          <div class="climate-row">
-            <label>Away:&nbsp;</label>
-            ${this._actionButton(
-              this.entity,
-              this.entity.away ? "ON" : "OFF",
-              `set?away=${!this.entity.away}`,
-              false
-            )}
-          </div>`
-      : nothing;
+    const away =
+      entity.away !== undefined
+        ? html`
+            <div class="climate-row">
+              <label>Away:&nbsp;</label>
+              ${this._actionButton(
+                entity,
+                entity.away ? "ON" : "OFF",
+                `set?away=${!entity.away}`
+              )}
+            </div>`
+        : nothing;
 
     // On/Off toggle (if supported)
-    let on_off = this.entity.is_on !== undefined
-      ? html`
-          <div class="climate-row">
-            <label>Power:&nbsp;</label>
-            ${this._actionButton(
-              this.entity,
-              this.entity.is_on ? "ON" : "OFF",
-              `set?is_on=${!this.entity.is_on}`,
-              false
-            )}
-          </div>`
-      : nothing;
+    const on_off =
+      entity.is_on !== undefined
+        ? html`
+            <div class="climate-row">
+              <label>Power:&nbsp;</label>
+              ${this._actionButton(
+                entity,
+                entity.is_on ? "ON" : "OFF",
+                `set?is_on=${!entity.is_on}`
+              )}
+            </div>`
+        : nothing;
 
     return html`
       <div class="climate-wrap">
-        ${current_temp} ${target_temp} ${modes} ${away} ${on_off}
+        ${this._currentTemperature(entity)} ${this._targetTemperature(entity)}
+        ${this._modeSelect(entity, entity.state || "")} ${away} ${on_off}
       </div>
     `;
   }
@@ -976,6 +967,7 @@ class ActionRenderer {
     }
 
     const entity = this.entity;
+    const basePath = this.basePath;
 
     // Helper to encode timings array to base64url
     const encodeTimings = (timingsStr: string): string => {
@@ -1017,10 +1009,8 @@ class ActionRenderer {
       }
 
       const timingsEncoded = encodeTimings(timingsRaw);
-      console.log('Infrared: Transmitting', { carrier, repeat, timingsRaw, timingsEncoded });
 
       // Build URL for transmit action (without query params - data goes in body)
-      const basePath = getBasePath();
       const url = buildEntityActionUrl(basePath, entity, 'transmit');
 
       // Send data in POST body to avoid URI Too Long error
@@ -1035,8 +1025,6 @@ class ActionRenderer {
           'Content-Type': 'application/x-www-form-urlencoded'
         },
         body: body.toString()
-      }).then(r => {
-        console.log('Infrared: Transmit response', r);
       }).catch(err => {
         console.error('Infrared: Transmit error', err);
       });

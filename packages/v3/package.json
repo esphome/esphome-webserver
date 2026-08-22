@@ -4,6 +4,7 @@
   "scripts": {
     "start": "npm run dev",
     "dev": "vite",
+    "typecheck": "tsc --noEmit -p tsconfig.json",
     "xbuild": "vite build --emptyOutDir",
     "build": "vite build --emptyOutDir && npm run deploy",
     "serve": "vite preview",
