@@ -19,6 +19,7 @@ interface entityConfig {
   value: string;
   name: string;
   device?: string;  // Device name for hierarchical URLs (sub-devices only)
+  display_name: string;
   entity_category?: number;
   when: string;
   icon?: string;
@@ -242,6 +243,7 @@ export class EntityTable extends LitElement implements RestAction {
         entity_category: data.entity_category,
         sorting_group: data.sorting_group ?? (EntityTable.ENTITY_CATEGORIES[parseInt(data.entity_category)] || EntityTable.ENTITY_UNDEFINED),
         value_numeric_history: [data.value],
+        display_name: data.device ? `[${data.device}] ${data.name}` : data.name,
       } as entityConfig;
       entity.has_action = this.hasAction(entity);
       if (entity.has_action) {
@@ -249,13 +251,13 @@ export class EntityTable extends LitElement implements RestAction {
       }
       this.entities.push(entity);
       this.entities.sort((a, b) => {
-        const sortA = a.sorting_weight ?? a.name;
-        const sortB = b.sorting_weight ?? b.name;
+        const sortA = a.sorting_weight ?? a.display_name;
+        const sortB = b.sorting_weight ?? b.display_name;
         return a.sorting_group < b.sorting_group
           ? -1
           : a.sorting_group === b.sorting_group
           ? sortA === sortB
-            ? a.name.toLowerCase() < b.name.toLowerCase()
+            ? a.display_name.toLowerCase() < b.display_name.toLowerCase()
               ? -1
               : 1
             : sortA < sortB
@@ -364,7 +366,7 @@ export class EntityTable extends LitElement implements RestAction {
                           ></iconify-icon>`
                         : nothing}
                     </div>
-                    <div>${component.device ? `[${component.device}] ` : ''}${component.name}</div>
+                    <div>${component.display_name}</div>
                     <div>
                       ${this.has_controls && component.has_action
                         ? this.control(component)
