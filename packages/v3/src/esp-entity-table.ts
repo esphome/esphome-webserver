@@ -40,8 +40,17 @@ interface entityConfig {
   max_length?: number;
   pattern?: string;
   current_temperature?: number;
+  current_humidity?: number;
   modes?: number[];
   mode?: number;
+  presets?: string[];
+  preset?: string;
+  custom_presets?: string[];
+  custom_preset?: string;
+  fan_modes?: string[];
+  fan_mode?: string;
+  custom_fan_modes?: string[];
+  custom_fan_mode?: string;
   speed_count?: number;
   speed_level?: number;
   speed: string;
@@ -66,6 +75,26 @@ interface groupConfig {
 
 export const stateOn = "ON";
 export const stateOff = "OFF";
+
+// Clear mutually exclusive fields before Object.assign to prevent stale values.
+function merge_climate(entity: entityConfig, data: Record<string, any>): void {
+  if ("fan_mode" in data) delete entity.custom_fan_mode;
+  if ("custom_fan_mode" in data) delete entity.fan_mode;
+  if ("preset" in data) delete entity.custom_preset;
+  if ("custom_preset" in data) delete entity.preset;
+  if (!("fan_mode" in data) && !("custom_fan_mode" in data)) {
+    delete entity.fan_mode;
+    delete entity.custom_fan_mode;
+  }
+  if (!("preset" in data) && !("custom_preset" in data)) {
+    delete entity.preset;
+    delete entity.custom_preset;
+  }
+}
+
+const merge_state: Record<string, (entity: entityConfig, data: Record<string, any>) => void> = {
+  climate: merge_climate,
+};
 
 export function getBasePath() {
   let str = window.location.pathname;
@@ -160,6 +189,7 @@ export class EntityTable extends LitElement implements RestAction {
         delete data.name_id;
         delete data.domain;
         delete data.unique_id;
+        merge_state[this.entities[idx].domain]?.(this.entities[idx], data);
         Object.assign(this.entities[idx], data);
         this.requestUpdate();
       } else {
@@ -789,8 +819,11 @@ class ActionRenderer {
   render_climate() {
     if (!this.entity) return;
     let target_temp_slider, target_temp_label, target_temp;
+    let humidity = this.entity.current_humidity !== undefined
+      ? html`&nbsp;|&nbsp;${this.entity.current_humidity} %`
+      : html``;
     let current_temp = html`<div class="climate-row" style="padding-bottom: 10px";>
-                              <label>Current:&nbsp;${this.entity.current_temperature} °C</label>
+                              <label style="white-space: nowrap; width: auto;">Current:&nbsp;${this.entity.current_temperature} °C${humidity}</label>
                             </div>`;
     
     if (
@@ -851,9 +884,46 @@ class ActionRenderer {
           )}
         </div>`;
     }
+    // Combine standard and custom presets into a single dropdown
+    let allPresets = [
+      "",
+      ...(this.entity.presets || []),
+      ...(this.entity.custom_presets || []),
+    ];
+    let presets = allPresets.length > 1
+      ? html`
+          <div class="climate-row">
+            <label>Preset:&nbsp;</label>
+            ${this._select(
+              this.entity,
+              "set",
+              "preset",
+              allPresets,
+              this.entity.preset || this.entity.custom_preset || ""
+            )}
+          </div>`
+      : html``;
+    // Combine standard and custom fan modes into a single dropdown
+    let allFanModes = [
+      ...(this.entity.fan_modes || []),
+      ...(this.entity.custom_fan_modes || []),
+    ];
+    let fan_modes = allFanModes.length > 0
+      ? html`
+          <div class="climate-row">
+            <label>Fan:&nbsp;</label>
+            ${this._select(
+              this.entity,
+              "set",
+              "fan_mode",
+              allFanModes,
+              this.entity.fan_mode || this.entity.custom_fan_mode || ""
+            )}
+          </div>`
+      : html``;
     return html`
       <div class="climate-wrap">
-        ${current_temp} ${target_temp} ${modes}
+        ${current_temp} ${target_temp} ${modes} ${presets} ${fan_modes}
       </div>
     `;
   }
