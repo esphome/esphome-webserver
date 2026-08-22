@@ -2,6 +2,8 @@
   "extends": "../../tsconfig.json",
   "compilerOptions": {
     "noEmit": true,
+    "module": "esnext",
+    "moduleResolution": "bundler",
     "useDefineForClassFields": false,
     "types": ["vite/client"]
   },

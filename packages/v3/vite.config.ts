@@ -1,33 +1,20 @@
 import { defineConfig } from "vite";
-import gzipPlugin from "rollup-plugin-gzip";
-import minifyHTML from "rollup-plugin-minify-html-template-literals";
-import { brotliCompressSync } from "zlib";
-import { nodeResolve } from "@rollup/plugin-node-resolve";
 import loadVersion from "vite-plugin-package-version";
 import { viteSingleFile } from "vite-plugin-singlefile";
-import { minifyHtml as ViteMinifyHtml } from "vite-plugin-html";
 import stripBanner from "rollup-plugin-strip-banner";
 import replace from "@rollup/plugin-replace";
+import compress from "../../scripts/vite-plugin-compress";
+import minifyHtml from "../../scripts/vite-plugin-minify-html";
+import minifyLiterals from "../../scripts/vite-plugin-minify-literals";
 
 const proxy_target = process.env.PROXY_TARGET || "http://nodemcu.local";
 
 export default defineConfig({
   clearScreen: false,
   plugins: [
-    {
-      ...nodeResolve({ exportConditions: ["development"] }),
-      enforce: "pre",
-      apply: "start",
-    },
     stripBanner(),
     loadVersion(),
-    { ...minifyHTML(), enforce: "pre", apply: "build" },
-    //
-    {
-      ...ViteMinifyHtml({ removeComments: true }),
-      enforce: "post",
-      apply: "build",
-    },
+    minifyLiterals(),
     replace({
       "@license": "license",
       "Value passed to 'css' function must be a 'css' function result:":
@@ -37,34 +24,20 @@ export default defineConfig({
       delimiters: ["", ""],
       preventAssignment: true,
     }),
-    viteSingleFile(),
-    {
-      ...gzipPlugin({
-        filter: /\.(js|css|html|svg)$/,
-        additionalFiles: [],
-        customCompression: (content) =>
-          brotliCompressSync(Buffer.from(content)),
-        fileName: ".br",
-      }),
-      enforce: "post",
-      apply: "build",
-    },
-    {
-      ...gzipPlugin({ filter: /\.(js|css|html|svg)$/ }),
-      enforce: "post",
-      apply: "build",
-    },
+    // deleteInlinedFiles: false keeps the standalone www.js on disk after it
+    // has been inlined into index.html. It is published to the CDN and users
+    // point `js_url` at it instead of embedding the page in the firmware.
+    viteSingleFile({ deleteInlinedFiles: false }),
+    minifyHtml(),
+    compress(/\.(js|css|html|svg)$/),
   ],
   build: {
-    brotliSize: false,
+    reportCompressedSize: false,
     // cssCodeSplit: true,
     outDir: "../../_static/v3",
-    polyfillModulePreload: false,
+    modulePreload: { polyfill: false },
     rollupOptions: {
       output: {
-        manualChunks: (chunk) => {
-          return "vendor";
-        }, // create one js bundle,
         chunkFileNames: "[name].js",
         assetFileNames: "www[extname]",
         entryFileNames: "www.js",

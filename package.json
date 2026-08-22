@@ -1,6 +1,7 @@
 {
   "name": "esphome-webserver",
   "version": "3.0.0",
+  "type": "module",
   "license": "MIT",
   "workspaces": [
     "packages/*"
@@ -9,5 +10,10 @@
     "build": "npm run build:packages && npm run deploy",
     "build:packages": "npm run build --workspaces --if-present",
     "deploy": "npm run deploy --workspaces --if-present"
+  },
+  "devDependencies": {
+    "html-minifier-next": "^7.5.2",
+    "minify-literals": "^2.1.0",
+    "vite": "^8.1.5"
   }
 }

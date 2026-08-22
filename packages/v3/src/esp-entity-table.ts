@@ -703,13 +703,21 @@ class ActionRenderer {
   }
 
   // Shared by cover, valve and lock: a fixed set of buttons, each disabled
-  // while the entity is already in the state it would move to.
+  // while the entity is already in the state it would move to. With
+  // assumed_state the reported state may not reflect reality, so nothing is
+  // treated as already-active and every button stays pressable.
   private _stateButtons(
     entity: entityConfig,
     buttons: [label: string, action: string, activeState?: string][]
   ) {
+    const assumed = entity.assumed_state === true;
     return html`${buttons.map(([label, action, activeState]) =>
-      this._actionButton(entity, label, action, entity.state === activeState)
+      this._actionButton(
+        entity,
+        label,
+        action,
+        !assumed && entity.state === activeState
+      )
     )}`;
   }
 

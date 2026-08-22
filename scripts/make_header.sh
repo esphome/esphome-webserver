@@ -29,7 +29,9 @@ embed_compressed_file() {
   local input_file="$1"
   local array_name="$2"
   echo "constexpr uint8_t ${array_name}[] PROGMEM = {" >>"$OUTPUT_FILE"
-  xxd -cols 19 -i "$input_file" | sed -e '2,$!d' -e 's/^/    /' -e '$d' | sed -e '$d' | sed -e '$s/$/};/' >>"$OUTPUT_FILE"
+  # xxd -i already indents byte rows by 2 spaces; normalize to the 4-space
+  # continuation indent that esphome's clang-format config expects.
+  xxd -cols 19 -i "$input_file" | sed -e '2,$!d' -e 's/^ */    /' -e '$d' | sed -e '$d' | sed -e '$s/$/};/' >>"$OUTPUT_FILE"
 }
 
 cat <<EOT >"$OUTPUT_FILE"
