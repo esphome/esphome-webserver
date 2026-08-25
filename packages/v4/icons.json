@@ -1,0 +1,17 @@
+{
+  "comment": "Icon names compiled into the bundle by scripts/gen-icons.ts. Keep it small: each icon costs ~80 bytes brotli. Unknown icons fall back to information-outline. Tailor per device (add the icons your device actually sends) and run `npm run icons` to regenerate.",
+  "icons": [
+    "theme-light-dark",
+    "view-grid-outline",
+    "view-list-outline",
+    "circle",
+    "circle-off-outline",
+    "checkbox-marked-circle",
+    "checkbox-blank-circle-outline",
+    "lightbulb",
+    "toggle-switch",
+    "fan",
+    "chart-line",
+    "information-outline"
+  ]
+}
