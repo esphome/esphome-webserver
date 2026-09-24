@@ -42,6 +42,7 @@ interface entityConfig {
   max_length?: number;
   pattern?: string;
   current_temperature?: number;
+  temperature_unit?: number;
   modes?: number[];
   mode?: number;
   speed_count?: number;
@@ -686,8 +687,9 @@ class ActionRenderer {
 
   private _currentTemperature(entity: entityConfig) {
     if (entity.current_temperature === undefined) return nothing;
+    const unit = ["°C", "°F", "K"][entity.temperature_unit ?? 0] ?? "";
     return html`<div class="climate-row" style="padding-bottom: 10px">
-      <label>Current:&nbsp;${entity.current_temperature} °C</label>
+      <label>Current:&nbsp;${entity.current_temperature}&nbsp;${unit}</label>
     </div>`;
   }
 
