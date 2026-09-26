@@ -10,6 +10,9 @@ import cssTab from "./css/tab";
 import "./esp-entity-chart";
 import "iconify-icon";
 
+// Mirrors the firmware's temperature_unit enum: 0 = Celsius, 1 = Fahrenheit, 2 = Kelvin
+const TEMPERATURE_UNITS = ["°C", "°F", "K"];
+
 interface entityConfig {
   unique_id: string;
   sorting_weight: number;
@@ -42,6 +45,7 @@ interface entityConfig {
   max_length?: number;
   pattern?: string;
   current_temperature?: number;
+  temperature_unit?: number;
   modes?: number[];
   mode?: number;
   speed_count?: number;
@@ -686,8 +690,9 @@ class ActionRenderer {
 
   private _currentTemperature(entity: entityConfig) {
     if (entity.current_temperature === undefined) return nothing;
+    const unit = TEMPERATURE_UNITS[entity.temperature_unit ?? 0];
     return html`<div class="climate-row" style="padding-bottom: 10px">
-      <label>Current:&nbsp;${entity.current_temperature} °C</label>
+      <label>Current:&nbsp;${entity.current_temperature}${unit ? html`&nbsp;${unit}` : nothing}</label>
     </div>`;
   }
 
