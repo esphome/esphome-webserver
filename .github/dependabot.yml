@@ -1,0 +1,29 @@
+version: 2
+
+updates:
+  # main only moves via release PRs from dev, so send updates to dev.
+  - package-ecosystem: github-actions
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+    groups:
+      github-actions:
+        patterns:
+          - "*"
+
+  # npm workspaces: the root lockfile covers every package under packages/.
+  - package-ecosystem: npm
+    directory: /
+    target-branch: dev
+    schedule:
+      interval: weekly
+    groups:
+      npm-development:
+        dependency-type: development
+        patterns:
+          - "*"
+      npm-production:
+        dependency-type: production
+        patterns:
+          - "*"

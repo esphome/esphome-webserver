@@ -1,4 +1,4 @@
-import { LitElement, html, css, PropertyValues, nothing } from "lit";
+import { LitElement, html, PropertyValues, nothing } from "lit";
 import { customElement, state, query } from "lit/decorators.js";
 import { getBasePath } from "./esp-entity-table";
 
@@ -7,6 +7,7 @@ import "./esp-log";
 import "./esp-switch";
 import "./esp-range-slider";
 import "./esp-logo";
+import "iconify-icon";
 import cssReset from "./css/reset";
 import cssButton from "./css/button";
 import cssApp from "./css/app";
@@ -19,6 +20,7 @@ interface Config {
   log: boolean;
   title: string;
   comment: string;
+  lang?: string;
 }
 
 function getRelativeTime(diff: number) {
@@ -27,26 +29,26 @@ function getRelativeTime(diff: number) {
   if (diff === 0) return new Intl.RelativeTimeFormat("en").format(0, "second");
 
   const times = [
-    { type: "year", seconds: 12 * 30 * 24 * 60 * 60 * 1000 },
-    { type: "month", seconds: 30 * 24 * 60 * 60 * 1000 },
-    { type: "week", seconds: 7 * 24 * 60 * 60 * 1000 },
-    { type: "day", seconds: 24 * 60 * 60 * 1000 },
-    { type: "hour", seconds: 60 * 60 * 1000 },
-    { type: "minute", seconds: 60 * 1000 },
-    { type: "second", seconds: 1000 },
+    { type: "year", ms: 12 * 30 * 24 * 60 * 60 * 1000 },
+    { type: "month", ms: 30 * 24 * 60 * 60 * 1000 },
+    { type: "week", ms: 7 * 24 * 60 * 60 * 1000 },
+    { type: "day", ms: 24 * 60 * 60 * 1000 },
+    { type: "hour", ms: 60 * 60 * 1000 },
+    { type: "minute", ms: 60 * 1000 },
+    { type: "second", ms: 1000 },
   ];
 
   let result = "";
   const timeformat = new Intl.RelativeTimeFormat("en");
   let count = 0;
   for (let t of times) {
-    const segment = Math.trunc(Math.abs(diff / t.seconds));
+    const segment = Math.trunc(Math.abs(diff / t.ms));
     if (segment > 0) {
       const part = timeformat.format(
         segment * mark,
         t.type as Intl.RelativeTimeFormatUnit
       );
-      diff -= segment * t.seconds * mark;
+      diff -= segment * t.ms * mark;
       // remove "ago" from the first segment - if not the only one
       result +=
         count === 0 && t.type != "second" ? part.replace(" ago", " ") : part;
@@ -63,6 +65,7 @@ export default class EspApp extends LitElement {
   @state() connected: boolean = true;
   @state() lastUpdate: number = 0;
   private _hasJsonUptime: boolean = false;
+  private _connectionTimer?: ReturnType<typeof setInterval>;
   @query("#beat")
   beat!: HTMLSpanElement;
 
@@ -73,10 +76,20 @@ export default class EspApp extends LitElement {
 
   frames = [{}, { color: "rgba(0, 196, 21, 0.75)" }, {}];
 
+  private _handleEntityTabDblClick = () => {
+    const mainElement = this.shadowRoot?.querySelector("main.flex-grid-half");
+    mainElement?.classList.toggle("expanded_entity");
+  };
+
+  private _handleLogTabDblClick = () => {
+    const mainElement = this.shadowRoot?.querySelector("main.flex-grid-half");
+    mainElement?.classList.toggle("expanded_logs");
+  };
+
   constructor() {
     super();
-    const conf = document.querySelector("script#config");
-    if (conf) this.setConfig(JSON.parse(conf.innerText));
+    const conf = document.querySelector("script#config")?.textContent;
+    if (conf) this.setConfig(JSON.parse(conf));
   }
 
   setConfig(config: any) {
@@ -86,16 +99,20 @@ export default class EspApp extends LitElement {
     this.config = config;
 
     document.title = config.title;
-    document.documentElement.lang = config.lang;
+    if (config.lang) document.documentElement.lang = config.lang;
   }
 
   firstUpdated(changedProperties: PropertyValues) {
     super.firstUpdated(changedProperties);
-    document.getElementsByTagName("head")[0].innerHTML +=
-      '<meta name=viewport content="width=device-width, initial-scale=1,user-scalable=no">';
+    const meta = document.createElement("meta");
+    meta.name = "viewport";
+    meta.content = "width=device-width, initial-scale=1,user-scalable=no";
+    document.head.appendChild(meta);
     const l = <HTMLLinkElement>document.querySelector("link[rel~='icon']"); // Set favicon to house
-    l.href =
-      'data:image/svg+xml,<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg"><style>path{stroke-width:1;fill:black;stroke:black;stroke-linecap:round;stroke-linejoin:round}@media (prefers-color-scheme:dark){path{fill:white;stroke:white}}</style><path d="M1.3 18H5v10h21.8V18h3.7l-3.7-3.7V7.8h-2.4V12l-8.7-8.7L1.3 18Z"/></svg>';
+    if (l) {
+      l.href =
+        'data:image/svg+xml,<svg width="32" height="32" xmlns="http://www.w3.org/2000/svg"><style>path{stroke-width:1;fill:black;stroke:black;stroke-linecap:round;stroke-linejoin:round}@media (prefers-color-scheme:dark){path{fill:white;stroke:white}}</style><path d="M1.3 18H5v10h21.8V18h3.7l-3.7-3.7V7.8h-2.4V12l-8.7-8.7L1.3 18Z"/></svg>';
+    }
     this.scheme = this.schemeDefault();
     window.source.addEventListener("ping", (e: MessageEvent) => {
       if (e.data?.length) {
@@ -133,23 +150,35 @@ export default class EspApp extends LitElement {
     window.source.addEventListener("state", (e: MessageEvent) => {
       this.lastUpdate = Date.now();
     });
-    window.source.addEventListener("error", (e: Event) => {
-      console.dir(e);
-      //console.log("Lost event stream!")
+    window.source.addEventListener("error", () => {
+      // EventSource reconnects on its own; just reflect the drop in the UI
       this.connected = false;
       this.requestUpdate();
     });
-    setInterval(() => {
+    this._connectionTimer = setInterval(() => {
       this.connected = !!this.ping && Date.now() - this.lastUpdate < 15000;
     }, 5000);
-    document.addEventListener('entity-tab-header-double-clicked', (e) => {
-      const mainElement = this.shadowRoot?.querySelector('main.flex-grid-half');
-      mainElement?.classList.toggle('expanded_entity');
-    });
-    document.addEventListener('log-tab-header-double-clicked', (e) => {
-      const mainElement = this.shadowRoot?.querySelector('main.flex-grid-half');
-      mainElement?.classList.toggle('expanded_logs');
-    });
+    document.addEventListener(
+      "entity-tab-header-double-clicked",
+      this._handleEntityTabDblClick
+    );
+    document.addEventListener(
+      "log-tab-header-double-clicked",
+      this._handleLogTabDblClick
+    );
+  }
+
+  disconnectedCallback() {
+    super.disconnectedCallback();
+    if (this._connectionTimer !== undefined) clearInterval(this._connectionTimer);
+    document.removeEventListener(
+      "entity-tab-header-double-clicked",
+      this._handleEntityTabDblClick
+    );
+    document.removeEventListener(
+      "log-tab-header-double-clicked",
+      this._handleLogTabDblClick
+    );
   }
 
   schemeDefault() {
@@ -159,7 +188,6 @@ export default class EspApp extends LitElement {
   updated(changedProperties: Map<string, unknown>) {
     super.updated(changedProperties);
     if (changedProperties.has("scheme")) {
-      let el = document.documentElement;
       document.documentElement.style.setProperty("color-scheme", this.scheme);
     }
     if (changedProperties.has("ping")) {
@@ -204,7 +232,6 @@ export default class EspApp extends LitElement {
       <div>
         ${[this.config.comment, `started ${this.uptime()}`]
           .filter((n) => n)
-          .map((e) => `${e}`)
           .join(" · ")}
       </div>
     `;
@@ -236,7 +263,7 @@ export default class EspApp extends LitElement {
         </a>
         ${this.renderTitle()}
       </header>
-      <main class="flex-grid-half" @toggle-layout="${this._handleLayoutToggle}">
+      <main class="flex-grid-half">
         <section
           id="col_entities"
           class="col"          

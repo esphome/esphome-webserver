@@ -17,6 +17,7 @@ interface entityConfig {
   option?: string[];
   assumed_state?: boolean;
   brightness?: number;
+  color_temp?: number;
   target_temperature?: number;
   target_temperature_low?: number;
   target_temperature_high?: number;
@@ -412,7 +413,18 @@ class ActionRenderer {
             this.entity.brightness,
             0,
             255,
-            1
+            1,
+          )
+        : "",
+      this.entity.color_temp
+        ? this._range(
+            this.entity,
+            "turn_on",
+            "color_temp",
+            this.entity.color_temp,
+            154,
+            370,
+            1,
           )
         : "",
       this.entity.effects?.filter((v) => v != "None").length
