@@ -54,9 +54,10 @@ jobs:
         run: npm ci
 
       - name: Type check ${{ matrix.name }}
-        # No package defines a ``typecheck`` script yet - the sources currently
-        # fail ``tsc --noEmit``, so this is a no-op until those are fixed. Add
-        # the script per package to turn it on. v1 is plain JS and never will.
+        # v3 defines a ``typecheck`` script and must stay clean. The other
+        # packages do not yet - their sources still fail ``tsc --noEmit``, so
+        # this stays a no-op for them until each one is fixed. v1 is plain JS
+        # and never will.
         run: npm run typecheck --if-present
         working-directory: packages/${{ matrix.package }}
 

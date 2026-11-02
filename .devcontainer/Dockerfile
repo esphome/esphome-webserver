@@ -1,5 +1,6 @@
-# See here for image contents: https://github.com/microsoft/vscode-dev-containers/tree/v0.195.0/containers/javascript-node/.devcontainer/base.Dockerfile
-FROM mcr.microsoft.com/vscode/devcontainers/javascript-node:16-bullseye
+# See here for image contents: https://github.com/devcontainers/images/tree/main/src/javascript-node
+# Node 24 to match .nvmrc; vite 8 requires ^20.19.0 || >=22.12.0.
+FROM mcr.microsoft.com/devcontainers/javascript-node:24-bookworm
 
 ENV \
   DEBIAN_FRONTEND=noninteractive \
