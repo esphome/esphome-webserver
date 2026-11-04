@@ -54,6 +54,7 @@ export default css`
     margin-left: 20px;
     text-align: right;
     display: flex;
+    align-items: center;
     justify-content: space-between;
   }
   .entity-row > :nth-child(3) > :only-child {
