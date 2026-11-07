@@ -12,6 +12,30 @@ A Lit Element web component htm webserver for esphome devices.
 - Entities are discovered and display
 - No css fetch - index page fetches one js file
 
+## v4 - dependency-free rebuild
+
+`packages/v4` is a ground-up rebuild targeting **< 10 KiB brotli** (ships at
+~9.7 KiB) while keeping the full feature set: table + optional card layout,
+sparkline charts with min/max dots and tick axis, all control domains,
+light/dark themes, mobile-first layout and the debug log.
+
+- **No framework** - hand-rolled template helper, event delegation and
+  patch-in-place entity views (inputs never lose focus on state events)
+- **No runtime icon fetch** - icons are compiled in from `icons.json`
+  (~80 brotli bytes each); unknown icons fall back to `information-outline`.
+  Tailor the list to your device and run `npm run icons` in `packages/v4`
+- **Size gate** - `npm run build` fails when `www.js.br` exceeds 10 KiB
+- Dropped vs v3: legacy `domain-object_id` entity ids (v3+ firmware only) and
+  the infrared transmitter panel
+
+```yaml
+web_server:
+  port: 80
+  version: 3
+  js_url: https://oi.esphome.io/v4/www.js
+```
+
+
 dark scheme desktop:
 ====================
 ![web_server-v2](https://user-images.githubusercontent.com/5050824/141174356-789cc160-46a1-43fc-9a86-ed5a764c35d7.png)
