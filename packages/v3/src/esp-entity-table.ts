@@ -24,7 +24,6 @@ interface entityConfig {
   value: string;
   name: string;
   device?: string;  // Device name for hierarchical URLs (sub-devices only)
-  display_name: string;
   entity_category?: number;
   when: string;
   icon?: string;
@@ -277,7 +276,6 @@ export class EntityTable extends LitElement implements RestAction {
             EntityTable.ENTITY_UNDEFINED),
         value_numeric_history:
           typeof data.value === "number" ? [data.value] : [],
-        display_name: data.device ? `[${data.device}] ${data.name}` : data.name,
       } as entityConfig;
       entity.has_action = this.hasAction(entity);
       if (entity.has_action) {
@@ -406,7 +404,9 @@ export class EntityTable extends LitElement implements RestAction {
                           ></iconify-icon>`
                         : nothing}
                     </div>
-                    <div>${component.display_name}</div>
+                    <div>
+                      ${component.device ? `[${component.device}] ` : ""}${component.name}
+                    </div>
                     <div>
                       ${this.has_controls && component.has_action
                         ? this.control(component)
