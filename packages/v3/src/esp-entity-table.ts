@@ -290,8 +290,12 @@ export class EntityTable extends LitElement implements RestAction {
         const wa = a.sorting_weight ?? Number.MAX_SAFE_INTEGER;
         const wb = b.sorting_weight ?? Number.MAX_SAFE_INTEGER;
         if (wa !== wb) return wa - wb;
-        const na = a.display_name.toLowerCase();
-        const nb = b.display_name.toLowerCase();
+        // main device first (no device), then each sub-device, each by name
+        const da = (a.device ?? "").toLowerCase();
+        const db = (b.device ?? "").toLowerCase();
+        if (da !== db) return da < db ? -1 : 1;
+        const na = a.name.toLowerCase();
+        const nb = b.name.toLowerCase();
         return na < nb ? -1 : na > nb ? 1 : 0;
       });
       this.requestUpdate();
