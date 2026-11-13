@@ -405,7 +405,7 @@ class ActionRenderer {
     if (!this.entity) return;
     return [
       this._switch(this.entity),
-      this.entity.brightness
+      this.entity.brightness !== undefined
         ? this._range(
             this.entity,
             "turn_on",
