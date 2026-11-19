@@ -8,6 +8,7 @@ workflows:
         - 'actions/setup-node@v7.1.0'
         - 'actions/upload-artifact@v7.0.2'
     '.github/workflows/ci.yaml': []
+    '.github/workflows/pr-event.yml': []
     '.github/workflows/release.yaml':
         - 'actions/checkout@v7.0.1'
         - 'actions/create-github-app-token@v3.3.0'
