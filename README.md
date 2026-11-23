@@ -163,3 +163,16 @@ npm run serve
 ```
 Starts a production test server on http://localhost:5001
 Events and the json api are proxied.
+
+docker
+======
+The static files can be self-hosted using this docker compose config:
+```yaml
+services:
+  esphome-webserver:
+    image: ghcr.io/esphome/webserver
+    container_name: esphome-webserver
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+```

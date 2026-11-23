@@ -1,0 +1,11 @@
+services:
+  esphome-webserver:
+    build: .
+    container_name: esphome-webserver
+    restart: unless-stopped
+    ports:
+      - "8080:80"
+    read_only: true
+    tmpfs:
+      - /var/cache/nginx:size=1M,uid=101,mode=1700
+      - /var/run:size=1M
