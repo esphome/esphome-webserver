@@ -1,4 +1,5 @@
-import { brotliCompressSync, gzipSync } from "zlib";
+import { brotliCompressSync } from "zlib";
+import { gzipAsync } from "@gfx/zopfli";
 import type { Plugin } from "vite";
 
 /**
@@ -15,7 +16,7 @@ export default function compress(filter: RegExp): Plugin {
     name: "esphome:compress",
     enforce: "post",
     apply: "build",
-    generateBundle(_options, bundle) {
+    async generateBundle(_options, bundle) {
       for (const [fileName, chunk] of Object.entries(bundle)) {
         if (!filter.test(fileName)) continue;
         const content = Buffer.from(
@@ -24,7 +25,7 @@ export default function compress(filter: RegExp): Plugin {
         this.emitFile({
           type: "asset",
           fileName: `${fileName}.gz`,
-          source: gzipSync(content),
+          source: await gzipAsync(content, { numiterations: 15 }),
         });
         this.emitFile({
           type: "asset",
